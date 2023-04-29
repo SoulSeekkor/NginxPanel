@@ -19,4 +19,7 @@ RUN dotnet publish "NginxPanel.csproj" -c Release -o /app/publish /p:UseAppHost=
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*
+
 ENTRYPOINT ["dotnet", "NginxPanel.dll"]

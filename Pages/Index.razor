@@ -1,9 +1,46 @@
 ﻿@page "/"
+@using System.Diagnostics;
 
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+Welcome to your new app!
+<br />
+<br />
+<pre>@outputTest</pre>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private string outputTest = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Placeholder
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Process process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "bash",
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false
+                    }
+                };
+
+            process.Start();
+            await process.StandardInput.WriteLineAsync("apt update & nginx -v & exit");
+
+            outputTest = "Standard Output:\r\n" + process.StandardOutput.ReadToEnd();
+            outputTest += "\r\n\r\nStandard Error:\r\n" + process.StandardError.ReadToEnd();
+
+            StateHasChanged();
+        }
+    }
+}
