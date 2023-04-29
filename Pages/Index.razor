@@ -11,42 +11,41 @@ Welcome to your new app!
 <pre>@outputTest</pre>
 
 @code {
+    private Process? _cli = null;
     private string outputTest = string.Empty;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Placeholder
+        _cli = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "bash",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            }
+        };
+
+        _cli.OutputDataReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
+        _cli.ErrorDataReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
+
+        _cli.Start();
+        _cli.BeginOutputReadLine();
+        _cli.BeginErrorReadLine();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !(_cli is null))
         {
-            Process process = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = "bash",
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false
-                }
-            };
-
-            process.OutputDataReceived += new DataReceivedEventHandler(Process_OutputDataReceived);
-            process.ErrorDataReceived += new DataReceivedEventHandler(Process_OutputDataReceived);
-
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            await process.StandardInput.WriteLineAsync("apt update");
-            await process.StandardInput.WriteLineAsync("nginx -v");
+            await _cli.StandardInput.WriteLineAsync("apt update");
+            await _cli.StandardInput.WriteLineAsync("nginx -v");
         }
     }
 
-    private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         outputTest += "\r\n" + e.Data;
         InvokeAsync(() => StateHasChanged());
