@@ -22,25 +22,33 @@ Welcome to your new app!
     {
         if (firstRender)
         {
-            Process process = new Process
+            Process process = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
                 {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "bash",
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false
-                    }
-                };
+                    FileName = "bash",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                }
+            };
+
+            process.OutputDataReceived += new DataReceivedEventHandler(Process_OutputDataReceived);
+            process.ErrorDataReceived += new DataReceivedEventHandler(Process_OutputDataReceived);
 
             process.Start();
-            await process.StandardInput.WriteLineAsync("apt update & nginx -v & exit");
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
-            outputTest = "Standard Output:\r\n" + process.StandardOutput.ReadToEnd();
-            outputTest += "\r\n\r\nStandard Error:\r\n" + process.StandardError.ReadToEnd();
-
-            StateHasChanged();
+            await process.StandardInput.WriteLineAsync("apt update");
+            await process.StandardInput.WriteLineAsync("nginx -v");
         }
+    }
+
+    private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        outputTest += "\r\n" + e.Data;
+        InvokeAsync(() => StateHasChanged());
     }
 }
