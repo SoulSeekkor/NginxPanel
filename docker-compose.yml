@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  nginxpanel:
+    image: ${DOCKER_REGISTRY-}nginxpanel
+    build:
+      context: .
+      dockerfile: Dockerfile
