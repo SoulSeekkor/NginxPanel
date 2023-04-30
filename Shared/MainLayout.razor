@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@using System.Diagnostics;
 
-<PageTitle>NginxPanel</PageTitle>
+@inject Shared.State.CLI _cli
 
 <div class="page">
     <div class="sidebar">
@@ -23,10 +24,40 @@
 </div>
 
 @code {
-    private string status = "<Unknown>";
+    private string status = "Checking...";
 
     protected override void OnInitialized()
     {
-        status = "Checking...";
+        _cli.OutReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
+        _cli.ErrorReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _cli.RunCommandAsync("service nginx status");
+        }
+    }
+
+    private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (!(e.Data is null))
+        {
+            if (e.Data.Contains("unrecognized"))
+            {
+                status = "<Unknown>";
+            }
+            else if (e.Data.Contains("not running"))
+            {
+                status = "Not Running";
+            }
+            else if (e.Data.Contains("running"))
+            {
+                status = "Running";
+            }
+        }
+
+        InvokeAsync(() => StateHasChanged());
     }
 }

@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Diagnostics;
 
+@inject Shared.State.CLI _cli
+
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
@@ -11,37 +13,20 @@ Welcome to your new app!
 <pre style="font-style: italic;">@outputTest</pre>
 
 @code {
-    private Process? _cli = null;
     private string outputTest = string.Empty;
 
     protected override void OnInitialized()
     {
-        _cli = new Process()
-        {
-            StartInfo = new ProcessStartInfo()
-            {
-                FileName = "bash",
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            }
-        };
-
-        _cli.OutputDataReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-        _cli.ErrorDataReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-
-        _cli.Start();
-        _cli.BeginOutputReadLine();
-        _cli.BeginErrorReadLine();
+        _cli.OutReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
+        _cli.ErrorReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !(_cli is null))
+        if (firstRender)
         {
-            await _cli.StandardInput.WriteLineAsync("apt update");
-            await _cli.StandardInput.WriteLineAsync("nginx -v");
+            await _cli.RunCommandAsync("apt update");
+            await _cli.RunCommandAsync("nginx -v");
         }
     }
 
