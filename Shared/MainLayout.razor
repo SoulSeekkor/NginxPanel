@@ -9,6 +9,10 @@
 
     <main>
         <div class="top-row px-4">
+            <span>
+                Service: @status
+            </span>
+
             <a href="">Logout</a>
         </div>
 
@@ -17,3 +21,12 @@
         </article>
     </main>
 </div>
+
+@code {
+    private string status = "<Unknown>";
+
+    protected override void OnInitialized()
+    {
+        status = "Checking...";
+    }
+}
