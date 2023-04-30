@@ -11,6 +11,10 @@
     <main>
         <div class="top-row px-4">
             <span>
+                <button @onclick=ServiceAction title="Start">Start</button>
+            </span>
+
+            <span>
                 Service: @status
             </span>
 
@@ -38,6 +42,11 @@
         {
             await _cli.RunCommandAsync("service nginx status");
         }
+    }
+
+    private async void ServiceAction()
+    {
+        await _cli.RunCommandAsync("service nginx start");
     }
 
     private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
