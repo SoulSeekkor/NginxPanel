@@ -42,7 +42,7 @@
     {
         if (firstRender)
         {
-            await _cli.RunCommandAsync("service nginx status");
+            await _cli.RunCommandAsync("systemctl status nginx");
         }
     }
 
@@ -50,14 +50,14 @@
     {
         if (serviceAction == "Start")
         {
-            await _cli.RunCommandAsync("service nginx start");
+            await _cli.RunCommandAsync("sudo systemctl start nginx");
         }
         else if (serviceAction == "Stop")
         {
-            await _cli.RunCommandAsync("service nginx stop");
+            await _cli.RunCommandAsync("sudo systemctl stop nginx");
         }
 
-        await _cli.RunCommandAsync("service nginx status");
+        await _cli.RunCommandAsync("systemctl status nginx");
     }
 
     private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -69,12 +69,12 @@
                 status = "<Unknown>";
                 serviceAction = "N/A";
             }
-            else if (e.Data.Contains("not running"))
+            else if (e.Data.Contains("inactive"))
             {
                 status = "Not Running";
                 serviceAction = "Start";
             }
-            else if (e.Data.Contains("running"))
+            else if (e.Data.Contains("active"))
             {
                 status = "Running";
                 serviceAction = "Stop";
