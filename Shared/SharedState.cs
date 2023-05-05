@@ -1,50 +1,40 @@
 ﻿using System.Diagnostics;
 
-namespace NginxPanel.Shared.State
+namespace NginxPanel.Shared
 {
     public class CLI
     {
-        private Process? _cli = null;
-
-        public DataReceivedEventHandler? OutReceived;
-        public DataReceivedEventHandler? ErrorReceived;
-
-        public CLI()
+        public static void RunCommand(string command, string arguments, out string output, out string error)
         {
-            _cli = new Process()
+            output = string.Empty;
+            error = string.Empty;
+
+            using (Process p = new Process())
             {
-                StartInfo = new ProcessStartInfo()
+                p.StartInfo = new ProcessStartInfo()
                 {
-                    FileName = "bash",
+                    FileName = command,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    Arguments = arguments
+                };
+
+                try
+                {
+                    p.Start();
+                    output = p.StandardOutput.ReadToEnd().Trim();
+                    error = p.StandardError.ReadToEnd().Trim();
+                    p.WaitForExit();
                 }
+                catch (Exception ex)
+                {
+                    error = ex.ToString();
+                }
+
+                
             };
-
-            _cli.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
-            _cli.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
-
-            _cli.Start();
-            _cli.BeginOutputReadLine();
-            _cli.BeginErrorReadLine();
-        }
-
-        public async Task RunCommandAsync(string command)
-        {
-            if (!(_cli is null))
-                await _cli.StandardInput.WriteLineAsync(command);
-        }
-
-        private void OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            OutReceived?.Invoke(sender, e);
-        }
-
-        private void ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            ErrorReceived?.Invoke(sender, e);
         }
     }
 }

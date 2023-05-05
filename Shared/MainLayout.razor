@@ -1,7 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using System.Diagnostics;
-
-@inject Shared.State.CLI _cli
 
 <div class="page">
     <div class="sidebar">
@@ -10,6 +7,9 @@
 
     <main>
         <div class="top-row px-4">
+            <span>
+                Running As: @whoami
+            </span>
             <span>
                 <button @onclick=PerformServiceAction title="Start">@serviceAction</button>
             </span>
@@ -28,59 +28,58 @@
 </div>
 
 @code {
+    private string whoami = "";
+
     private string status = "Checking...";
 
     private string serviceAction = "N/A";
 
-    protected override void OnInitialized()
-    {
-        _cli.OutReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-        _cli.ErrorReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            await _cli.RunCommandAsync("systemctl status nginx");
+            CLI.RunCommand("whoami", "", out whoami, out _);
+
+            StateHasChanged();
+            //await _cli.RunCommandAsync("systemctl status nginx");
         }
     }
 
-    private async void PerformServiceAction()
+    private void PerformServiceAction()
     {
-        if (serviceAction == "Start")
-        {
-            await _cli.RunCommandAsync("sudo systemctl start nginx");
-        }
-        else if (serviceAction == "Stop")
-        {
-            await _cli.RunCommandAsync("sudo systemctl stop nginx");
-        }
+        //if (serviceAction == "Start")
+        //{
+        //    await _cli.RunCommandAsync("sudo systemctl start nginx");
+        //}
+        //else if (serviceAction == "Stop")
+        //{
+        //    await _cli.RunCommandAsync("sudo systemctl stop nginx");
+        //}
 
-        await _cli.RunCommandAsync("systemctl status nginx");
+        //await _cli.RunCommandAsync("systemctl status nginx");
     }
 
-    private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
-    {
-        if (!(e.Data is null))
-        {
-            if (e.Data.Contains("unrecognized"))
-            {
-                status = "<Unknown>";
-                serviceAction = "N/A";
-            }
-            else if (e.Data.Contains("inactive"))
-            {
-                status = "Not Running";
-                serviceAction = "Start";
-            }
-            else if (e.Data.Contains("active"))
-            {
-                status = "Running";
-                serviceAction = "Stop";
-            }
-        }
+    //private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    //{
+    //    if (!(e.Data is null))
+    //    {
+    //        if (e.Data.Contains("unrecognized"))
+    //        {
+    //            status = "<Unknown>";
+    //            serviceAction = "N/A";
+    //        }
+    //        else if (e.Data.Contains("inactive"))
+    //        {
+    //            status = "Not Running";
+    //            serviceAction = "Start";
+    //        }
+    //        else if (e.Data.Contains("active"))
+    //        {
+    //            status = "Running";
+    //            serviceAction = "Stop";
+    //        }
+    //    }
 
-        InvokeAsync(() => StateHasChanged());
-    }
+    //    InvokeAsync(() => StateHasChanged());
+    //}
 }

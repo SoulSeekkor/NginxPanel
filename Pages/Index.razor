@@ -1,34 +1,28 @@
 ﻿@page "/"
-@using System.Diagnostics;
-
-@inject Shared.State.CLI _cli
 
 <PageTitle>Index</PageTitle>
 
-<pre style="font-style: italic;">@outputTest</pre>
+<h2>@nginxFound</h2>
 
 @code {
-    private string outputTest = string.Empty;
+    private bool nginxInstalled = false;
+    private string nginxFound = string.Empty;
 
     protected override void OnInitialized()
     {
-        _cli.OutReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-        _cli.ErrorReceived += new DataReceivedEventHandler(CLI_OutputDataReceived);
-    }
+        string output;
+        string error;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        CLI.RunCommand("nginx", "-v", out output, out error);
+
+        if (error.Contains("nginx version:"))
         {
-            await _cli.RunCommandAsync("sudo apt update");
-            await _cli.RunCommandAsync("whoami");
-            await _cli.RunCommandAsync("nginx -v");
+            nginxInstalled = true;
+            nginxFound = "Nginx was found: " + error.Substring(error.IndexOf("/") + 1);
         }
-    }
-
-    private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
-    {
-        outputTest += "\r\n" + e.Data;
-        InvokeAsync(() => StateHasChanged());
+        else
+        {
+            nginxFound = "Nginx is not currently installed, install now?";
+        }
     }
 }
