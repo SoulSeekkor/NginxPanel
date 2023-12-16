@@ -10,15 +10,12 @@
 
     protected override void OnInitialized()
     {
-        string output;
-        string error;
+        CLI.RunCommand("nginx", "-v");
 
-        CLI.RunCommand("nginx", "-v", out output, out error);
-
-        if (error.Contains("nginx version:"))
+        if (CLI.StandardError.Contains("nginx version:"))
         {
             nginxInstalled = true;
-            nginxFound = "Nginx was found: " + error.Substring(error.IndexOf("/") + 1);
+            nginxFound = "Nginx was found: " + CLI.StandardError.Substring(CLI.StandardError.IndexOf("/") + 1);
         }
         else
         {

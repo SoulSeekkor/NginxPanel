@@ -18,8 +18,6 @@
             <span>
                 <button @onclick=PerformServiceAction title="Start">@serviceAction</button>
             </span>
-
-            <a href="">Logout</a>
         </div>
 
         <article class="content px-4">
@@ -39,7 +37,9 @@
     {
         if (firstRender && !CLI.Initialized)
         {
-            CLI.RunCommand("whoami", "", out whoami, out _);
+            CLI.RunCommand("whoami", "");
+
+            whoami = CLI.StandardOut;
 
             CLI.Initialized = true;
 
@@ -49,16 +49,13 @@
 
     private void PerformServiceAction()
     {
-        string output;
-        string error;
-
         if (serviceAction == "Start")
         {
-            CLI.RunCommand("sudo", "systemctl start nginx", out output, out error);
+            CLI.RunCommand("sudo", "systemctl start nginx");
         }
         else if (serviceAction == "Stop")
         {
-            CLI.RunCommand("sudo", "systemctl stop nginx", out output, out error);
+            CLI.RunCommand("sudo", "systemctl stop nginx");
         }
 
         RefreshServiceStatus();
@@ -66,27 +63,24 @@
 
     private void RefreshServiceStatus()
     {
-        string output;
-        string error;
+        CLI.RunCommand("systemctl", "status nginx");
 
-        CLI.RunCommand("systemctl", "status nginx", out output, out error);
-
-        if (!string.IsNullOrWhiteSpace(error))
+        if (!string.IsNullOrWhiteSpace(CLI.StandardError))
         {
-            if (error == "Unit nginxd.service could not be found.")
+            if (CLI.StandardError == "Unit nginxd.service could not be found.")
             {
                 status = "<Unknown>";
                 serviceAction = "N/A";
             }
         }
-        else if (!string.IsNullOrWhiteSpace(output))
+        else if (!string.IsNullOrWhiteSpace(CLI.StandardOut))
         {
-            if (output.Contains("inactive"))
+            if (CLI.StandardOut.Contains("inactive"))
             {
                 status = "Not Running";
                 serviceAction = "Start";
             }
-            else if (output.Contains("active"))
+            else if (CLI.StandardOut.Contains("active"))
             {
                 status = "Running";
                 serviceAction = "Stop";

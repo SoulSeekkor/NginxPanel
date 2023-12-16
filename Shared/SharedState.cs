@@ -1,15 +1,34 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Http.Features;
+using System.Diagnostics;
 
 namespace NginxPanel.Shared
 {
     public class CLI
     {
-        public static bool Initialized = false;
+        private static bool _initialized = false;
 
-        public static void RunCommand(string command, string arguments, out string output, out string error)
+        private static string _standardOut = string.Empty;
+        private static string _standardError = string.Empty;
+
+        public static bool Initialized
         {
-            output = string.Empty;
-            error = string.Empty;
+            get { return _initialized; }
+            set { _initialized = value; }
+        }
+
+        public static string StandardOut
+        {
+            get { return (_standardOut ?? string.Empty).Trim(); }
+        }
+        public static string StandardError
+        {
+            get { return (_standardError ?? string.Empty).Trim(); }
+        }
+
+        public static void RunCommand(string command, string arguments)
+        {
+            _standardOut = string.Empty;
+            _standardError = string.Empty;
 
             using (Process p = new Process())
             {
@@ -26,13 +45,13 @@ namespace NginxPanel.Shared
                 try
                 {
                     p.Start();
-                    output = p.StandardOutput.ReadToEnd().Trim();
-                    error = p.StandardError.ReadToEnd().Trim();
+                    _standardOut = p.StandardOutput.ReadToEnd().Trim();
+                    _standardError = p.StandardError.ReadToEnd().Trim();
                     p.WaitForExit();
                 }
                 catch (Exception ex)
                 {
-                    error = ex.ToString();
+                    _standardError = ex.ToString();
                 }
 
                 
