@@ -4,6 +4,8 @@ namespace NginxPanel.Shared
 {
     public class CLI
     {
+        public static bool Initialized = false;
+
         public static void RunCommand(string command, string arguments, out string output, out string error)
         {
             output = string.Empty;

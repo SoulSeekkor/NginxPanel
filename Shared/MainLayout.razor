@@ -7,15 +7,16 @@
 
     <main>
         <div class="top-row px-4">
-            <span>
+            <span style="padding-right: 10px;">
                 Running As: @whoami
             </span>
-            <span>
-                <button @onclick=PerformServiceAction title="Start">@serviceAction</button>
+
+            <span style="padding-right: 10px;">
+                Service: @status
             </span>
 
             <span>
-                Service: @status
+                <button @onclick=PerformServiceAction title="Start">@serviceAction</button>
             </span>
 
             <a href="">Logout</a>
@@ -36,31 +37,59 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !CLI.Initialized)
         {
+            string output;
+            string error;
+
             CLI.RunCommand("whoami", "", out whoami, out _);
 
+            CLI.RunCommand("systemctl", "status nginx", out output, out error);
+
+            CLI.Initialized = true;
+
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                if (error == "Unit nginxd.service could not be found.")
+                {
+                    status = "<Unknown>";
+                    serviceAction = "N/A";
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(output))
+            {
+                if (output.Contains("inactive"))
+                {
+                    status = "Not Running";
+                    serviceAction = "Start";
+                }
+                else if (output.Contains("active"))
+                {
+                    status = "Running";
+                    serviceAction = "Stop";
+                }
+            }
+
             StateHasChanged();
-            //await _cli.RunCommandAsync("systemctl status nginx");
         }
     }
 
     private void PerformServiceAction()
     {
-        //if (serviceAction == "Start")
-        //{
+        // if (serviceAction == "Start")
+        // {
         //    await _cli.RunCommandAsync("sudo systemctl start nginx");
-        //}
-        //else if (serviceAction == "Stop")
-        //{
+        // }
+        // else if (serviceAction == "Stop")
+        // {
         //    await _cli.RunCommandAsync("sudo systemctl stop nginx");
-        //}
+        // }
 
-        //await _cli.RunCommandAsync("systemctl status nginx");
+        // await _cli.RunCommandAsync("systemctl status nginx");
     }
 
-    //private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
-    //{
+    // private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    // {
     //    if (!(e.Data is null))
     //    {
     //        if (e.Data.Contains("unrecognized"))
@@ -81,5 +110,5 @@
     //    }
 
     //    InvokeAsync(() => StateHasChanged());
-    //}
+    // }
 }
