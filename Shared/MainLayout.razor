@@ -39,76 +39,60 @@
     {
         if (firstRender && !CLI.Initialized)
         {
-            string output;
-            string error;
-
             CLI.RunCommand("whoami", "", out whoami, out _);
-
-            CLI.RunCommand("systemctl", "status nginx", out output, out error);
 
             CLI.Initialized = true;
 
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                if (error == "Unit nginxd.service could not be found.")
-                {
-                    status = "<Unknown>";
-                    serviceAction = "N/A";
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(output))
-            {
-                if (output.Contains("inactive"))
-                {
-                    status = "Not Running";
-                    serviceAction = "Start";
-                }
-                else if (output.Contains("active"))
-                {
-                    status = "Running";
-                    serviceAction = "Stop";
-                }
-            }
-
-            StateHasChanged();
+            RefreshServiceStatus();
         }
     }
 
     private void PerformServiceAction()
     {
-        // if (serviceAction == "Start")
-        // {
-        //    await _cli.RunCommandAsync("sudo systemctl start nginx");
-        // }
-        // else if (serviceAction == "Stop")
-        // {
-        //    await _cli.RunCommandAsync("sudo systemctl stop nginx");
-        // }
+        string output;
+        string error;
 
-        // await _cli.RunCommandAsync("systemctl status nginx");
+        if (serviceAction == "Start")
+        {
+            CLI.RunCommand("sudo", "systemctl start nginx", out output, out error);
+        }
+        else if (serviceAction == "Stop")
+        {
+            CLI.RunCommand("sudo", "systemctl stop nginx", out output, out error);
+        }
+
+        RefreshServiceStatus();
     }
 
-    // private void CLI_OutputDataReceived(object sender, DataReceivedEventArgs e)
-    // {
-    //    if (!(e.Data is null))
-    //    {
-    //        if (e.Data.Contains("unrecognized"))
-    //        {
-    //            status = "<Unknown>";
-    //            serviceAction = "N/A";
-    //        }
-    //        else if (e.Data.Contains("inactive"))
-    //        {
-    //            status = "Not Running";
-    //            serviceAction = "Start";
-    //        }
-    //        else if (e.Data.Contains("active"))
-    //        {
-    //            status = "Running";
-    //            serviceAction = "Stop";
-    //        }
-    //    }
+    private void RefreshServiceStatus()
+    {
+        string output;
+        string error;
 
-    //    InvokeAsync(() => StateHasChanged());
-    // }
+        CLI.RunCommand("systemctl", "status nginx", out output, out error);
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            if (error == "Unit nginxd.service could not be found.")
+            {
+                status = "<Unknown>";
+                serviceAction = "N/A";
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(output))
+        {
+            if (output.Contains("inactive"))
+            {
+                status = "Not Running";
+                serviceAction = "Start";
+            }
+            else if (output.Contains("active"))
+            {
+                status = "Running";
+                serviceAction = "Stop";
+            }
+        }
+
+        StateHasChanged();
+    }
 }
