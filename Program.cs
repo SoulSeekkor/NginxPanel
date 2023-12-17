@@ -1,11 +1,13 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using NginxPanel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+
+// Add custom services.
+builder.Services.AddSingleton<CLI>();
 
 var app = builder.Build();
 

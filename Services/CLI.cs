@@ -1,31 +1,30 @@
-﻿using Microsoft.AspNetCore.Http.Features;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace NginxPanel.Shared
+namespace NginxPanel.Services
 {
     public class CLI
     {
-        private static bool _initialized = false;
+        private bool _initialized = false;
 
-        private static string _standardOut = string.Empty;
-        private static string _standardError = string.Empty;
+        private string _standardOut = string.Empty;
+        private string _standardError = string.Empty;
 
-        public static bool Initialized
+        public bool Initialized
         {
             get { return _initialized; }
             set { _initialized = value; }
         }
 
-        public static string StandardOut
+        public string StandardOut
         {
             get { return (_standardOut ?? string.Empty).Trim(); }
         }
-        public static string StandardError
+        public string StandardError
         {
             get { return (_standardError ?? string.Empty).Trim(); }
         }
 
-        public static void RunCommand(string command, string arguments)
+        public void RunCommand(string command, string arguments)
         {
             _standardOut = string.Empty;
             _standardError = string.Empty;
@@ -54,7 +53,7 @@ namespace NginxPanel.Shared
                     _standardError = ex.ToString();
                 }
 
-                
+
             };
         }
     }
