@@ -4,16 +4,8 @@ namespace NginxPanel.Services
 {
     public class CLI
     {
-        private bool _initialized = false;
-
         private string _standardOut = string.Empty;
         private string _standardError = string.Empty;
-
-        public bool Initialized
-        {
-            get { return _initialized; }
-            set { _initialized = value; }
-        }
 
         public string StandardOut
         {

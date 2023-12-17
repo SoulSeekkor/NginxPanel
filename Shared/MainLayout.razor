@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 @inject Services.CLI CLI;
+@inject Services.Nginx Nginx;
 
 <div class="page">
     <div class="sidebar">
@@ -14,11 +15,11 @@
             </span>
 
             <span style="padding-right: 10px;">
-                Service: @status
+                Service: @Nginx.ServiceStatus.ToString()
             </span>
 
             <span>
-                <button @onclick=PerformServiceAction title="Start">@serviceAction</button>
+                <button @onclick=PerformServiceAction title="@Nginx.GetServiceAction()">@Nginx.GetServiceAction()</button>
             </span>
         </div>
 
@@ -31,64 +32,27 @@
 @code {
     private string whoami = "";
 
-    private string status = "Checking...";
-
-    private string serviceAction = "N/A";
-
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender && !CLI.Initialized)
+        if (firstRender)
         {
             CLI.RunCommand("whoami", "");
 
             whoami = CLI.StandardOut;
-
-            CLI.Initialized = true;
-
-            RefreshServiceStatus();
         }
     }
 
     private void PerformServiceAction()
     {
-        if (serviceAction == "Start")
+        if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Stopped)
         {
             CLI.RunCommand("sudo", "systemctl start nginx");
         }
-        else if (serviceAction == "Stop")
+        else if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
         {
             CLI.RunCommand("sudo", "systemctl stop nginx");
         }
 
-        RefreshServiceStatus();
-    }
-
-    private void RefreshServiceStatus()
-    {
-        CLI.RunCommand("systemctl", "status nginx");
-
-        if (!string.IsNullOrWhiteSpace(CLI.StandardError))
-        {
-            if (CLI.StandardError == "Unit nginxd.service could not be found.")
-            {
-                status = "<Unknown>";
-                serviceAction = "N/A";
-            }
-        }
-        else if (!string.IsNullOrWhiteSpace(CLI.StandardOut))
-        {
-            if (CLI.StandardOut.Contains("inactive"))
-            {
-                status = "Not Running";
-                serviceAction = "Start";
-            }
-            else if (CLI.StandardOut.Contains("active"))
-            {
-                status = "Running";
-                serviceAction = "Stop";
-            }
-        }
-
-        StateHasChanged();
+        Nginx.GetServiceStatus();
     }
 }

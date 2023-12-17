@@ -1,27 +1,13 @@
 ﻿@page "/"
 
-@inject Services.CLI CLI;
+@inject Services.Nginx Nginx;
 
 <PageTitle>Index</PageTitle>
 
-<h2>@nginxFound</h2>
+<h2>@Nginx.Version</h2>
 
 @code {
-    private bool nginxInstalled = false;
-    private string nginxFound = string.Empty;
-
     protected override void OnInitialized()
     {
-        CLI.RunCommand("nginx", "-v");
-
-        if (CLI.StandardError.Contains("nginx version:"))
-        {
-            nginxInstalled = true;
-            nginxFound = "Nginx was found: " + CLI.StandardError.Substring(CLI.StandardError.IndexOf("/") + 1);
-        }
-        else
-        {
-            nginxFound = "Nginx is not currently installed, install now?";
-        }
     }
 }

@@ -8,6 +8,7 @@ builder.Services.AddServerSideBlazor();
 
 // Add custom services.
 builder.Services.AddSingleton<CLI>();
+builder.Services.AddSingleton<Nginx>();
 
 var app = builder.Build();
 
