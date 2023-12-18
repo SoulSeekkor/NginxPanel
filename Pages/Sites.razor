@@ -6,14 +6,13 @@
 
 <h3>Sites</h3>
 
-<ul>
-    @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
-    {
-        <li>
-            @conf.Name&nbsp;(@(conf.Enabled ? "Enabled" : "Disabled"))
-        </li>
-    }
-</ul>
+@foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+{
+    <div>
+        <input type="checkbox" id="@conf.Name" name="@conf.Name" @bind="@conf.Enabled" />
+        <label for="@conf.Name">@conf.Name</label>
+    </div>
+}
 
 @code {
 
