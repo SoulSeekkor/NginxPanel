@@ -1,5 +1,6 @@
 ﻿@page "/sites"
 
+@inject IJSRuntime JSRuntime;
 @inject Services.Nginx Nginx;
 
 <PageTitle>Sites</PageTitle>
@@ -17,7 +18,7 @@
         <label for="collapsible_@conf.Name" class="lbl-toggle">@conf.Name</label>
         <div class="collapsible-content">
             <br />
-            <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
+            <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="() => ToggleSite(conf)" />
             <label for="file_@conf.Name" style="font-size: 16px;">Enabled</label>
             <br />
             <br />
@@ -40,5 +41,26 @@
     {
         await Task.Run(() => Nginx.RefreshFiles());
         StateHasChanged();
+    }
+
+    private async void ToggleSite(Services.Nginx.ConfigFile conf)
+    {
+        try
+        {
+            Nginx.ToggleEnabled(conf);
+
+            if (conf.Enabled)
+            {
+                await JSRuntime.InvokeVoidAsync("notify", "success", "Site enabled successfully!", 5);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("notify", "success", "Site disabled successfully!", 5);
+            }
+        }
+        catch
+        {
+            await JSRuntime.InvokeVoidAsync("notify", "error", "Error occurred while enabling site!", 5);
+        }
     }
 }

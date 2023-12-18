@@ -194,6 +194,8 @@ namespace NginxPanel.Services
                 // Add to sites-enabled
                 _CLI.RunCommand("sudo", "ln -s " + config.ConfigPath + " " + Path.Combine(_rootPath, "sites-enabled", config.Name));
             }
+
+            config.Enabled = !config.Enabled;
         }
     }
 }

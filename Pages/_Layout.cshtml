@@ -9,13 +9,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="css/collapsible.css" rel="stylesheet" />
-    <link href="NginxPanel.styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="NginxPanel.styles.css" />
+
+    <!-- custom styling -->
+    <link rel="stylesheet" href="css/collapsible.css" />
+    <link rel="stylesheet" href="~/css/buttons.css" />
+    
+    <!-- alertify styling -->
+    <link rel="stylesheet" href="~/css/alertify/alertify.min.css" />
+    <link rel="stylesheet" href="~/css/alertify/default.min.css" />
+
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
     @RenderBody()
+
+    <script src="~/scripts/alertify.min.js"></script>
+    <script src="~/scripts/clipboard.min.js"></script>
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
@@ -29,5 +40,54 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+
+    <script>
+        new ClipboardJS('.clip');
+
+        function notify(type, message, timeout) {
+            type = type || "default";
+            timeout = timeout || 2;
+
+            switch (type) {
+                case "warning":
+                    alertify.warning(message, timeout);
+                    break;
+                case "success":
+                    alertify.success(message, timeout);
+                    break;
+                case "error":
+                    alertify.error(message, timeout);
+                    break;
+                default:
+                    alertify.message(message, timeout);
+            }
+        }
+
+        function ask(type, message) {
+            var icon = '';
+
+            switch (type) {
+                case "warning":
+                    icon = 'exclamation-triangle';
+                    break;
+                case "question":
+                    icon = "question";
+                    break;
+            }
+
+            message = "<span style='font-size: 16px;'>" + message + "</span>";
+
+            if (icon != '')
+                message = "<i style='padding-right: 30px; font-size: 32px;' class='fa fa-" + icon + "'></i>" + message;
+
+            return new Promise((resolve, reject) => {
+                alertify.confirm(message, function () {
+                    resolve(true);
+                }, function () {
+                    resolve(false);
+                }).autoCancel(15).set({ labels: { ok: 'Yes', cancel: 'No' }, resizable: true, defaultFocus: 'cancel' }).setHeader('Confirm').resizeTo(650, 200)
+            });
+        }
+    </script>
 </body>
 </html>
