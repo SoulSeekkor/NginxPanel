@@ -1,4 +1,6 @@
-﻿namespace NginxPanel.Services
+﻿using System.Text.RegularExpressions;
+
+namespace NginxPanel.Services
 {
     public class Nginx
     {
@@ -18,7 +20,8 @@
         private CLI _CLI;
 
         private string _version = "";
-        public enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
+        private string _configPath = "";
+        private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
 
         public string Version
         {
@@ -41,11 +44,14 @@
         {
             _version = "";
 
-            _CLI.RunCommand("nginx", "-v");
+            _CLI.RunCommand("nginx", "-V");
 
-            if (_CLI.StandardError.Contains("nginx version:"))
+            Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s").Match(_CLI.StandardError);
+
+            if (match.Success)
             {
-                _version = _CLI.StandardError.Substring(_CLI.StandardError.IndexOf("/") + 1);
+                _version = match.Groups["version"].Value;
+                _configPath = match.Groups["config"].Value;
 
                 GetServiceStatus();
             }
