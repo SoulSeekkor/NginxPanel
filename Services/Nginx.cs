@@ -8,15 +8,18 @@ namespace NginxPanel.Services
 
         public class ConfigFile
         {
-            public bool Enabled = false;
             public string Name = string.Empty;
             public string ConfigPath = string.Empty;
+
+            public bool Enabled = false;
+            public string FileContents = string.Empty;
 
             public ConfigFile(string rootPath, string configPath)
             {
                 ConfigPath = configPath;
                 Name = new FileInfo(configPath).Name;
                 Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
+                FileContents = File.ReadAllText(configPath);
             }
         }
 
