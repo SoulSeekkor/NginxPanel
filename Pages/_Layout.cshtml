@@ -8,25 +8,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="content/css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="content/css/site.css" />
     <link rel="stylesheet" href="NginxPanel.styles.css" />
 
     <!-- custom styling -->
-    <link rel="stylesheet" href="css/collapsible.css" />
-    <link rel="stylesheet" href="~/css/buttons.css" />
+    <link rel="stylesheet" href="content/css/theme.css" />
+    <link rel="stylesheet" href="content/css/collapsible.css" />
+    <link rel="stylesheet" href="content/css/buttons.css" />
+    <link rel="stylesheet" href="content/css/layout.css" />
+    <link rel="stylesheet" href="content/font-awesome/css/all.min.css" />
     
     <!-- alertify styling -->
-    <link rel="stylesheet" href="~/css/alertify/alertify.min.css" />
-    <link rel="stylesheet" href="~/css/alertify/default.min.css" />
+    <link rel="stylesheet" href="content/css/alertify/alertify.min.css" />
+    <link rel="stylesheet" href="content/css/alertify/default.min.css" />
 
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
     @RenderBody()
 
-    <script src="~/scripts/alertify.min.js"></script>
-    <script src="~/scripts/clipboard.min.js"></script>
+    <script src="content/scripts/alertify.min.js"></script>
+    <script src="content/scripts/clipboard.min.js"></script>
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">

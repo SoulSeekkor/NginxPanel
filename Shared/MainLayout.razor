@@ -20,7 +20,7 @@
             </span>
 
             <span>
-                <button @onclick=@(() => PerformServiceAction()) title="@Nginx.ReturnServiceActionString()">@Nginx.ReturnServiceActionString()</button>
+                <button class="btn @(Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running ? "red fa-stop" : "green fa-play") rounded small fa button-icon" @onclick=@(() => PerformServiceAction()) title="@Nginx.ReturnServiceActionString()">&nbsp;&nbsp;@Nginx.ReturnServiceActionString()</button>
             </span>
         </div>
 

@@ -7,7 +7,7 @@
 
 <h3>Sites</h3>
 
-<button @onclick="RefreshSites">Refresh</button>
+<button class="btn green rounded small fa fa-sync button-icon" @onclick="@(() => RefreshSites(true))">&nbsp;&nbsp;Refresh</button>
 <br />
 <br />
 
@@ -34,12 +34,18 @@
 @code {
     protected override void OnInitialized()
     {
-        RefreshSites();
+        RefreshSites(false);
     }
 
-    private async void RefreshSites()
+    private async void RefreshSites(bool notifyUser)
     {
         await Task.Run(() => Nginx.RefreshFiles());
+
+        if (notifyUser)
+        {
+            await JSRuntime.InvokeVoidAsync("notify", "success", "Sites refreshed successfully!", 5);
+        }
+
         StateHasChanged();
     }
 
