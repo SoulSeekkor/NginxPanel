@@ -9,7 +9,7 @@
 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
 {
     <div>
-        <input type="checkbox" id="@conf.Name" name="@conf.Name" @bind="@conf.Enabled" />
+        <input type="checkbox" id="@conf.Name" name="@conf.Name" @bind="@conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
         <label for="@conf.Name">@conf.Name</label>
     </div>
 }

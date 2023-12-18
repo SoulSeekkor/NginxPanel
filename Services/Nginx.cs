@@ -45,6 +45,7 @@ namespace NginxPanel.Services
 
         private string _version = "";
         private string _rootConfig = "";
+        private string _rootPath = "";
         private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
 
         private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
@@ -93,6 +94,7 @@ namespace NginxPanel.Services
             {
                 _version = match.Groups["version"].Value;
                 _rootConfig = match.Groups["config"].Value;
+                _rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
 
                 GetServiceStatus();
                 RefreshFiles();
@@ -168,14 +170,26 @@ namespace NginxPanel.Services
         {
             _siteConfigs.Clear();
 
-            string rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
-
-            if (!string.IsNullOrWhiteSpace(rootPath) && Directory.Exists(rootPath))
+            if (!string.IsNullOrWhiteSpace(_rootPath) && Directory.Exists(_rootPath))
             {
-                foreach (string file in Directory.GetFiles(Path.Combine(rootPath, "sites-available")))
+                foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "sites-available")))
                 {
-                    _siteConfigs.Add(new ConfigFile(rootPath, file));
+                    _siteConfigs.Add(new ConfigFile(_rootPath, file));
                 }
+            }
+        }
+
+        public void ToggleEnabled(ConfigFile config)
+        {
+            if (config.Enabled)
+            {
+                // Remove from sites-enabled
+                _CLI.RunCommand("sudo", "rm " + Path.Combine(_rootPath, "sites-enabled", config.Name));
+            }
+            else
+            {
+                // Add to sites-enabled
+                _CLI.RunCommand("sudo", "ln -s " + config.ConfigPath + " " + Path.Combine(_rootPath, "sites-enabled", config.Name));
             }
         }
     }
