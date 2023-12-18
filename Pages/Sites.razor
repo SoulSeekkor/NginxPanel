@@ -9,8 +9,16 @@
 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
 {
     <div>
-        <input type="checkbox" id="@conf.Name" name="@conf.Name" @bind="@conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
-        <label for="@conf.Name">@conf.Name</label>
+        <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="@conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
+        <label for="file_@conf.Name">@conf.Name</label>
+        <br />
+        <br />
+        <label for="contents_@conf.Name">Configuration:</label>
+        <br />
+        <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="width: 800px; height: 400px; color: white; background-color: black;" />
+        <br />
+        <hr />
+
     </div>
 }
 
