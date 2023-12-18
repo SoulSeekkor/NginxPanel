@@ -7,13 +7,11 @@
 }
 
 .lbl-toggle {
-    display: block;
+    min-width: 300px;
     font-weight: bold;
     font-family: monospace;
     font-size: 1.2rem;
-    text-transform: uppercase;
-    text-align: center;
-    padding: 1rem;
+    padding: .5rem;
     color: #DDD;
     background: #0069ff;
     cursor: pointer;
@@ -48,7 +46,7 @@
 }
 
 .toggle:checked + .lbl-toggle + .collapsible-content {
-    max-height: 350px;
+    max-height: 500px;
 }
 
 .toggle:checked + .lbl-toggle {
