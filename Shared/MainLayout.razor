@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
+@inject IJSRuntime JSRuntime;
 @inject Services.CLI CLI;
 @inject Services.Nginx Nginx;
 
@@ -19,7 +20,7 @@
             </span>
 
             <span>
-                <button @onclick=PerformServiceAction title="@Nginx.ReturnServiceActionString()">@Nginx.ReturnServiceActionString()</button>
+                <button @onclick=@(() => PerformServiceAction()) title="@Nginx.ReturnServiceActionString()">@Nginx.ReturnServiceActionString()</button>
             </span>
         </div>
 
@@ -44,15 +45,17 @@
         }
     }
 
-    private void PerformServiceAction()
+    private async void PerformServiceAction()
     {
         if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Stopped)
         {
             Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Start);
+            await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service started!", 5);
         }
         else if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
         {
             Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Stop);
+            await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service stopped!", 5);
         }
     }
 }
