@@ -6,33 +6,34 @@
 
 <h3>Sites</h3>
 
-<button @onclick="RefreshFiles">Refresh</button>
+<button @onclick="RefreshSites">Refresh</button>
 <br />
 <br />
 
 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
 {
     <div>
-        <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="@conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
-        <label for="file_@conf.Name">@conf.Name</label>
+        <span style="font-size: 16px; font-weight: bold; font-style: italic;">@conf.Name</span>
+        <br />
+        <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
+        <label for="file_@conf.Name" style="font-size: 14px;">Enabled</label>
         <br />
         <br />
-        <label for="contents_@conf.Name">Configuration:</label>
+        <label for="contents_@conf.Name" style="font-size: 14px;">Configuration:</label>
         <br />
-        <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="width: 800px; height: 400px; color: white; background-color: black;" />
+        <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="font-size: 12px; width: 800px; height: 400px; color: #cbd0da; background-color: #222733;" />
         <br />
         <hr />
-
     </div>
 }
 
 @code {
     protected override void OnInitialized()
     {
-        RefreshFiles();
+        RefreshSites();
     }
 
-    private async void RefreshFiles()
+    private async void RefreshSites()
     {
         await Task.Run(() => Nginx.RefreshFiles());
         StateHasChanged();
