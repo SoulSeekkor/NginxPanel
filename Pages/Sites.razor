@@ -12,16 +12,19 @@
 
 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
 {
-    <div>
-        <span style="font-size: 16px; font-weight: bold; font-style: italic;">@conf.Name</span>
-        <br />
-        <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
-        <label for="file_@conf.Name" style="font-size: 14px;">Enabled</label>
-        <br />
-        <br />
-        <label for="contents_@conf.Name" style="font-size: 14px;">Configuration:</label>
-        <br />
-        <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="font-size: 12px; width: 800px; height: 400px; color: #cbd0da; background-color: #222733;" />
+    <div class="wrap-collapsible">
+        <input type="checkbox" id="collapsible_@conf.Name" class="toggle">
+        <label for="collapsible_@conf.Name" class="lbl-toggle">@conf.Name</label>
+        <div class="collapsible-content">
+            <br />
+            <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="@(() => Nginx.ToggleEnabled(conf))" />
+            <label for="file_@conf.Name" style="font-size: 16px;">Enabled</label>
+            <br />
+            <br />
+            <label for="contents_@conf.Name" style="font-size: 14px;">Configuration:</label>
+            <br />
+            <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="font-size: 12px; width: 800px; height: 400px; color: #cbd0da; background-color: #222733;" />
+        </div>        
         <br />
         <hr />
     </div>
