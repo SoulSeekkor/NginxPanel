@@ -9,12 +9,14 @@ namespace NginxPanel.Services
         public class ConfigFile
         {
             public bool Enabled = false;
+            public string Name = string.Empty;
             public string ConfigPath = string.Empty;
 
             public ConfigFile(string rootPath, string configPath)
             {
                 ConfigPath = configPath;
-                Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", new FileInfo(configPath).Name));
+                Name = new FileInfo(configPath).Name;
+                Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
             }
         }
 
@@ -45,7 +47,7 @@ namespace NginxPanel.Services
         private string _rootConfig = "";
         private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
 
-        private List<ConfigFile> configs = new List<ConfigFile>();
+        private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
 
         #endregion
 
@@ -59,6 +61,11 @@ namespace NginxPanel.Services
         public enuServiceStatus ServiceStatus
         {
             get { return _serviceStatus; }
+        }
+
+        public List<ConfigFile> SiteConfigs
+        {
+            get { return _siteConfigs; }
         }
 
         #endregion
@@ -159,7 +166,7 @@ namespace NginxPanel.Services
 
         public void RefreshFiles()
         {
-            configs.Clear();
+            _siteConfigs.Clear();
 
             string rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
 
@@ -167,7 +174,7 @@ namespace NginxPanel.Services
             {
                 foreach (string file in Directory.GetFiles(Path.Combine(rootPath, "sites-available")))
                 {
-                    configs.Add(new ConfigFile(rootPath, file));
+                    _siteConfigs.Add(new ConfigFile(rootPath, file));
                 }
             }
         }
