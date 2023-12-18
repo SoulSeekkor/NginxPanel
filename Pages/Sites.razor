@@ -6,6 +6,10 @@
 
 <h3>Sites</h3>
 
+<button @onclick="RefreshFiles">Refresh</button>
+<br />
+<br />
+
 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
 {
     <div>
@@ -23,10 +27,14 @@
 }
 
 @code {
-
     protected override void OnInitialized()
     {
-        Nginx.RefreshFiles();
+        RefreshFiles();
     }
 
+    private async void RefreshFiles()
+    {
+        await Task.Run(() => Nginx.RefreshFiles());
+        StateHasChanged();
+    }
 }
