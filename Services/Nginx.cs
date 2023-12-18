@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NginxPanel.Services
+﻿namespace NginxPanel.Services
 {
     public class Nginx
     {
@@ -9,6 +7,12 @@ namespace NginxPanel.Services
             Unknown,
             Running,
             Stopped
+        }
+
+        public enum enuServiceAction
+        {
+            Start,
+            Stop
         }
 
         private CLI _CLI;
@@ -45,6 +49,10 @@ namespace NginxPanel.Services
 
                 GetServiceStatus();
             }
+            else
+            {
+                _serviceStatus = enuServiceStatus.Unknown;
+            }
         }
 
         public void GetServiceStatus()
@@ -71,7 +79,21 @@ namespace NginxPanel.Services
             }
         }
 
-        public string GetServiceAction()
+        public void PerformServiceAction(enuServiceAction serviceAction)
+        {
+            if (serviceAction == enuServiceAction.Start)
+            {
+                _CLI.RunCommand("sudo", "systemctl start nginx");
+            }
+            else if (serviceAction == enuServiceAction.Stop)
+            {
+                _CLI.RunCommand("sudo", "systemctl stop nginx");
+            }
+
+            GetServiceStatus();
+        }
+
+        public string ReturnServiceActionString()
         {
             if (_serviceStatus == enuServiceStatus.Running)
             {
@@ -85,6 +107,13 @@ namespace NginxPanel.Services
             {
                 return "N/A";
             }
+        }
+
+        public string TestConfig()
+        {
+            _CLI.RunCommand("nginx", "-t");
+
+            return _CLI.StandardOut + _CLI.StandardError;
         }
     }
 }

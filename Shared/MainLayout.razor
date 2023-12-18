@@ -19,7 +19,7 @@
             </span>
 
             <span>
-                <button @onclick=PerformServiceAction title="@Nginx.GetServiceAction()">@Nginx.GetServiceAction()</button>
+                <button @onclick=PerformServiceAction title="@Nginx.ReturnServiceActionString()">@Nginx.ReturnServiceActionString()</button>
             </span>
         </div>
 
@@ -39,6 +39,8 @@
             CLI.RunCommand("whoami", "");
 
             whoami = CLI.StandardOut;
+
+            StateHasChanged();
         }
     }
 
@@ -46,13 +48,11 @@
     {
         if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Stopped)
         {
-            CLI.RunCommand("sudo", "systemctl start nginx");
+            Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Start);
         }
         else if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
         {
-            CLI.RunCommand("sudo", "systemctl stop nginx");
+            Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Stop);
         }
-
-        Nginx.GetServiceStatus();
     }
 }
