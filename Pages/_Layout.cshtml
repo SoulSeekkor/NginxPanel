@@ -18,18 +18,15 @@
     <link rel="stylesheet" href="content/css/buttons.css" />
     <link rel="stylesheet" href="content/css/layout.css" />
     <link rel="stylesheet" href="content/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/dark-base.css" />
     
-    <!-- alertify styling -->
-    <link rel="stylesheet" href="content/css/alertify/alertify.min.css" />
-    <link rel="stylesheet" href="content/css/alertify/default.min.css" />
-
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
     @RenderBody()
 
-    <script src="content/scripts/alertify.min.js"></script>
     <script src="content/scripts/clipboard.min.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">

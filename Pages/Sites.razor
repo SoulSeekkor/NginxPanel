@@ -1,7 +1,7 @@
 ﻿@page "/sites"
 
-@inject IJSRuntime JSRuntime;
 @inject Services.Nginx Nginx;
+@inject NotificationService NotificationService
 
 <PageTitle>Sites</PageTitle>
 
@@ -32,6 +32,9 @@
 }
 
 @code {
+    [CascadingParameter]
+    private MainLayout? layout { get; set; }
+
     protected override void OnInitialized()
     {
         RefreshSites(false);
@@ -43,13 +46,13 @@
 
         if (notifyUser)
         {
-            await JSRuntime.InvokeVoidAsync("notify", "success", "Sites refreshed successfully!", 5);
+            layout?.ShowNotification(NotificationSeverity.Info, "Info", "Sites refreshed successfully!");
         }
 
         StateHasChanged();
     }
 
-    private async void ToggleSite(Services.Nginx.ConfigFile conf)
+    private void ToggleSite(Services.Nginx.ConfigFile conf)
     {
         try
         {
@@ -57,16 +60,16 @@
 
             if (conf.Enabled)
             {
-                await JSRuntime.InvokeVoidAsync("notify", "success", "Site enabled successfully!", 5);
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", "Site enabled successfully!");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("notify", "success", "Site disabled successfully!", 5);
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", "Site disabled successfully!");
             }
         }
         catch
         {
-            await JSRuntime.InvokeVoidAsync("notify", "error", "Error occurred while enabling site!", 5);
+            layout?.ShowNotification(NotificationSeverity.Error, "Error", "Error occurred while enabling site!");
         }
     }
 }

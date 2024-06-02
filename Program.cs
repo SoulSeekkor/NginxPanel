@@ -1,10 +1,12 @@
 using NginxPanel.Services;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddRadzenComponents();
 
 // Add custom services.
 builder.Services.AddSingleton<CLI>();

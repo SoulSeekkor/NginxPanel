@@ -1,43 +1,47 @@
 ﻿@inherits LayoutComponentBase
 
-@inject IJSRuntime JSRuntime;
 @inject Services.CLI CLI;
 @inject Services.Nginx Nginx;
+@inject NotificationService NotificationService
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <span style="padding-right: 10px;">
-                Running As: @whoami
-            </span>
-
-            <span style="padding-right: 10px;">
-                Nginx Service: @Nginx.ServiceStatus.ToString()
-            </span>
-
-            <span>
-                @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
-                {
-                    <button type="button" class="btn red fa fa-stop rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
-                    <button type="button" class="btn blue fa fa-rotate-right rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
-                }
-                else
-                {
-                    <button type="button" class="btn green fa fa-play rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
-                }
-                <button type="button" class="btn purple fa fa-check rounded small button-icon" @onclick=@(() => TestConfig()) title="Test Config">&nbsp;&nbsp;Test Config</button>
-            </span>
+<CascadingValue Value="this">
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <main>
+            <div class="top-row px-4">
+                <span style="padding-right: 10px;">
+                    Running As: @whoami
+                </span>
+
+                <span style="padding-right: 10px;">
+                    Nginx Service: @Nginx.ServiceStatus.ToString()
+                </span>
+
+                <span>
+                    @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
+                    {
+                        <button type="button" class="btn red fa fa-stop rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
+                        <button type="button" class="btn blue fa fa-rotate-right rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn green fa fa-play rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
+                    }
+                    <button type="button" class="btn purple fa fa-check rounded small button-icon" @onclick=@(() => TestConfig()) title="Test Config">&nbsp;&nbsp;Test Config</button>
+                </span>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+
+    <RadzenComponents />
+</CascadingValue>
 
 @code {
     private string whoami = "";
@@ -54,7 +58,7 @@
         }
     }
 
-    private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
+    private void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
         // Perform requested action
         Nginx.PerformServiceAction(action);
@@ -62,20 +66,34 @@
         switch (action)
         {
             case Services.Nginx.enuServiceAction.Start:
-                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service started!", 5);
+                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service started!");
                 break;
 
             case Services.Nginx.enuServiceAction.Stop:
-                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service stopped!", 5);
+                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service stopped!");
                 break;
 
             case Services.Nginx.enuServiceAction.Restart:
-                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service restarted!", 5);
+                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service restarted!");
                 break;
         }
     }
 
-    private async void TestConfig()
+    public void ShowNotification(NotificationSeverity severity, string title, string message, int duration = 3000)
+    {
+        NotificationMessage notifMessage = new NotificationMessage();
+
+        notifMessage.Severity = severity;
+        notifMessage.Summary = title;
+        notifMessage.Detail = message;
+        notifMessage.Duration = duration;
+        notifMessage.CloseOnClick = true;
+
+
+        NotificationService.Notify(notifMessage);
+    }
+
+    private void TestConfig()
     {
         
     }
