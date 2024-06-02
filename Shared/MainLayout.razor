@@ -16,19 +16,20 @@
             </span>
 
             <span style="padding-right: 10px;">
-                Service: @Nginx.ServiceStatus.ToString()
+                Nginx Service: @Nginx.ServiceStatus.ToString()
             </span>
 
             <span>
                 @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
                 {
-                    <button type="button" class="btn red fa-stop rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
-                    <button type="button" class="btn red fa-stop rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
+                    <button type="button" class="btn red fa fa-stop rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
+                    <button type="button" class="btn blue fa fa-rotate-right rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
                 }
                 else
                 {
-                    <button type="button" class="btn green fa-play rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
+                    <button type="button" class="btn green fa fa-play rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
                 }
+                <button type="button" class="btn purple fa fa-check rounded small button-icon" @onclick=@(() => TestConfig()) title="Test Config">&nbsp;&nbsp;Test Config</button>
             </span>
         </div>
 
@@ -72,5 +73,10 @@
                 await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service restarted!", 5);
                 break;
         }
+    }
+
+    private async void TestConfig()
+    {
+        
     }
 }
