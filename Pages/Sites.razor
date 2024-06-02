@@ -14,17 +14,14 @@
     <Items>
         @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
         {
-            <RadzenAccordionItem Text="@conf.Name" Icon="description" class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left">
-                <div class="collapsible-content" style="border:solid black 1px; padding: 20px;">
-                    <br />
+            <RadzenAccordionItem Text="@conf.Name" Icon="description" class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
+                <RadzenCard>
                     <RadzenCheckBox TValue="bool" Value=conf.Enabled Name="@conf.Name" Change="() => ToggleSite(conf)" />
-                    <RadzenLabel Text="Enabled" Component="@conf.Name" Style="margin-left: 8px; vertical-align: middle;" />
-                    <br />
-                    <br />
-                    <label for="contents_@conf.Name" style="font-size: 14px;">Configuration:</label>
-                    <br />
-                    <textarea id="contents_@conf.Name" name="contents_@conf.Name" value="@conf.FileContents" style="font-size: 12px; width: 800px; height: 400px; color: #cbd0da; background-color: #222733;" />
-                </div>
+                    <RadzenLabel Text="Enabled" Component="@conf.Name"/>
+
+                    <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+                    <RadzenTextArea Value=@conf.FileContents Cols="125" Rows="20" />
+                </RadzenCard>
             </RadzenAccordionItem>
         }
     </Items>
