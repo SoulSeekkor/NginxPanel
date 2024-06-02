@@ -20,7 +20,15 @@
             </span>
 
             <span>
-                <button class="btn @(Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running ? "red fa-stop" : "green fa-play") rounded small fa button-icon" @onclick=@(() => PerformServiceAction()) title="@Nginx.ReturnServiceActionString()">&nbsp;&nbsp;@Nginx.ReturnServiceActionString()</button>
+                @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
+                {
+                    <button type="button" class="btn red fa-stop rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
+                    <button type="button" class="btn red fa-stop rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
+                }
+                else
+                {
+                    <button type="button" class="btn green fa-play rounded small fa button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
+                }
             </span>
         </div>
 
@@ -45,17 +53,24 @@
         }
     }
 
-    private async void PerformServiceAction()
+    private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
-        if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Stopped)
+        // Perform requested action
+        Nginx.PerformServiceAction(action);
+
+        switch (action)
         {
-            Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Start);
-            await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service started!", 5);
-        }
-        else if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
-        {
-            Nginx.PerformServiceAction(Services.Nginx.enuServiceAction.Stop);
-            await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service stopped!", 5);
+            case Services.Nginx.enuServiceAction.Start:
+                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service started!", 5);
+                break;
+
+            case Services.Nginx.enuServiceAction.Stop:
+                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service stopped!", 5);
+                break;
+
+            case Services.Nginx.enuServiceAction.Restart:
+                await JSRuntime.InvokeVoidAsync("notify", "success", "Nginx service restarted!", 5);
+                break;
         }
     }
 }

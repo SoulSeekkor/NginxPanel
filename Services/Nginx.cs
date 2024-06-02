@@ -37,7 +37,8 @@ namespace NginxPanel.Services
         public enum enuServiceAction
         {
             Start,
-            Stop
+            Stop,
+            Restart
         }
 
         #endregion
@@ -142,24 +143,12 @@ namespace NginxPanel.Services
             {
                 _CLI.RunCommand("sudo", "systemctl stop nginx");
             }
+            else if (serviceAction == enuServiceAction.Restart)
+            {
+                _CLI.RunCommand("sudo", "systemctl restart nginx");
+            }
 
             GetServiceStatus();
-        }
-
-        public string ReturnServiceActionString()
-        {
-            if (_serviceStatus == enuServiceStatus.Running)
-            {
-                return "Stop";
-            }
-            else if (_serviceStatus == enuServiceStatus.Stopped)
-            {
-                return "Start";
-            }
-            else
-            {
-                return "N/A";
-            }
         }
 
         public string TestConfig()
