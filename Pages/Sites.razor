@@ -21,6 +21,8 @@
 
                     <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
                     <RadzenTextArea Value=@conf.FileContents Cols="125" Rows="20" />
+                    <br />
+                <RadzenButton Click=@(() => conf.Save(this)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
                 </RadzenCard>
             </RadzenAccordionItem>
         }
@@ -77,5 +79,10 @@
         {
             layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while updating site '{conf.Name}'!");
         }
+    }
+
+    public void RefreshState()
+    {
+        StateHasChanged();
     }
 }

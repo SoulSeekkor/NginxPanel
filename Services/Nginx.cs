@@ -14,12 +14,28 @@ namespace NginxPanel.Services
             public bool Enabled = false;
             public string FileContents = string.Empty;
 
+            public bool busySaving = false;
+
             public ConfigFile(string rootPath, string configPath)
             {
                 ConfigPath = configPath;
                 Name = new FileInfo(configPath).Name;
                 Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
                 FileContents = File.ReadAllText(configPath);
+            }
+
+            public async void Save(Pages.Sites caller)
+            {
+                try
+                {
+                    busySaving = true;
+                    await Task.Run(() => Thread.Sleep(2000));
+                }
+                finally
+                {
+                    busySaving = false;
+                    caller.RefreshState();
+                }
             }
         }
 
