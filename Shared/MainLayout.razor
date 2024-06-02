@@ -12,11 +12,9 @@
 
         <main>
             <div class="top-row px-4">
-                <span style="padding-right: 10px;">
-                    Running As: @whoami
-                </span>
-
-                <span style="padding-right: 10px;">
+                <span style="padding-right: 50px;">
+                    User: @whoami
+                    <br />
                     Nginx Service: @Nginx.ServiceStatus.ToString()
                 </span>
 
@@ -24,13 +22,13 @@
                     @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
                     {
                         <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
-                        <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Secondary" />
+                        <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
                     }
                     else
                     {
                         <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
                     }
-                    <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Light" class="rz-ripple" />
+                    <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
                 </span>
             </div>
 
