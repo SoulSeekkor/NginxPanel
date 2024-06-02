@@ -6,7 +6,7 @@
 
 <h3>Sites</h3>
 
-<RadzenButton Click=@(() => RefreshSites(true)) Text="Refresh" Icon="cached" ButtonStyle="ButtonStyle.Info" />
+<RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" />
 <br />
 <br />
 
@@ -34,6 +34,8 @@
     [CascadingParameter]
     private MainLayout? layout { get; set; }
 
+    private bool busyRefreshing = false;
+
     protected override void OnInitialized()
     {
         RefreshSites(false);
@@ -41,14 +43,22 @@
 
     private async void RefreshSites(bool notifyUser)
     {
-        await Task.Run(() => Nginx.RefreshFiles());
-
-        if (notifyUser)
+        try
         {
-            layout?.ShowNotification(NotificationSeverity.Info, "Info", "Sites refreshed successfully!");
-        }
+            busyRefreshing = true;
 
-        StateHasChanged();
+            await Task.Run(() => Nginx.RefreshFiles());
+
+            if (notifyUser)
+            {
+                layout?.ShowNotification(NotificationSeverity.Info, "Info", "Sites refreshed successfully!");
+            }
+        }
+        finally
+        {
+            busyRefreshing = false;
+            StateHasChanged();
+        }
     }
 
     private void ToggleSite(Services.Nginx.ConfigFile conf)
