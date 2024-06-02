@@ -1,7 +1,6 @@
 ﻿@page "/sites"
 
 @inject Services.Nginx Nginx;
-@inject NotificationService NotificationService
 
 <PageTitle>Sites</PageTitle>
 
@@ -18,8 +17,8 @@
         <label for="collapsible_@conf.Name" class="lbl-toggle">@conf.Name</label>
         <div class="collapsible-content">
             <br />
-            <input type="checkbox" id="file_@conf.Name" name="file_@conf.Name" @bind="conf.Enabled" @onclick="() => ToggleSite(conf)" />
-            <label for="file_@conf.Name" style="font-size: 16px;">Enabled</label>
+            <RadzenCheckBox TValue="bool" Value=conf.Enabled Name="@conf.Name" Change="() => ToggleSite(conf)" />
+            <RadzenLabel Text="Enabled" Component="@conf.Name" Style="margin-left: 8px; vertical-align: middle;" />
             <br />
             <br />
             <label for="contents_@conf.Name" style="font-size: 14px;">Configuration:</label>
@@ -60,16 +59,16 @@
 
             if (conf.Enabled)
             {
-                layout?.ShowNotification(NotificationSeverity.Success, "Success", "Site enabled successfully!");
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: blue; font-style: italic;'>{conf.Name}</span> enabled successfully!");
             }
             else
             {
-                layout?.ShowNotification(NotificationSeverity.Success, "Success", "Site disabled successfully!");
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: red; font-style: italic;'>{conf.Name}</span> disabled successfully!");
             }
         }
         catch
         {
-            layout?.ShowNotification(NotificationSeverity.Error, "Error", "Error occurred while enabling site!");
+            layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while updating site '{conf.Name}'!");
         }
     }
 }
