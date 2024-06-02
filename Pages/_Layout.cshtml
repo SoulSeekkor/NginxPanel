@@ -9,23 +9,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
     <link rel="stylesheet" href="content/css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="content/css/site.css" />
     <link rel="stylesheet" href="NginxPanel.styles.css" />
 
     <!-- custom styling -->
-    <link rel="stylesheet" href="content/css/theme.css" />
     <link rel="stylesheet" href="content/css/collapsible.css" />
-    <link rel="stylesheet" href="content/css/layout.css" />
-    <link rel="stylesheet" href="content/font-awesome/css/all.min.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/dark-base.css" />
-    
+
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/dark-base.css" />    
+    <style>
+        :root {
+            font-size: var(--rz-root-font-size);
+        }
+
+        body {
+            font-family: var(--rz-text-font-family);
+            color: var(--rz-text-color);
+            font-size: var(--rz-body-font-size);
+            line-height: var(--rz-body-line-height);
+            background-color: var(--rz-body-background-color);
+        }
+
+        a {
+            color: var(--rz-link-color);
+        }
+
+            a:hover,
+            a:focus {
+                color: var(--rz-link-hover-color);
+            }
+    </style>
+
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
     @RenderBody()
 
     <script src="content/scripts/clipboard.min.js"></script>
-    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
