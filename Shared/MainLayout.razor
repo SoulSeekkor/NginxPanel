@@ -30,7 +30,7 @@
                     {
                         <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
                     }
-                    <RadzenButton Click=@(() => TestConfig()) Text="Test Config" Icon="check" ButtonStyle="ButtonStyle.Light" />
+                    <RadzenButton Click=@(() => TestConfig()) Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="@busyTesting" ButtonStyle="ButtonStyle.Light" class="rz-ripple" />
                 </span>
             </div>
 
@@ -45,6 +45,7 @@
 
 @code {
     private string whoami = "";
+    private bool busyTesting = false;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -58,24 +59,31 @@
         }
     }
 
-    private void PerformServiceAction(Services.Nginx.enuServiceAction action)
+    private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
-        // Perform requested action
-        Nginx.PerformServiceAction(action);
-
-        switch (action)
+        try
         {
-            case Services.Nginx.enuServiceAction.Start:
-                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service started!");
-                break;
+            // Perform requested action
+            await Task.Run(() => Nginx.PerformServiceAction(action));
 
-            case Services.Nginx.enuServiceAction.Stop:
-                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service stopped!");
-                break;
+            switch (action)
+            {
+                case Services.Nginx.enuServiceAction.Start:
+                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service started!");
+                    break;
 
-            case Services.Nginx.enuServiceAction.Restart:
-                ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service restarted!");
-                break;
+                case Services.Nginx.enuServiceAction.Stop:
+                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service stopped!");
+                    break;
+
+                case Services.Nginx.enuServiceAction.Restart:
+                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service restarted!");
+                    break;
+            }
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 
@@ -88,13 +96,22 @@
         notifMessage.Detail = message;
         notifMessage.Duration = duration;
         notifMessage.CloseOnClick = true;
-
+        notifMessage.Style = "font-weight: bold;";
 
         NotificationService.Notify(notifMessage);
     }
 
-    private void TestConfig()
+    private async void TestConfig()
     {
-        
+        try
+        {
+            busyTesting = true;
+            await Task.Run(() => System.Threading.Thread.Sleep(2000));
+        }
+        finally
+        {
+            busyTesting = false;
+            StateHasChanged();
+        }
     }
 }
