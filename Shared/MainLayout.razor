@@ -23,14 +23,14 @@
                 <span>
                     @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
                     {
-                        <button type="button" class="btn red fa fa-stop rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) title="Stop">&nbsp;&nbsp;Stop</button>
-                        <button type="button" class="btn blue fa fa-rotate-right rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) title="Restart">&nbsp;&nbsp;Restart</button>
+                        <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Secondary" />
                     }
                     else
                     {
-                        <button type="button" class="btn green fa fa-play rounded small button-icon" @onclick=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) title="Start">&nbsp;&nbsp;Start</button>
+                        <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
                     }
-                    <button type="button" class="btn purple fa fa-check rounded small button-icon" @onclick=@(() => TestConfig()) title="Test Config">&nbsp;&nbsp;Test Config</button>
+                    <RadzenButton Click=@(() => TestConfig()) Text="Test Config" Icon="check" ButtonStyle="ButtonStyle.Light" />
                 </span>
             </div>
 

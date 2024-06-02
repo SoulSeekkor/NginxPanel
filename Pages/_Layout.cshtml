@@ -15,7 +15,6 @@
     <!-- custom styling -->
     <link rel="stylesheet" href="content/css/theme.css" />
     <link rel="stylesheet" href="content/css/collapsible.css" />
-    <link rel="stylesheet" href="content/css/buttons.css" />
     <link rel="stylesheet" href="content/css/layout.css" />
     <link rel="stylesheet" href="content/font-awesome/css/all.min.css" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/dark-base.css" />
@@ -43,51 +42,6 @@
 
     <script>
         new ClipboardJS('.clip');
-
-        function notify(type, message, timeout) {
-            type = type || "default";
-            timeout = timeout || 2;
-
-            switch (type) {
-                case "warning":
-                    alertify.warning(message, timeout);
-                    break;
-                case "success":
-                    alertify.success(message, timeout);
-                    break;
-                case "error":
-                    alertify.error(message, timeout);
-                    break;
-                default:
-                    alertify.message(message, timeout);
-            }
-        }
-
-        function ask(type, message) {
-            var icon = '';
-
-            switch (type) {
-                case "warning":
-                    icon = 'exclamation-triangle';
-                    break;
-                case "question":
-                    icon = "question";
-                    break;
-            }
-
-            message = "<span style='font-size: 16px;'>" + message + "</span>";
-
-            if (icon != '')
-                message = "<i style='padding-right: 30px; font-size: 32px;' class='fa fa-" + icon + "'></i>" + message;
-
-            return new Promise((resolve, reject) => {
-                alertify.confirm(message, function () {
-                    resolve(true);
-                }, function () {
-                    resolve(false);
-                }).autoCancel(15).set({ labels: { ok: 'Yes', cancel: 'No' }, resizable: true, defaultFocus: 'cancel' }).setHeader('Confirm').resizeTo(650, 200)
-            });
-        }
     </script>
 </body>
 </html>
