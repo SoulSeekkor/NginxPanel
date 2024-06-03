@@ -1,5 +1,8 @@
 ﻿@page "/sites"
 
+@using NginxPanel.Services;
+
+@inject Services.CLI CLI;
 @inject Services.Nginx Nginx;
 
 <PageTitle>Sites</PageTitle>
@@ -16,13 +19,13 @@
         {
             <RadzenAccordionItem Text="@conf.Name" Icon="description" class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
                 <RadzenCard>
-                    <RadzenCheckBox TValue="bool" Value=conf.Enabled Name="@conf.Name" Change="() => ToggleSite(conf)" />
+                    <RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSite(conf)" />
                     <RadzenLabel Text="Enabled" Component="@conf.Name"/>
 
                     <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                    <RadzenTextArea Value=@conf.FileContents Cols="125" Rows="20" />
+                    <RadzenTextArea Value="@conf.FileContents" Change=@((value) => @conf.FileContents = value) Cols="125" Rows="20" />
                     <br />
-                <RadzenButton Click=@(() => conf.Save(this)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
+                <RadzenButton Click=@(() => Save(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
                 </RadzenCard>
             </RadzenAccordionItem>
         }
@@ -81,8 +84,24 @@
         }
     }
 
-    public void RefreshState()
+    private async void Save(Nginx.ConfigFile conf)
     {
-        StateHasChanged();
+        try
+        {
+            conf.busySaving = true;
+
+            await Task.Run(() => File.WriteAllText(conf.ConfigPath, conf.FileContents));
+
+            layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: blue; font-style: italic;'>{conf.Name}</span> saved successfully!");
+        }
+        catch
+        {
+            layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while saving site '{conf.Name}'!");
+        }
+        finally
+        {
+            conf.busySaving = false;
+            StateHasChanged();
+        }
     }
 }

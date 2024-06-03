@@ -44,8 +44,6 @@ namespace NginxPanel.Services
                 {
                     _standardError = ex.ToString();
                 }
-
-
             };
         }
     }

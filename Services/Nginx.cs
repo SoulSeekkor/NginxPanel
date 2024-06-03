@@ -23,20 +23,6 @@ namespace NginxPanel.Services
                 Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
                 FileContents = File.ReadAllText(configPath);
             }
-
-            public async void Save(Pages.Sites caller)
-            {
-                try
-                {
-                    busySaving = true;
-                    await Task.Run(() => Thread.Sleep(2000));
-                }
-                finally
-                {
-                    busySaving = false;
-                    caller.RefreshState();
-                }
-            }
         }
 
         #endregion
