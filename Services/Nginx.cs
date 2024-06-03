@@ -33,7 +33,8 @@ namespace NginxPanel.Services
         {
             Unknown,
             Running,
-            Stopped
+            Stopped,
+            Failed
         }
 
         public enum enuServiceAction
@@ -92,7 +93,7 @@ namespace NginxPanel.Services
         {
             _version = "";
 
-            _CLI.RunCommand("nginx", "-V");
+            _CLI.RunCommand("sudo", "nginx -V");
 
             Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s").Match(_CLI.StandardError);
 
@@ -113,7 +114,7 @@ namespace NginxPanel.Services
 
         public void GetServiceStatus()
         {
-            _CLI.RunCommand("systemctl", "status nginx");
+            _CLI.RunCommand("sudo", "systemctl status nginx");
 
             if (!string.IsNullOrWhiteSpace(_CLI.StandardError))
             {
@@ -124,13 +125,17 @@ namespace NginxPanel.Services
             }
             else if (!string.IsNullOrWhiteSpace(_CLI.StandardOut))
             {
-                if (_CLI.StandardOut.Contains("inactive"))
+                if (_CLI.StandardOut.Contains("Active: inactive"))
                 {
                     _serviceStatus = enuServiceStatus.Stopped;
                 }
-                else if (_CLI.StandardOut.Contains("active"))
+                else if (_CLI.StandardOut.Contains("Active: active"))
                 {
                     _serviceStatus = enuServiceStatus.Running;
+                }
+                else if (_CLI.StandardOut.Contains("Active: failed"))
+                {
+                    _serviceStatus = enuServiceStatus.Failed;
                 }
             }
         }
@@ -155,7 +160,7 @@ namespace NginxPanel.Services
 
         public string TestConfig()
         {
-            _CLI.RunCommand("nginx", "-t");
+            _CLI.RunCommand("sudo", "nginx -t");
 
             return _CLI.StandardOut + _CLI.StandardError;
         }

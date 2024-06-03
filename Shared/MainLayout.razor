@@ -98,7 +98,6 @@
         notifMessage.Detail = message;
         notifMessage.Duration = duration;
         notifMessage.CloseOnClick = true;
-        notifMessage.Style = "font-weight: bold;";
 
         NotificationService.Notify(notifMessage);
     }
@@ -108,7 +107,18 @@
         try
         {
             busyTesting = true;
-            await Task.Run(() => System.Threading.Thread.Sleep(2000));
+
+            string results = "";
+            await Task.Run(() => results = Nginx.TestConfig());
+
+            if (results.Contains("test is successful"))
+            {
+                ShowNotification(NotificationSeverity.Success, "Success", "Nginx configuration test was successful!");
+            }
+            else
+            {
+                ShowNotification(NotificationSeverity.Error, "Error", "Nginx configuration test failed! View sites with errors for more details.", duration: 10000);
+            }
         }
         finally
         {
