@@ -6,6 +6,20 @@
 
 <h2>Nginx Version: @Nginx.Version</h2>
 
-@code {
+<br />
+<br />
+<span>
+	@((MarkupString)@serviceDetails)
+</span>
 
+@code {
+	private string serviceDetails = "";
+
+	protected override void OnInitialized()
+	{
+		if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Failed)
+		{
+			serviceDetails = Nginx.ServiceDetails;
+		}
+	}
 }

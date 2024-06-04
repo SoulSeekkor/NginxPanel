@@ -54,6 +54,7 @@ namespace NginxPanel.Services
         private string _rootConfig = "";
         private string _rootPath = "";
         private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
+        private string _serviceDetails = "";
 
         private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
 
@@ -69,6 +70,11 @@ namespace NginxPanel.Services
         public enuServiceStatus ServiceStatus
         {
             get { return _serviceStatus; }
+        }
+
+        public string ServiceDetails
+        {
+            get { return _serviceDetails; }
         }
 
         public List<ConfigFile> SiteConfigs
@@ -125,6 +131,8 @@ namespace NginxPanel.Services
             }
             else if (!string.IsNullOrWhiteSpace(_CLI.StandardOut))
             {
+                _serviceDetails = string.Empty;
+
                 if (_CLI.StandardOut.Contains("Active: inactive"))
                 {
                     _serviceStatus = enuServiceStatus.Stopped;
@@ -136,6 +144,31 @@ namespace NginxPanel.Services
                 else if (_CLI.StandardOut.Contains("Active: failed"))
                 {
                     _serviceStatus = enuServiceStatus.Failed;
+
+                    // Parse failures from the output
+                    Match match = new Regex(@"(?si)reverse proxy server\.\.\.(?<failures>.*?)\n[^\n]*nginx\.service").Match(_CLI.StandardOut);
+
+                    if (match.Success)
+                    {
+                        _serviceDetails = "The following errors were returned by the service when attempting to start:<br />";
+
+                        string failures = match.Groups["failures"].Value.Trim();
+
+                        // Attempt to match individual failures
+                        MatchCollection matches = new Regex(@"(?si)nginx:\s(?<failure>[^\n]*)").Matches(failures);
+
+                        if (matches.Count > 0)
+                        {
+                            for (int i = 0; i < matches.Count; i++)
+                            {
+                                _serviceDetails += "&emsp;" + (i+1).ToString() + ")&nbsp;" + matches[i].Groups["failure"].Value + "<br />";
+                            }
+                        }
+                        else
+                        {
+                            _serviceDetails += failures.Replace(Environment.NewLine, "<br />");
+                        }
+                    }
                 }
             }
         }
