@@ -1,0 +1,29 @@
+﻿@page "/settings"
+
+@inject Services.CLI CLI;
+
+<PageTitle>Settings</PageTitle>
+<br />
+<br />
+<h3>Settings</h3>
+<br />
+<br />
+Reset Nginx by reinstalling (includes configs):
+<br />
+<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyResetting" ButtonStyle="ButtonStyle.Info" />
+
+@code {
+	[CascadingParameter]
+	private MainLayout? layout { get; set; }
+
+	private bool busyResetting = false;
+
+	private void ResetNginx()
+	{
+		//CLI.RunCommand("sudo", "apt purge nginx nginx-common nginx-full");
+		//CLI.RunCommand("sudo", "apt install nginx");
+
+		// If all else fails
+		//CLI.RunCommand("sudo", "dpkg --force-confmiss -i /var/cache/apt/archives/nginx-common_*.deb ");
+	}
+}
