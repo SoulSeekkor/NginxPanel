@@ -11,6 +11,7 @@
 <h3>Sites</h3>
 
 <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" />
+<RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
 <br />
 <br />
 
@@ -20,6 +21,7 @@
         {
             <RadzenAccordionItem Text="@conf.Name" Icon="description" class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
                 <RadzenCard>
+                    <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
                     <RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSite(conf)" />
                     <RadzenLabel Text="Enabled" Component="@conf.Name"/>
 
