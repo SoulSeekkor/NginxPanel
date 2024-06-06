@@ -85,11 +85,11 @@
         finally
         {
             disableAllButtons = false;
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
         }
     }
 
-    public void ShowNotification(NotificationSeverity severity, string title, string message, int duration = 2000)
+    public void ShowNotification(NotificationSeverity severity, string title, string message, int duration = 4000)
     {
         NotificationMessage notifMessage = new NotificationMessage();
 
@@ -123,7 +123,7 @@
         finally
         {
             busyTesting = false;
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
         }
     }
 }

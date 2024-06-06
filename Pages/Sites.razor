@@ -2,6 +2,7 @@
 
 @using NginxPanel.Services;
 
+@inject DialogService DialogService;
 @inject Services.CLI CLI;
 @inject Services.Nginx Nginx;
 
@@ -11,26 +12,30 @@
 <h3>Sites</h3>
 
 <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" />
-<RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+<RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
 <br />
 <br />
 
 <RadzenAccordion Multiple="true">
     <Items>
-        @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+        @if (!busyRefreshing)
         {
-            <RadzenAccordionItem Text="@conf.Name" Icon="description" class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
-                <RadzenCard>
-                    <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
-                    <RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSite(conf)" />
-                    <RadzenLabel Text="Enabled" Component="@conf.Name"/>
+            @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+            {
+                <RadzenAccordionItem Text="@conf.Name" Icon="description" Selected=false class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
+                    <RadzenCard>
+                        <RadzenButton Click=@(() => DeleteSite(conf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
 
-                    <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                    <RadzenTextArea Value="@conf.FileContents" Change=@((value) => @conf.FileContents = value) Cols="125" Rows="20" />
-                    <br />
-                <RadzenButton Click=@(() => Save(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
-                </RadzenCard>
-            </RadzenAccordionItem>
+                        <RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSite(conf)" />
+                        <RadzenLabel Text="Enabled" Component="@conf.Name" />
+
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+                        <RadzenTextArea Value="@conf.FileContents" Change=@((value) => @conf.FileContents = value) Cols="125" Rows="20" />
+                        <br />
+                        <RadzenButton Click=@(() => SaveSite(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
+                    </RadzenCard>
+                </RadzenAccordionItem>
+            }
         }
     </Items>
 </RadzenAccordion>
@@ -62,7 +67,7 @@
         finally
         {
             busyRefreshing = false;
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
         }
     }
 
@@ -74,11 +79,11 @@
 
             if (conf.Enabled)
             {
-                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: blue; font-style: italic;'>{conf.Name}</span> enabled successfully!");
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> enabled successfully!");
             }
             else
             {
-                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: red; font-style: italic;'>{conf.Name}</span> disabled successfully!");
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> disabled successfully!");
             }
         }
         catch
@@ -87,7 +92,7 @@
         }
     }
 
-    private async void Save(Nginx.ConfigFile conf)
+    private async void SaveSite(Nginx.ConfigFile conf)
     {
         try
         {
@@ -95,16 +100,89 @@
 
             await Task.Run(() => File.WriteAllText(conf.ConfigPath, conf.FileContents));
 
-            layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: blue; font-style: italic;'>{conf.Name}</span> saved successfully!");
+            layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> saved successfully!");
         }
         catch
         {
-            layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while saving site '{conf.Name}'!");
+            layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while saving site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span>!");
         }
         finally
         {
             conf.busySaving = false;
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async void AddSite()
+    {
+        string siteName = string.Empty;
+        var result = await DialogService.OpenAsync("Add Site", ds =>
+            @<RadzenStack Gap="1.5rem">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the site:</RadzenText>
+                <RadzenTextBox @bind-Value=@siteName class="w-100" />
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+                        <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenStack>
+    );
+
+        if (!(result is null) && result)
+        {
+            if (String.IsNullOrWhiteSpace(siteName))
+            {
+                layout?.ShowNotification(NotificationSeverity.Error, "Error", "Site name cannot be blank!");
+                return;
+            }
+
+            siteName = siteName.Trim();
+            string configPath = Path.Combine(Nginx.SitesAvailable, siteName);
+
+            if (File.Exists(configPath))
+            {
+                layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Site with the name <span style='color: DarkRed; font-style: italic;'>{siteName}</span> already exists!");
+                return;
+            }
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    File.WriteAllText(configPath, "");
+                    RefreshSites(false);
+                });
+
+                layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkRed; font-style: italic;'>{siteName}</span> has been added!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(System.UnauthorizedAccessException))
+                {
+                    layout?.ShowNotification(NotificationSeverity.Error, "Error", $"File permission error occurred while adding site <span style='color: DarkRed; font-style: italic;'>{siteName}</span>!");
+                }
+                else
+                {
+                    layout?.ShowNotification(NotificationSeverity.Error, "Error", $"Error occurred while adding site <span style='color: DarkRed; font-style: italic;'>{siteName}</span>!");
+                }
+            }
+        }
+    }
+
+    private async void DeleteSite(Nginx.ConfigFile conf)
+    {
+        bool? confirm = await DialogService.Confirm($"Are you sure you want to delete site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?", "Delete Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+        if (confirm.HasValue && confirm.Value)
+        {
+            await Task.Run(() =>
+            {
+                File.Delete(conf.ConfigPath);
+                RefreshSites(false);
+            });
+
+            layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been deleted!");
         }
     }
 }
