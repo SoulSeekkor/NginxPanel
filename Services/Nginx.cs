@@ -77,6 +77,11 @@ namespace NginxPanel.Services
             get { return _serviceDetails; }
         }
 
+        public string SitesAvailable
+        {
+            get { return Path.Combine(_rootPath, "sites-available"); }
+        }
+
         public List<ConfigFile> SiteConfigs
         {
             get { return _siteConfigs; }
@@ -208,6 +213,7 @@ namespace NginxPanel.Services
                 {
                     _siteConfigs.Add(new ConfigFile(_rootPath, file));
                 }
+                _siteConfigs.Sort((a,b) => a.Name.CompareTo(b.Name));
             }
         }
 
