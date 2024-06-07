@@ -10,40 +10,56 @@
 <br />
 <br />
 <h3>Sites</h3>
-
-<RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" />
-<RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
 <br />
 <br />
 
-<RadzenAccordion Multiple="true">
-    <Items>
-        @if (!busyRefreshing)
-        {
-            @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+            <RadzenSidebarToggle Click="@(() => sitesSidebarExpanded = !sitesSidebarExpanded)" />
+            <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
+            <RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenSidebar @bind-Expanded="@sitesSidebarExpanded">
+        <RadzenPanelMenu>
+            @if (!busyRefreshing)
             {
-                <RadzenAccordionItem Text="@conf.Name" Icon="description" Selected=false class="p-1 rz-background-color-light rz-color-on-light rz-text-align-left rz-shadow-10">
-                    <RadzenCard>
-                        <RadzenButton Click=@(() => DeleteSite(conf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
-
-                        <RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSite(conf)" />
-                        <RadzenLabel Text="Enabled" Component="@conf.Name" />
-
-                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@conf.FileContents" Change=@((value) => @conf.FileContents = value) Cols="125" Rows="20" />
-                        <br />
-                        <RadzenButton Click=@(() => SaveSite(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
-                    </RadzenCard>
-                </RadzenAccordionItem>
+                @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+                {
+                    <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" />
+                }
             }
-        }
-    </Items>
-</RadzenAccordion>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+    <RadzenBody>
+        <div class="rz-p-4">
+            @if (!(selectedConf is null) && !busyRefreshing)
+            {
+                // Display selected site config
+                <RadzenCard>
+                    <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+
+                    <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
+                    <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+
+                    <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+                    <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="125" Rows="20" />
+                    <br />
+                    <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
+                </RadzenCard>
+            }
+        </div>
+    </RadzenBody>
+</RadzenLayout>
 
 @code {
     [CascadingParameter]
     private MainLayout? layout { get; set; }
 
+    private Nginx.ConfigFile? selectedConf = null;
+
+    private bool sitesSidebarExpanded = true;
     private bool busyRefreshing = false;
 
     protected override void OnInitialized()
@@ -56,6 +72,7 @@
         try
         {
             busyRefreshing = true;
+            selectedConf = null;
 
             await Task.Run(() => Nginx.RefreshFiles());
 
