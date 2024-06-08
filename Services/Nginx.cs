@@ -8,11 +8,21 @@ namespace NginxPanel.Services
 
         public class ConfigFile
         {
+            private string _fileContents = string.Empty;
+
             public string Name = string.Empty;
             public string ConfigPath = string.Empty;
 
             public bool Enabled = false;
-            public string FileContents = string.Empty;
+            public string FileContents
+            {
+                get { return _fileContents; }
+                set {
+                    _fileContents = value;
+                    ContentsDirty = true;
+                }
+            }
+            public bool ContentsDirty = false;
 
             public bool busySaving = false;
 
@@ -21,7 +31,13 @@ namespace NginxPanel.Services
                 ConfigPath = configPath;
                 Name = new FileInfo(configPath).Name;
                 Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
-                FileContents = File.ReadAllText(configPath);
+                _fileContents = File.ReadAllText(configPath);
+            }
+
+            public async Task Save()
+            {
+                await Task.Run(() => File.WriteAllText(ConfigPath, _fileContents));
+                ContentsDirty = false;
             }
         }
 

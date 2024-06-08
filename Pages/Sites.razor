@@ -27,7 +27,12 @@
             {
                 @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
                 {
-                    <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" />
+                    string style = "";
+
+                    if (conf.ContentsDirty)
+                        style = "background-color: darkred;";
+
+                    <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
                 }
             }
         </RadzenPanelMenu>
@@ -115,7 +120,7 @@
         {
             conf.busySaving = true;
 
-            await Task.Run(() => File.WriteAllText(conf.ConfigPath, conf.FileContents));
+            await conf.Save();
 
             layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Site <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> saved successfully!");
         }
