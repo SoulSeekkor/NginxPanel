@@ -30,7 +30,7 @@
                     string style = "";
 
                     if (conf.ContentsDirty)
-                        style = "background-color: darkred;";
+                        style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
 
                     <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
                 }
