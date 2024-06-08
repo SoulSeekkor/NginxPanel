@@ -1,6 +1,7 @@
 ﻿@page "/settings"
 
 @inject Services.CLI CLI;
+@inject Services.Nginx Nginx;
 
 <PageTitle>Settings</PageTitle>
 <br />
@@ -8,22 +9,55 @@
 <h3>Settings</h3>
 <br />
 <br />
+Install or reinstall Nginx, leaves configs and gives the option of stable or mainline:
+<br />
+<RadzenButton Click=@(() => InstallNginx()) Disabled="true" Text="@installText" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+<br />
+<br />
 Reset Nginx by reinstalling (includes configs):
 <br />
-<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyResetting" ButtonStyle="ButtonStyle.Danger" />
+<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 
 @code {
 	[CascadingParameter]
 	private MainLayout? layout { get; set; }
 
-	private bool busyResetting = false;
+	string installText = "Install Nginx";
+
+	private bool busyInstallReset = false;
+
+	protected override void OnInitialized()
+	{
+		if (Nginx.Installed)
+		{
+			installText = "Reinstall Nginx";
+		}
+	}
 
 	private void ResetNginx()
 	{
+		//busyInstallReset = true;
 		//CLI.RunCommand("sudo", "apt purge nginx nginx-common nginx-full");
 		//CLI.RunCommand("sudo", "apt install nginx");
 
 		// If all else fails
 		//CLI.RunCommand("sudo", "dpkg --force-confmiss -i /var/cache/apt/archives/nginx-common_*.deb ");
+		//busyInstallReset = false;
+	}
+
+	private void InstallNginx()
+	{
+		//busyInstallReset = true;
+
+		// Remove existing Nginx first
+		//CLI.RunCommand("sudo", "apt remove nginx -y");
+
+		//CLI.RunCommand("sudo", "apt install software-properties-common -y");
+		//CLI.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx");  // Stable
+		//CLI.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx-mainline");  // Mainline
+		//CLI.RunCommand("sudo", "apt update");
+		//CLI.RunCommand("sudo", "apt install nginx-full");
+
+		//busyInstallReset = false;
 	}
 }

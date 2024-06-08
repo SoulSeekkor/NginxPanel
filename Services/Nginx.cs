@@ -78,6 +78,11 @@ namespace NginxPanel.Services
 
         #region Properties
 
+        public bool Installed
+        {
+            get { return !(_rootConfig == ""); }
+        }
+
         public string Version
         {
             get { return _version; }
