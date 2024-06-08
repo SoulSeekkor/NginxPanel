@@ -11,6 +11,7 @@ builder.Services.AddRadzenComponents();
 // Add custom services.
 builder.Services.AddSingleton<CLI>();
 builder.Services.AddSingleton<Nginx>();
+builder.Services.AddSingleton<ACME>();
 
 var app = builder.Build();
 

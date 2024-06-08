@@ -1,11 +1,13 @@
 ﻿@page "/"
 
 @inject Services.Nginx Nginx;
+@inject Services.ACME ACME;
 
 <PageTitle>Index</PageTitle>
 <br />
 <br />
-<h2>Nginx Version: @Nginx.Version</h2>
+<h3>Nginx Version: @Nginx.Version</h3>
+<h3>ACME Version: @ACME.Version</h3>
 
 <br />
 <br />
