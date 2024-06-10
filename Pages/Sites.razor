@@ -3,8 +3,7 @@
 @using NginxPanel.Services;
 
 @inject DialogService DialogService;
-@inject Services.CLI CLI;
-@inject Services.Nginx Nginx;
+@inject Services.Nginx nginx;
 
 <PageTitle>Sites</PageTitle>
 <br />
@@ -13,50 +12,57 @@
 <br />
 <br />
 
-<RadzenLayout>
-    <RadzenHeader>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-            <RadzenSidebarToggle Click="@(() => sitesSidebarExpanded = !sitesSidebarExpanded)" />
-            <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
-            <RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
-        </RadzenStack>
-    </RadzenHeader>
-    <RadzenSidebar @bind-Expanded="@sitesSidebarExpanded">
-        <RadzenPanelMenu>
-            @if (!busyRefreshing)
-            {
-                @foreach (Services.Nginx.ConfigFile conf in Nginx.SiteConfigs)
+@if (nginx.Installed)
+{
+    <RadzenLayout>
+        <RadzenHeader>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                <RadzenSidebarToggle Click="@(() => sitesSidebarExpanded = !sitesSidebarExpanded)" />
+                <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
+                <RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+            </RadzenStack>
+        </RadzenHeader>
+        <RadzenSidebar @bind-Expanded="@sitesSidebarExpanded">
+            <RadzenPanelMenu>
+                @if (!busyRefreshing)
                 {
-                    string style = "";
+                    @foreach (Services.Nginx.ConfigFile conf in nginx.SiteConfigs)
+                    {
+                        string style = "";
 
-                    if (conf.ContentsDirty)
-                        style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
+                        if (conf.ContentsDirty)
+                            style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
 
-                    <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
+                        <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
+                    }
                 }
-            }
-        </RadzenPanelMenu>
-    </RadzenSidebar>
-    <RadzenBody>
-        <div class="rz-p-4">
-            @if (!(selectedConf is null) && !busyRefreshing)
-            {
-                // Display selected site config
-                <RadzenCard>
-                    <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+            </RadzenPanelMenu>
+        </RadzenSidebar>
+        <RadzenBody>
+            <div class="rz-p-4">
+                @if (!(selectedConf is null) && !busyRefreshing)
+                {
+                    // Display selected site config
+                    <RadzenCard>
+                        <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
 
-                    <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
-                    <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+                        <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
+                        <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
 
-                    <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                    <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="125" Rows="20" />
-                    <br />
-                    <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
-                </RadzenCard>
-            }
-        </div>
-    </RadzenBody>
-</RadzenLayout>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="125" Rows="20" />
+                        <br />
+                        <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
+                    </RadzenCard>
+                }
+            </div>
+        </RadzenBody>
+    </RadzenLayout>
+}
+else
+{
+    <RadzenText TextStyle="TextStyle.DisplayH5" class="rz-mt-5" TagName="TagName.H5">Nginx service was not found, you must install Nginx before using this page.</RadzenText>
+}
 
 @code {
     [CascadingParameter]
@@ -79,7 +85,7 @@
             busyRefreshing = true;
             selectedConf = null;
 
-            await Task.Run(() => Nginx.RefreshFiles());
+            await Task.Run(() => nginx.RefreshFiles());
 
             if (notifyUser)
             {
@@ -97,7 +103,7 @@
     {
         try
         {
-            Nginx.ToggleEnabled(conf);
+            nginx.ToggleEnabled(conf);
 
             if (conf.Enabled)
             {
@@ -160,7 +166,7 @@
             }
 
             siteName = siteName.Trim();
-            string configPath = Path.Combine(Nginx.SitesAvailable, siteName);
+            string configPath = Path.Combine(nginx.SitesAvailable, siteName);
 
             if (File.Exists(configPath))
             {
