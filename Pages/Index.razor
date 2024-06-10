@@ -1,13 +1,13 @@
 ﻿@page "/"
 
-@inject Services.Nginx Nginx;
-@inject Services.ACME ACME;
+@inject Services.Nginx nginx;
+@inject Services.ACME acme;
 
 <PageTitle>Index</PageTitle>
 <br />
 <br />
-<h3>Nginx Version: @Nginx.Version</h3>
-<h3>ACME Version: @ACME.Version</h3>
+<h3>Nginx Version: @nginx.Version</h3>
+<h3>ACME Version: @acme.Version</h3>
 
 <br />
 <br />
@@ -20,9 +20,9 @@
 
 	protected override void OnInitialized()
 	{
-		if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Failed)
+		if (nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Failed)
 		{
-			serviceDetails = Nginx.ServiceDetails;
+			serviceDetails = nginx.ServiceDetails;
 		}
 	}
 }

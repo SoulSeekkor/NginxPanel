@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
-@inject Services.CLI CLI;
-@inject Services.Nginx Nginx;
+@inject Services.CLI cli;
+@inject Services.Nginx nginx;
 @inject NotificationService NotificationService
 
 <CascadingValue Value="this">
@@ -15,11 +15,11 @@
                 <span style="padding-right: 50px;">
                     User: @whoami
                     <br />
-                    Nginx Service: @Nginx.ServiceStatus.ToString()
+                    Nginx Service: @nginx.ServiceStatus.ToString()
                 </span>
 
                 <span>
-                    @if (Nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
+                    @if (nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
                     {
                         <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
                         <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
@@ -50,9 +50,9 @@
     {
         if (firstRender)
         {
-            CLI.RunCommand("whoami", "");
+            cli.RunCommand("whoami", "");
 
-            whoami = CLI.StandardOut;
+            whoami = cli.StandardOut;
 
             StateHasChanged();
         }
@@ -65,7 +65,7 @@
             disableAllButtons = true;
 
             // Perform requested action
-            await Task.Run(() => Nginx.PerformServiceAction(action));
+            await Task.Run(() => nginx.PerformServiceAction(action));
 
             switch (action)
             {
@@ -109,7 +109,7 @@
             busyTesting = true;
 
             string results = "";
-            await Task.Run(() => results = Nginx.TestConfig());
+            await Task.Run(() => results = nginx.TestConfig());
 
             if (results.Contains("test is successful"))
             {

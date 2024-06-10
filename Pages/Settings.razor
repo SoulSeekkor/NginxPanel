@@ -1,7 +1,7 @@
 ﻿@page "/settings"
 
-@inject Services.CLI CLI;
-@inject Services.Nginx Nginx;
+@inject Services.CLI cli;
+@inject Services.Nginx nginx;
 
 <PageTitle>Settings</PageTitle>
 <br />
@@ -28,7 +28,7 @@ Reset Nginx by reinstalling (includes configs):
 
 	protected override void OnInitialized()
 	{
-		if (Nginx.Installed)
+		if (nginx.Installed)
 		{
 			installText = "Reinstall Nginx";
 		}
