@@ -4,6 +4,7 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if !DEBUG
 builder.WebHost.ConfigureKestrel((context, serverOptions) =>
 {
 	serverOptions.Listen(IPAddress.Any, 5000);
@@ -12,6 +13,7 @@ builder.WebHost.ConfigureKestrel((context, serverOptions) =>
 	//	listenOptions.UseHttps("testCert.pfx", "testPassword");
 	//});
 });
+#endif
 
 // Add services to the container.
 builder.Services.AddRazorPages();
