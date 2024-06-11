@@ -61,19 +61,47 @@ Install ACME:
 			busyInstallReset = true;
 			StateHasChanged();
 
-			await Task.Run(() =>
+
+			var result = await DialogService.OpenAsync("Nginx Package", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please select the Nginx package to use.</RadzenText>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="System Default" Click="@(() => ds.Close(""))" Style="width: 140px;" />
+				<RadzenButton Text="Stable" Click="@(() => ds.Close("stable"))" Style="width: 80px;" />
+				<RadzenButton Text="Mainline" Click="@(() => ds.Close("mainline"))" Style="width: 80px;" />
+			</RadzenStack>
+			<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null))
 			{
-				// Remove existing Nginx first
-				cli.RunCommand("sudo", "apt remove nginx nginx-common nginx-full -y");
+				await Task.Run(() =>
+				{
+					// Remove existing Nginx first
+					cli.RunCommand("sudo", "apt remove nginx nginx-common nginx-full -y");
 
-				cli.RunCommand("sudo", "apt install software-properties-common -y");
-				//cli.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx -y");  // Stable
-				cli.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx-mainline -y");  // Mainline
-				cli.RunCommand("sudo", "apt update");
-				cli.RunCommand("sudo", "apt install nginx-full -y");
-			});
+					if (!String.IsNullOrWhiteSpace(result))
+					{
+						// Install dependencies
+						cli.RunCommand("sudo", "apt install software-properties-common -y");
 
-			layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Nginx installed successfully!");
+						if (result == "stable")
+							cli.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx -y");  // Stable
+						else if (result == "mainline")
+							cli.RunCommand("sudo", "add-apt-repository ppa:ondrej/nginx-mainline -y");  // Mainline
+
+						cli.RunCommand("sudo", "apt update");
+						cli.RunCommand("sudo", "apt install nginx-full -y");
+					}
+					else
+						cli.RunCommand("sudo", "apt install nginx -y");
+				});
+
+				layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Nginx installed successfully!");
+			}
 		}
 		finally
 		{
