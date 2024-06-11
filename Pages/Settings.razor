@@ -23,7 +23,7 @@ Reset Nginx by reinstalling (includes configs):
 <br />
 Install ACME:
 <br />
-<RadzenButton Click=@(() => InstallACME()) Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 
 @code {
 	[CascadingParameter]
@@ -87,12 +87,15 @@ Install ACME:
 			if (confirm.HasValue && confirm.Value)
 			{
 				busyInstallReset = true;
+				StateHasChanged();
 
-				cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
-				cli.RunCommand("sudo", "chmod +x acme.sh");
-				cli.RunCommand("sudo", "bash acme.sh");
+				await Task.Run(() => {
+					cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
+					cli.RunCommand("sudo", "chmod +x acme.sh");
+					cli.RunCommand("sudo", "bash acme.sh");
 
-				//acme.GetVersion();
+					//acme.GetVersion();
+				});
 
 				if (cli.StandardOut.Contains("Install success!"))
 				{
