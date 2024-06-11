@@ -13,7 +13,7 @@
         <main>
             <div class="top-row px-4">
                 <span style="padding-right: 50px;">
-                    User: @whoami
+                    User: @cli.RunningAsUser
                     <br />
                     Nginx Service: @nginx.ServiceStatus.ToString()
                 </span>
@@ -48,18 +48,6 @@
     private string whoami = "";
     private bool disableAllButtons = false;
     private bool busyTesting = false;
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            cli.RunCommand("whoami", "");
-
-            whoami = cli.StandardOut;
-
-            StateHasChanged();
-        }
-    }
 
     private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
