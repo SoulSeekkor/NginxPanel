@@ -115,7 +115,6 @@ namespace NginxPanel.Services
 		public Nginx(CLI CLI)
 		{
 			_CLI = CLI;
-
 			Refresh();
 		}
 
