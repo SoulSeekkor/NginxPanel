@@ -1,42 +1,49 @@
 ﻿namespace NginxPanel.Services
 {
-    public class ACME
+	public class ACME
 	{
 
-        #region Variables
+		#region Variables
 
-        private CLI _CLI;
+		private CLI _CLI;
 
-        private string _version = "";
+		private string _version = "";
 
-        #endregion
+		#endregion
 
-        #region Properties
+		#region Properties
 
-        public string Version
-        {
-            get { return _version; }
-        }
+		public bool Installed
+		{
+			get { return !(_version == ""); }
+		}
 
-        #endregion
+		public string Version
+		{
+			get { return _version; }
+		}
 
-        #region Constructors
+		#endregion
 
-        public ACME(CLI CLI)
-        {
-            _CLI = CLI;
+		#region Constructors
 
-            GetVersion();
-        }
+		public ACME(CLI CLI)
+		{
+			_CLI = CLI;
+			GetVersion();
+		}
 
-        #endregion
+		#endregion
 
-        public void GetVersion()
-        {
-            _version = "";
-
-            _CLI.RunCommand(".acme.sh/acme.sh", "-v");
-            _version = _CLI.StandardOut;
-        }
-    }
+		public void GetVersion()
+		{
+			_version = "";
+			
+			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
+			{
+				_CLI.RunCommand("sudo", "bash acme.sh -v", working_dir: $"{_CLI.HomePath}/.acme.sh");
+				_version = _CLI.StandardOut.Split("\n")[1];
+			}
+		}
+	}
 }

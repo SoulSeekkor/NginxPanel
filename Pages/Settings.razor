@@ -1,5 +1,7 @@
 ﻿@page "/settings"
 
+@inject DialogService DialogService;
+@inject Services.ACME acme;
 @inject Services.CLI cli;
 @inject Services.Nginx nginx;
 
@@ -17,6 +19,11 @@ Install or reinstall Nginx, leaves configs and gives the option of stable or mai
 Reset Nginx by reinstalling (includes configs):
 <br />
 <RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+<br />
+<br />
+Install ACME:
+<br />
+<RadzenButton Click=@(() => InstallACME()) Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 
 @code {
 	[CascadingParameter]
@@ -69,5 +76,36 @@ Reset Nginx by reinstalling (includes configs):
 		nginx.Refresh();
 
 		StateHasChanged();
+	}
+
+	private async void InstallACME()
+	{
+		string email = string.Empty;
+		var result = await DialogService.OpenAsync("Registration Email", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the email to register with the ACME script:</RadzenText>
+		<RadzenTextBox @bind-Value=@email class="w-100" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+		if (!String.IsNullOrWhiteSpace(email))
+		{
+			busyInstallReset = true;
+
+			cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
+			cli.RunCommand("sudo", "chmod +x acme.sh");
+			cli.RunCommand("sudo", "bash acme.sh");
+
+			//acme.GetVersion();
+
+			busyInstallReset = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
 	}
 }
