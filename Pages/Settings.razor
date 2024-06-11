@@ -97,7 +97,13 @@ Install ACME:
 						cli.RunCommand("sudo", "apt install nginx-full -y");
 					}
 					else
-						cli.RunCommand("sudo", "apt install nginx -y");
+					{
+						// Remove custom repositories if they exist first
+						cli.RunCommand("sudo", "add-apt-repository --remove ppa:ondrej/nginx -y");
+						cli.RunCommand("sudo", "add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+						cli.RunCommand("sudo", "apt update");
+						cli.RunCommand("sudo", "apt install nginx -y");  // Default system package
+					}
 				});
 
 				layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Nginx installed successfully!");
