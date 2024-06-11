@@ -30,10 +30,15 @@
 		public ACME(CLI CLI)
 		{
 			_CLI = CLI;
-			GetVersion();
+			Refresh();
 		}
 
 		#endregion
+
+		public void Refresh()
+		{
+			GetVersion();
+		}
 
 		public void GetVersion()
 		{

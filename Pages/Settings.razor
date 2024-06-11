@@ -98,8 +98,6 @@ Install ACME:
 					cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
 					cli.RunCommand("sudo", "chmod +x acme.sh");
 					cli.RunCommand("sudo", "bash acme.sh");
-
-					//acme.GetVersion();
 				});
 
 				if (cli.StandardOut.Contains("Install success!"))
@@ -115,6 +113,7 @@ Install ACME:
 		finally
 		{
 			busyInstallReset = false;
+			acme.Refresh();
 			StateHasChanged();
 		}
 	}
