@@ -80,32 +80,34 @@ Install ACME:
 
 	private async void InstallACME()
 	{
-		string email = string.Empty;
-		var result = await DialogService.OpenAsync("Registration Email", ds =>
-	@<RadzenStack Gap="1.5rem">
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the email to register with the ACME script:</RadzenText>
-		<RadzenTextBox @bind-Value=@email class="w-100" />
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
-
-		if (!String.IsNullOrWhiteSpace(email))
+		try
 		{
-			busyInstallReset = true;
+			bool? confirm = await DialogService.Confirm($"Are you sure you want to install the ACME script?", "Install ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
-			cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
-			cli.RunCommand("sudo", "chmod +x acme.sh");
-			cli.RunCommand("sudo", "bash acme.sh");
+			if (confirm.HasValue && confirm.Value)
+			{
+				busyInstallReset = true;
 
-			//acme.GetVersion();
+				cli.RunCommand("wget", "-O acme.sh https://get.acme.sh");
+				cli.RunCommand("sudo", "chmod +x acme.sh");
+				cli.RunCommand("sudo", "bash acme.sh");
 
+				//acme.GetVersion();
+
+				if (cli.StandardOut.Contains("Install success!"))
+				{
+					layout?.ShowNotification(NotificationSeverity.Success, "Success", "ACME installed successfully!");
+				}
+				else
+				{
+					layout?.ShowNotification(NotificationSeverity.Error, "Error", "ACME failed to install!");
+				}
+			}
+		}
+		finally
+		{
 			busyInstallReset = false;
-			await InvokeAsync(() => StateHasChanged());
+			StateHasChanged();
 		}
 	}
 }
