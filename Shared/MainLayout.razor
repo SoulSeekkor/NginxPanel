@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@inject IJSRuntime JSRuntime;
+
 @inject Services.CLI cli;
 @inject Services.Nginx nginx;
 @inject NotificationService NotificationService
@@ -48,6 +50,19 @@
     private bool disableAllButtons = false;
     private bool busyTesting = false;
 
+    public enum toastType
+    {
+        success,
+        warning,
+        error,
+        info
+    }
+
+    public async Task DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
+    {
+        await JSRuntime.InvokeVoidAsync("toast", type.ToString(), message, title, dismissable);
+    }
+
     private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
         try
@@ -60,15 +75,15 @@
             switch (action)
             {
                 case Services.Nginx.enuServiceAction.Start:
-                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service started!");
+                    await DisplayToast(toastType.info, "Nginx service started!");
                     break;
 
                 case Services.Nginx.enuServiceAction.Stop:
-                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service stopped!");
+                    await DisplayToast(toastType.info, "Nginx service stopped!");
                     break;
 
                 case Services.Nginx.enuServiceAction.Restart:
-                    ShowNotification(NotificationSeverity.Info, "Service Status", "Nginx service restarted!");
+                    await DisplayToast(toastType.info, "Nginx service restarted!");
                     break;
             }
         }
@@ -77,19 +92,6 @@
             disableAllButtons = false;
             await InvokeAsync(() => StateHasChanged());
         }
-    }
-
-    public void ShowNotification(NotificationSeverity severity, string title, string message, int duration = 4000)
-    {
-        NotificationMessage notifMessage = new NotificationMessage();
-
-        notifMessage.Severity = severity;
-        notifMessage.Summary = title;
-        notifMessage.Detail = message;
-        notifMessage.Duration = duration;
-        notifMessage.CloseOnClick = true;
-
-        NotificationService.Notify(notifMessage);
     }
 
     private async void TestConfig()
@@ -103,11 +105,11 @@
 
             if (results.Contains("test is successful"))
             {
-                ShowNotification(NotificationSeverity.Success, "Success", "Nginx configuration test was successful!");
+                await DisplayToast(toastType.success, "Nginx configuration test was successful!");
             }
             else
             {
-                ShowNotification(NotificationSeverity.Error, "Error", "Nginx configuration test failed! View sites with errors for more details.", duration: 10000);
+                await DisplayToast(toastType.error, "Nginx configuration test failed! View sites with errors for more details.");
             }
         }
         finally

@@ -106,7 +106,7 @@ Install ACME:
 					}
 				});
 
-				layout?.ShowNotification(NotificationSeverity.Success, "Success", $"Nginx installed successfully!");
+				layout?.DisplayToast(MainLayout.toastType.success, "Nginx installed successfully!");
 			}
 		}
 		finally
@@ -136,11 +136,11 @@ Install ACME:
 
 				if (cli.StandardOut.Contains("Install success!"))
 				{
-					layout?.ShowNotification(NotificationSeverity.Success, "Success", "ACME installed successfully!");
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME installed successfully!");
 				}
 				else
 				{
-					layout?.ShowNotification(NotificationSeverity.Error, "Error", "ACME failed to install!");
+					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to install!");
 				}
 			}
 		}

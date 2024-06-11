@@ -36,12 +36,16 @@
             }
     </style>
 
+    <!-- other custom styling -->
+    <link rel="stylesheet" href="content/css/butterup.min.css" />
+
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
     @RenderBody()
 
     <script src="content/scripts/clipboard.min.js"></script>
+    <script src="content/scripts/butterup.min.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
     <div id="blazor-error-ui">
@@ -59,6 +63,20 @@
 
     <script>
         new ClipboardJS('.clip');
+    </script>
+    <!-- Butterup -->
+    <!-- https://github.com/dgtlss/butterup -->
+    <script>
+        function toast(type, message, title, dismissable) {
+            butterup.toast({
+                location: 'top-right',
+                type: type,
+                icon: (type != ""),
+                message: message,
+                title: title,
+                dismissable: dismissable,
+            });
+        }
     </script>
 </body>
 </html>
