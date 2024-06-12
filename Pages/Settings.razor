@@ -21,14 +21,23 @@ Reset Nginx by reinstalling (includes configs):
 <RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 <br />
 <br />
-Install ACME:
-<br />
-<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-<br />
-<br />
-Upgrade ACME:
-<br />
-<RadzenButton Click=@(() => UpgradeACME()) Disabled="!acme.Installed" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+@if (!acme.Installed)
+{
+	<span>Install ACME:</span>
+	<br />
+	<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+}
+else
+{
+	<span>Uninstall ACME:</span>
+	<br />
+	<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+	<br />
+	<br />
+	<span>Upgrade ACME:</span>
+	<br />
+	<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+}
 
 @code {
 	[CascadingParameter]
@@ -146,6 +155,40 @@ Upgrade ACME:
 				else
 				{
 					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to install!");
+				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			acme.Refresh();
+			StateHasChanged();
+		}
+	}
+
+	private async void UninstallACME()
+	{
+		try
+		{
+			bool? confirm = await DialogService.Confirm($"Are you sure you want to uninstall the ACME script?", "Uninstall ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+			if (confirm.HasValue && confirm.Value)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				await Task.Run(() =>
+				{
+					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --uninstall", sudo: false);
+				});
+
+				if (cli.StandardOut.Contains("Uninstalling alias"))
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME uninstalled successfully!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to uninstall!");
 				}
 			}
 		}

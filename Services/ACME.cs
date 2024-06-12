@@ -2,12 +2,27 @@
 {
 	public class ACME
 	{
+		#region Classes
+
+		public class Certificate
+		{
+			public string MainDomain = string.Empty;
+			public string SANDomains = string.Empty;
+			public string KeyLength = string.Empty;
+			public string CA = string.Empty;
+			public DateTime Created;
+			public DateTime Renew;
+		}
+
+		#endregion
 
 		#region Variables
 
 		private CLI _CLI;
 
 		private string _version = "";
+
+		private List<Certificate> _certificates = new List<Certificate>();
 
 		#endregion
 
@@ -21,6 +36,11 @@
 		public string Version
 		{
 			get { return _version; }
+		}
+
+		public List<Certificate> Certificates
+		{
+			get { return _certificates; }
 		}
 
 		#endregion
@@ -38,6 +58,7 @@
 		public void Refresh()
 		{
 			GetVersion();
+			RefreshCertificates();
 		}
 
 		public void GetVersion()
@@ -46,12 +67,45 @@
 			
 			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
 			{
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh -v", sudo: false);
-				_version = _CLI.StandardOut.Split("\n")[1];
+				try
+				{
+					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh -v", sudo: false);
+					_version = _CLI.StandardOut.Split(Environment.NewLine)[1];
+				}
+				catch
+				{
+					_version = "Unknown";
+				}	
 			}
-			else
+		}
+
+		public void RefreshCertificates()
+		{
+			_certificates.Clear();
+
+			if (Installed)
 			{
-				_version = "Unknown";
+				// Refresh list of certificates
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --list", sudo: false);
+
+				string listing = _CLI.StandardOut;
+				
+				if (!listing.StartsWith("Main_Domain  KeyLength  SAN_Domains  CA  Created  Renew"))
+				{
+					// Unable to parse, headers are not as expected!
+					return;
+				}
+
+				if (listing.Contains(Environment.NewLine))
+				{
+					// First line are headers, remove it
+					listing = listing.Substring(listing.IndexOf(Environment.NewLine)).Trim();
+
+					foreach (string line in listing.Split(Environment.NewLine))
+					{
+
+					}
+				}
 			}
 		}
 	}

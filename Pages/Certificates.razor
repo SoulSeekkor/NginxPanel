@@ -1,12 +1,25 @@
 ﻿@page "/certificates"
 
+@inject Services.ACME acme;
+
 <PageTitle>Certificates</PageTitle>
 <br />
 <br />
 <h3>Certificates</h3>
 
-This is where certificates will be displayed.
+@if (acme.Installed)
+{
+	
+}
+else
+{
+	<span>This is where certificates will be displayed once ACME has been installed.</span>
+}
 
 @code {
 
+	protected override void OnInitialized()
+	{
+		
+	}
 }
