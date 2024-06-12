@@ -129,7 +129,7 @@ namespace NginxPanel.Services
 		{
 			_version = "";
 
-			_CLI.RunCommand("sudo", "nginx -V");
+			_CLI.RunCommand("nginx -V");
 
 			Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s").Match(_CLI.StandardError);
 
@@ -150,7 +150,7 @@ namespace NginxPanel.Services
 
 		public void GetServiceStatus()
 		{
-			_CLI.RunCommand("sudo", "systemctl status nginx");
+			_CLI.RunCommand("systemctl status nginx");
 
 			if (!string.IsNullOrWhiteSpace(_CLI.StandardError))
 			{
@@ -207,15 +207,15 @@ namespace NginxPanel.Services
 		{
 			if (serviceAction == enuServiceAction.Start)
 			{
-				_CLI.RunCommand("sudo", "systemctl start nginx");
+				_CLI.RunCommand("systemctl start nginx");
 			}
 			else if (serviceAction == enuServiceAction.Stop)
 			{
-				_CLI.RunCommand("sudo", "systemctl stop nginx");
+				_CLI.RunCommand("systemctl stop nginx");
 			}
 			else if (serviceAction == enuServiceAction.Restart)
 			{
-				_CLI.RunCommand("sudo", "systemctl restart nginx");
+				_CLI.RunCommand("systemctl restart nginx");
 			}
 
 			GetServiceStatus();
@@ -223,7 +223,7 @@ namespace NginxPanel.Services
 
 		public string TestConfig()
 		{
-			_CLI.RunCommand("sudo", "nginx -t");
+			_CLI.RunCommand("nginx -t");
 
 			return _CLI.StandardOut + _CLI.StandardError;
 		}
@@ -247,12 +247,12 @@ namespace NginxPanel.Services
 			if (config.Enabled)
 			{
 				// Remove from sites-enabled
-				_CLI.RunCommand("sudo", "rm " + Path.Combine(_rootPath, "sites-enabled", config.Name));
+				_CLI.RunCommand("rm " + Path.Combine(_rootPath, "sites-enabled", config.Name));
 			}
 			else
 			{
 				// Add to sites-enabled
-				_CLI.RunCommand("sudo", "ln -s " + config.ConfigPath + " " + Path.Combine(_rootPath, "sites-enabled", config.Name));
+				_CLI.RunCommand("ln -s " + config.ConfigPath + " " + Path.Combine(_rootPath, "sites-enabled", config.Name));
 			}
 
 			config.Enabled = !config.Enabled;

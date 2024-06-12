@@ -48,10 +48,19 @@ namespace NginxPanel.Services
 #endif
 		}
 
-		public void RunCommand(string command, string arguments, string working_dir = "")
+		public void RunCommand(string command, string working_dir = "")
 		{
 			_standardOut = string.Empty;
 			_standardError = string.Empty;
+
+			string arguments = command;
+			command = "sudo";
+
+			//if (command.Contains(" "))
+			//{
+			//	arguments = command.Substring(command.IndexOf(" ") + 1);
+			//	command = command.Substring(0, command.IndexOf(" "));
+			//}
 
 			using (Process p = new Process())
 			{

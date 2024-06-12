@@ -46,7 +46,7 @@
 			
 			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
 			{
-				_CLI.RunCommand("sudo", "bash acme.sh -v", working_dir: $"{_CLI.HomePath}/.acme.sh");
+				_CLI.RunCommand("bash acme.sh -v", working_dir: $"{_CLI.HomePath}/.acme.sh");
 				_version = _CLI.StandardOut.Split("\n")[1];
 			}
 		}
