@@ -44,7 +44,7 @@
 		{
 			_version = "";
 			
-			if (FileExists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
+			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
 			{
 				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh -v", sudo: false);
 				_version = _CLI.StandardOut.Split("\n")[1];
@@ -53,15 +53,6 @@
 			{
 				_version = "Unknown";
 			}
-		}
-
-		private bool FileExists(string file)
-		{
-			_CLI.RunCommand($"bash -c \"(sudo ls {file} >> /dev/null 2>&1 && echo 1) || echo 0\"");
-			if (_CLI.StandardOut.Contains("1"))
-				return true;
-			else
-				return false;
 		}
 	}
 }
