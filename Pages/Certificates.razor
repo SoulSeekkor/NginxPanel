@@ -1,5 +1,6 @@
 ﻿@page "/certificates"
 
+@inject DialogService DialogService;
 @inject Services.ACME acme;
 
 <PageTitle>Certificates</PageTitle>
@@ -9,7 +10,24 @@
 
 @if (acme.Installed)
 {
-	
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+		<RadzenButton Click=@(() => RefreshCertificates(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
+		<RadzenButton Click=@(() => AddCertificate()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+	</RadzenStack>
+	<br />
+	<br />
+
+	if (acme.Certificates.Count == 0)
+	{
+		<span>There are currently no certificates to display.</span>
+	}
+	else
+	{
+		foreach (Services.ACME.Certificate cert in acme.Certificates)
+		{
+			
+		}
+	}
 }
 else
 {
@@ -17,9 +35,56 @@ else
 }
 
 @code {
+	[CascadingParameter]
+	private MainLayout? layout { get; set; }
 
-	protected override void OnInitialized()
+	private bool busyRefreshing = false;
+
+	private async void RefreshCertificates(bool notifyUser)
 	{
-		
+		try
+		{
+			busyRefreshing = true;
+
+			await Task.Run(() => acme.RefreshCertificates());
+
+			if (notifyUser)
+			{
+				layout?.DisplayToast(MainLayout.toastType.info, "Certificates refreshed successfully!");
+			}
+		}
+		finally
+		{
+			busyRefreshing = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
+
+	private async void AddCertificate()
+	{
+		List<string> domains = new List<string>() { "test.com", "test.net" };
+		string newDomain = string.Empty;
+		string domain = string.Empty;
+		bool exportToPFX = false;
+
+		var result = await DialogService.OpenAsync("Add Certificate", ds =>
+	@<RadzenStack>
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the primary certificate domain:</RadzenText>
+		<RadzenTextBox @bind-Value=@newDomain class="w-100" />
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the subject alternative domains:</RadzenText>
+		<RadzenTextBox class="w-100" />
+		<RadzenListBox @bind-Value=@domain Data="@domains" />
+		<span class="rz-text-align-left">
+			<RadzenCheckBox @bind-Value=@exportToPFX Name="chkExportPFX" />
+			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
+		</span>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 	}
 }

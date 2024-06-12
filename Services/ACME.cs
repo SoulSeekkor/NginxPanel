@@ -69,7 +69,7 @@
 			{
 				try
 				{
-					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh -v", sudo: false);
+					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --version", sudo: false);
 					_version = _CLI.StandardOut.Split(Environment.NewLine)[1];
 				}
 				catch
