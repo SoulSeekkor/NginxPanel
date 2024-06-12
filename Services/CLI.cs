@@ -37,15 +37,7 @@ namespace NginxPanel.Services
 			_runningAsUser = StandardOut;
 
 			// Determine user's home path
-#if DEBUG
-			if (_runningAsUser == "root")
-				_homePath = "/" + Environment.UserName;
-			else
-				_homePath = "/home/" + Environment.UserName;
-#else
-			RunCommand("echo", "$HOME");
-			_homePath = StandardOut;
-#endif
+			_homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 		}
 
 		public void RunCommand(string command, string working_dir = "", bool sudo = true)
