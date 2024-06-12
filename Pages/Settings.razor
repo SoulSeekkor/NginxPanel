@@ -24,6 +24,11 @@ Reset Nginx by reinstalling (includes configs):
 Install ACME:
 <br />
 <RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+<br />
+<br />
+Upgrade ACME:
+<br />
+<RadzenButton Click=@(() => UpgradeACME()) Disabled="!acme.Installed" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 
 @code {
 	[CascadingParameter]
@@ -141,6 +146,40 @@ Install ACME:
 				else
 				{
 					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to install!");
+				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			acme.Refresh();
+			StateHasChanged();
+		}
+	}
+
+	private async void UpgradeACME()
+	{
+		try
+		{
+			bool? confirm = await DialogService.Confirm($"Are you sure you want to upgrade the ACME script?", "Upgrade ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+			if (confirm.HasValue && confirm.Value)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				await Task.Run(() =>
+				{
+					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --upgrade", sudo: false);
+				});
+
+				if (cli.StandardOut.Contains("Upgrade success!"))
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME upgraded successfully!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to upgrade!");
 				}
 			}
 		}
