@@ -33,8 +33,7 @@ namespace NginxPanel.Services
 		public CLI()
 		{
 			// Determine user this is running as
-			RunCommand("whoami", "");
-			_runningAsUser = StandardOut;
+			_runningAsUser = Environment.UserName;
 
 			// Determine user's home path
 			_homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
