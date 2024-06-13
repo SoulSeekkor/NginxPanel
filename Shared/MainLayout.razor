@@ -100,16 +100,17 @@
         {
             busyTesting = true;
 
-            string results = "";
-            await Task.Run(() => results = nginx.TestConfig());
+            await Task.Run(() => nginx.TestConfig());
 
-            if (results.Contains("test is successful"))
+            string results = nginx.LastTestResults;
+
+            if (results.Contains("Successful"))
             {
                 await DisplayToast(toastType.success, "Nginx configuration test was successful!");
             }
             else
             {
-                await DisplayToast(toastType.error, "Nginx configuration test failed! View sites with errors for more details.");
+                await DisplayToast(toastType.error, $"Nginx configuration test failed! View dashboard for more information.");
             }
         }
         finally

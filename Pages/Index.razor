@@ -7,22 +7,12 @@
 <br />
 <br />
 <h3>Nginx Version: @nginx.Version</h3>
+<h4>Last config test results:</h4>
+@((MarkupString)nginx.LastTestResults)
+<br />
+<br />
+<br />
 <h3>ACME Version: @acme.Version</h3>
 
-<br />
-<br />
-<span>
-	@((MarkupString)@serviceDetails)
-</span>
-
 @code {
-	private string serviceDetails = "";
-
-	protected override void OnInitialized()
-	{
-		if (nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Failed)
-		{
-			serviceDetails = nginx.ServiceDetails;
-		}
-	}
 }

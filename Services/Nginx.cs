@@ -69,8 +69,10 @@ namespace NginxPanel.Services
 		private string _version = "";
 		private string _rootConfig = "";
 		private string _rootPath = "";
+
 		private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
 		private string _serviceDetails = "";
+		private string _lastTestResults = "";
 
 		private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
 
@@ -96,6 +98,11 @@ namespace NginxPanel.Services
 		public string ServiceDetails
 		{
 			get { return _serviceDetails; }
+		}
+
+		public string LastTestResults
+		{
+			get { return _lastTestResults; }
 		}
 
 		public string SitesAvailable
@@ -221,11 +228,20 @@ namespace NginxPanel.Services
 			GetServiceStatus();
 		}
 
-		public string TestConfig()
+		public void TestConfig()
 		{
+			_lastTestResults = string.Empty;
+
 			_CLI.RunCommand("nginx -t");
 
-			return _CLI.StandardOut + _CLI.StandardError;
+			if (_CLI.StandardError.Contains("test is successful"))
+			{
+				_lastTestResults = "Successful test.";
+			}
+			else
+			{
+				_lastTestResults = _CLI.StandardError.Replace(Environment.NewLine, "<br />");
+			}
 		}
 
 		public void RefreshFiles()
