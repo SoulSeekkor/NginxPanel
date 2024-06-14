@@ -66,6 +66,7 @@ else
 		string newDomain = string.Empty;
 		string domain = string.Empty;
 		bool exportToPFX = false;
+		string PFXpassword = string.Empty;
 
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenStack>
@@ -77,6 +78,8 @@ else
 		<span class="rz-text-align-left">
 			<RadzenCheckBox @bind-Value=@exportToPFX Name="chkExportPFX" />
 			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
+			<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
+			<RadzenTextBox @bind-Value=PFXpassword class="w-20" />
 		</span>
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">
@@ -86,5 +89,10 @@ else
 		</RadzenStack>
 	</RadzenStack>
 	);
+
+		if (!(result is null) && result)
+		{
+			// Create new certificate
+		}
 	}
 }
