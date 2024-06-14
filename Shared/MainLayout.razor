@@ -4,7 +4,8 @@
 
 @inject Services.CLI cli;
 @inject Services.Nginx nginx;
-@inject NotificationService NotificationService
+@inject NotificationService NotificationService;
+@inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
     <div class="page">
@@ -62,6 +63,8 @@
     {
         await JSRuntime.InvokeVoidAsync("toast", type.ToString(), message, title, dismissable);
     }
+
+    public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions options = null) => TooltipService.Open(elementReference, text, options);
 
     private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {
