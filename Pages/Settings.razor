@@ -212,7 +212,7 @@ else
 		<span>Are you sure you want to upgrade the ACME script?</span>
 		<span class="rz-text-align-left">
 			<RadzenCheckBox @bind-Value=@autoUpgrade Name="chkAutoUpgrade" />
-			<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto-upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
+			<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
 		</span>
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">

@@ -64,7 +64,7 @@
         await JSRuntime.InvokeVoidAsync("toast", type.ToString(), message, title, dismissable);
     }
 
-    public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions options = null) => TooltipService.Open(elementReference, text, options);
+    public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
 
     private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
     {

@@ -70,9 +70,9 @@ else
 
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenStack>
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the primary certificate domain:</RadzenText>
+		<span>Please enter the primary certificate domain:</span>
 		<RadzenTextBox @bind-Value=@newDomain class="w-100" />
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the subject alternative domains:</RadzenText>
+		<span>Please enter the subject alternative domains:</span>
 		<RadzenTextBox class="w-100" />
 		<RadzenListBox @bind-Value=@domain Data="@domains" />
 		<span class="rz-text-align-left">
