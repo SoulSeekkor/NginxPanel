@@ -142,7 +142,9 @@ else
 				busyInstallReset = true;
 				StateHasChanged();
 
-				await Task.Run(() => {
+				await Task.Run(() =>
+				{
+					//cli.RunCommand("apt install openssl cron socat curl");  // Potential prerequisite packages
 					cli.RunCommand("wget -O acme.sh https://get.acme.sh");
 					cli.RunCommand("chmod +x acme.sh");
 					cli.RunCommand("bash acme.sh");
@@ -204,21 +206,36 @@ else
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm($"Are you sure you want to upgrade the ACME script?", "Upgrade ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool autoUpgrade = false;
+			var result = await DialogService.OpenAsync("Upgrade ACME", ds =>
+	@<RadzenStack>
+		<span>Are you sure you want to upgrade the ACME script?</span>
+		<span class="rz-text-align-left">
+			<RadzenCheckBox @bind-Value=@autoUpgrade Name="chkAutoUpgrade" />
+			<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" Style="margin-left: 8px; vertical-align: middle;" />
+		</span>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Yes" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="No" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 
-			if (confirm.HasValue && confirm.Value)
+			if (!(result is null) && result)
 			{
 				busyInstallReset = true;
 				StateHasChanged();
 
 				await Task.Run(() =>
 				{
-					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --upgrade", sudo: false);
+					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --upgrade --auto-upgrade " + (autoUpgrade ? "1" : "0"), sudo: false);
 				});
 
 				if (cli.StandardOut.Contains("Upgrade success!"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME upgraded successfully!");
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME upgraded successfully! Auto upgrade was " + (autoUpgrade ? "enabled" : "disabled") + ".");
 				}
 				else
 				{
