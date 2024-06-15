@@ -65,18 +65,20 @@ else
 		List<string> domains = new List<string>() { "test.com", "test.net" };
 		string newDomain = string.Empty;
 		string domain = string.Empty;
+		string SANdomain = string.Empty;
 		bool exportToPFX = false;
 		string PFXpassword = string.Empty;
+		RadzenListBox<string>? SANs = null;
 
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenStack>
 		<span>Please enter the primary certificate domain:</span>
-		<RadzenTextBox @bind-Value=@newDomain class="w-100" />
+		<RadzenTextBox @bind-Value=newDomain class="w-100" />
 		<span>Please enter the subject alternative domains:</span>
-		<RadzenTextBox class="w-100" />
-		<RadzenListBox @bind-Value=@domain Data="@domains" />
+		<RadzenTextBox @bind-Value=SANdomain class="w-100" /><RadzenButton Click=@(() => { domains.Add(SANdomain); SANs?.Reset(); }) Icon="add" ButtonStyle="ButtonStyle.Success" />
+		<RadzenListBox @ref=SANs @bind-Value=domain Data="@domains" AllowVirtualization="false" Style="height: 180px;" />
 		<span class="rz-text-align-left">
-			<RadzenCheckBox @bind-Value=@exportToPFX Name="chkExportPFX" />
+			<RadzenCheckBox @bind-Value=exportToPFX Name="chkExportPFX" />
 			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
 			<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
 			<RadzenTextBox @bind-Value=PFXpassword class="w-20" />
