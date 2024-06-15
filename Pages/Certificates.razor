@@ -64,20 +64,23 @@ else
 	{
 		List<string> domains = new List<string>() { "test.com", "test.net" };
 		string newDomain = string.Empty;
-		string domain = string.Empty;
-		string SANdomain = string.Empty;
+		string selectedSAN = string.Empty;
+		string addSANdomain = string.Empty;
 		bool exportToPFX = false;
 		string PFXpassword = string.Empty;
 		RadzenListBox<string>? SANs = null;
+		RadzenButton? deleteSAN = null;
+		bool SANselected = false;
 
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenStack>
 		<span>Please enter the primary certificate domain:</span>
 		<RadzenTextBox @bind-Value=newDomain class="w-100" />
-		<span>Please enter the subject alternative domains:</span>
-		<RadzenTextBox @bind-Value=SANdomain class="w-100" /><RadzenButton Click=@(() => { domains.Add(SANdomain); SANs?.Reset(); }) Icon="add" ButtonStyle="ButtonStyle.Success" />
-		<RadzenListBox @ref=SANs @bind-Value=domain Data="@domains" AllowVirtualization="false" Style="height: 180px;" />
-		<span class="rz-text-align-left">
+		<span>Please enter the subject alternative domains (SANs):</span>
+		<RadzenTextBox @bind-Value=addSANdomain class="w-100" /><RadzenButton Click=@(() => AddSAN(domains, addSANdomain, SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" />
+		<RadzenListBox @ref=SANs @bind-Value=selectedSAN Data="@domains" SelectedItemChanged="() => { SANselected = !String.IsNullOrWhiteSpace(selectedSAN); StateHasChanged(); }" Style="height: 180px;" />
+		<RadzenButton @ref=deleteSAN Click =@(() => DeleteSAN(domains, selectedSAN, SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
+		<span class="rz-text-align-left rz-mt-5 rz-mb-5">
 			<RadzenCheckBox @bind-Value=exportToPFX Name="chkExportPFX" />
 			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
 			<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
@@ -95,6 +98,30 @@ else
 		if (!(result is null) && result)
 		{
 			// Create new certificate
+		}
+	}
+
+	private void AddSAN(List<string> domains, string addSANdomain, RadzenListBox<string>? SANs)
+	{
+		if (!domains.Contains(addSANdomain))
+		{
+			domains.Add(addSANdomain);
+
+			// Force the listbox to refresh
+			SANs?.Reset();
+		}
+		else
+			layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
+	}
+
+	private void DeleteSAN(List<string> domains, string selectedSAN, RadzenListBox<string>? SANs)
+	{
+		if (!String.IsNullOrWhiteSpace(selectedSAN) && domains.Contains(selectedSAN))
+		{
+			domains.Remove(selectedSAN);
+
+			// Force the listbox to refresh
+			SANs?.Reset();
 		}
 	}
 }
