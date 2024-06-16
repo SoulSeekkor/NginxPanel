@@ -62,24 +62,26 @@ else
 
 	private async void AddCertificate()
 	{
-		List<string> domains = new List<string>() { "test.com", "test.net" };
-		string newDomain = string.Empty;
+		string primaryDomain = string.Empty;
+
+		// SAN listbox related variables
+		RadzenListBox<string>? SANs = null;
+		List<string> SANdomains = new List<string>();
 		string selectedSAN = string.Empty;
-		string addSANdomain = string.Empty;
+		string newSANdomain = string.Empty;
+
+		// PFX related variables
 		bool exportToPFX = false;
 		string PFXpassword = string.Empty;
-		RadzenListBox<string>? SANs = null;
-		RadzenButton? deleteSAN = null;
-		bool SANselected = false;
 
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenStack>
 		<span>Please enter the primary certificate domain:</span>
-		<RadzenTextBox @bind-Value=newDomain class="w-100" />
+		<RadzenTextBox @bind-Value=primaryDomain class="w-100" />
 		<span>Please enter the subject alternative domains (SANs):</span>
-		<RadzenTextBox @bind-Value=addSANdomain class="w-100" /><RadzenButton Click=@(() => AddSAN(domains, addSANdomain, SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" />
-		<RadzenListBox @ref=SANs @bind-Value=selectedSAN Data="@domains" SelectedItemChanged="() => { SANselected = !String.IsNullOrWhiteSpace(selectedSAN); StateHasChanged(); }" Style="height: 180px;" />
-		<RadzenButton @ref=deleteSAN Click =@(() => DeleteSAN(domains, selectedSAN, SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
+		<RadzenTextBox @bind-Value=newSANdomain class="w-100" /><RadzenButton Click=@(() => AddSAN(SANdomains, newSANdomain, SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" />
+		<RadzenListBox @ref=SANs @bind-Value=selectedSAN Data="@SANdomains" Style="height: 180px;" />
+		<RadzenButton Click =@(() => DeleteSAN(SANdomains, selectedSAN, SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
 		<span class="rz-text-align-left rz-mt-5 rz-mb-5">
 			<RadzenCheckBox @bind-Value=exportToPFX Name="chkExportPFX" />
 			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
