@@ -62,66 +62,16 @@ else
 
 	private async void AddCertificate()
 	{
-		List<string> domains = new List<string>() { "test.com", "test.net" };
-		string newDomain = string.Empty;
-		string selectedSAN = string.Empty;
-		string addSANdomain = string.Empty;
-		bool exportToPFX = false;
+		List<string> SANdomains = new List<string>();
+		string primaryDomain = string.Empty;
 		string PFXpassword = string.Empty;
-		RadzenListBox<string>? SANs = null;
-		RadzenButton? deleteSAN = null;
-		bool SANselected = false;
+		bool exportToPFX = false;
 
-		var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenStack>
-		<span>Please enter the primary certificate domain:</span>
-		<RadzenTextBox @bind-Value=newDomain class="w-100" />
-		<span>Please enter the subject alternative domains (SANs):</span>
-		<RadzenTextBox @bind-Value=addSANdomain class="w-100" /><RadzenButton Click=@(() => AddSAN(domains, addSANdomain, SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" />
-		<RadzenListBox @ref=SANs @bind-Value=selectedSAN Data="@domains" SelectedItemChanged="() => { SANselected = !String.IsNullOrWhiteSpace(selectedSAN); StateHasChanged(); }" Style="height: 180px;" />
-		<RadzenButton @ref=deleteSAN Click =@(() => DeleteSAN(domains, selectedSAN, SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
-		<span class="rz-text-align-left rz-mt-5 rz-mb-5">
-			<RadzenCheckBox @bind-Value=exportToPFX Name="chkExportPFX" />
-			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
-			<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
-			<RadzenTextBox @bind-Value=PFXpassword class="w-20" />
-		</span>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+		var result = await DialogService.OpenAsync("Add Certificate", ds => @<NginxPanel.Components.AddCertificate SANdomains="@SANdomains" @bind-primaryDomain="primaryDomain" @bind-PFXpassword="PFXpassword" @bind-exportToPFX="exportToPFX" />);
 
 		if (!(result is null) && result)
 		{
 			// Create new certificate
-		}
-	}
-
-	private void AddSAN(List<string> domains, string addSANdomain, RadzenListBox<string>? SANs)
-	{
-		if (!domains.Contains(addSANdomain))
-		{
-			domains.Add(addSANdomain);
-
-			// Force the listbox to refresh
-			SANs?.Reset();
-		}
-		else
-			layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
-	}
-
-	private void DeleteSAN(List<string> domains, string selectedSAN, RadzenListBox<string>? SANs)
-	{
-		if (!String.IsNullOrWhiteSpace(selectedSAN) && domains.Contains(selectedSAN))
-		{
-			domains.Remove(selectedSAN);
-
-			// Force the listbox to refresh
-			SANs?.Reset();
 		}
 	}
 }
