@@ -60,65 +60,102 @@ else
 		}
 	}
 
-	private async void AddCertificate()
+	private class CertificateModel
 	{
-		string primaryDomain = string.Empty;
+		public string primaryDomain = string.Empty;
 
 		// SAN listbox related variables
-		RadzenListBox<string>? SANs = null;
-		List<string> SANdomains = new List<string>();
-		string selectedSAN = string.Empty;
-		string newSANdomain = string.Empty;
+		public RadzenListBox<string>? SANs = null;
+		public List<string> SANdomains = new List<string>();
+		public string selectedSAN = string.Empty;
+		public string newSANdomain = string.Empty;
 
 		// PFX related variables
-		bool exportToPFX = false;
-		string PFXpassword = string.Empty;
+		public bool exportToPFX = false;
+		public string PFXpassword = string.Empty;
+	}
 
+	private async void AddCertificate()
+	{
+		CertificateModel certificateModel = new CertificateModel();
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenStack>
-		<span>Please enter the primary certificate domain:</span>
-		<RadzenTextBox @bind-Value=primaryDomain class="w-100" />
-		<span>Please enter the subject alternative domains (SANs):</span>
-		<RadzenTextBox @bind-Value=newSANdomain class="w-100" /><RadzenButton Click=@(() => AddSAN(SANdomains, newSANdomain, SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" />
-		<RadzenListBox @ref=SANs @bind-Value=selectedSAN Data="@SANdomains" Style="height: 180px;" />
-		<RadzenButton Click =@(() => DeleteSAN(SANdomains, selectedSAN, SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
-		<span class="rz-text-align-left rz-mt-5 rz-mb-5">
-			<RadzenCheckBox @bind-Value=exportToPFX Name="chkExportPFX" />
-			<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
-			<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
-			<RadzenTextBox @bind-Value=PFXpassword class="w-20" />
-		</span>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+	@<RadzenTemplateForm TItem="CertificateModel" Data=@certificateModel Submit=@OnSubmit InvalidSubmit=@OnInvalidSubmit>
+		<RadzenFieldset Text="Certificate Information">
+			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+				<div>
+					<RadzenLabel Text="Please enter the primary certificate domain:" />
+					<RadzenTextBox Name="PrimaryDomain" @bind-Value=certificateModel.primaryDomain class="w-50" style="display: block" />
+					<RadzenRequiredValidator Component="PrimaryDomain" Text="Primary domain is required" Popup=false Style="position: absolute" />
+					<RadzenRegexValidator Component="PrimaryDomain" Text="Must be a valid domain or wildcard FQDN" Pattern="^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$" Popup=false Style="position: absolute" />
+				</div>
+				<div>
+					<RadzenLabel Text="Please enter the subject alternative domains (SANs):" />
+					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+						<RadzenTextBox @bind-Value=certificateModel.newSANdomain class="w-50" />
+						<RadzenButton Click=@(() => AddSAN(certificateModel.SANdomains, certificateModel.newSANdomain, certificateModel.SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+					</RadzenStack>
+					<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenListBox @ref=certificateModel.SANs @bind-Value=certificateModel.selectedSAN Data="@certificateModel.SANdomains" Style="height: 185px;" />
+						<RadzenButton Click=@(() => DeleteSAN(certificateModel.SANdomains, certificateModel.selectedSAN, certificateModel.SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
+					</RadzenStack>
+				</div>
+				<span class="rz-text-align-left rz-mt-5 rz-mb-5">
+					<RadzenCheckBox @bind-Value=certificateModel.exportToPFX Name="chkExportPFX" />
+					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
+					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
+					<RadzenTextBox @bind-Value=certificateModel.PFXpassword class="w-20" />
+				</span>
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
+					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+				</RadzenStack>
 			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
+		</RadzenFieldset>
+	</RadzenTemplateForm>
 	);
+	}
 
-		if (!(result is null) && result)
+	void OnSubmit(CertificateModel certificateModel)
+	{
+		//console.Log($"Submit: {JsonSerializer.Serialize(model, new JsonSerializerOptions() { WriteIndented = true })}");
+
+		// Create new certificate
+
+		// Validate domain names
+		if (System.Uri.CheckHostName(certificateModel.primaryDomain) == UriHostNameType.Unknown)
 		{
-			// Create new certificate
-			if (exportToPFX && String.IsNullOrWhiteSpace(PFXpassword))
-			{
-				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!!");
-				return;
-			}
+			layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
+			return;
 		}
+
+		// Validate PFX password if export PFX was checked
+		if (certificateModel.exportToPFX && String.IsNullOrWhiteSpace(certificateModel.PFXpassword))
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
+			return;
+		}
+	}
+
+	void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+	{
+		layout?.DisplayToast(MainLayout.toastType.error, "Invalid submission!");
+		//console.Log($"InvalidSubmit: {JsonSerializer.Serialize(args, new JsonSerializerOptions() { WriteIndented = true })}");
 	}
 
 	private void AddSAN(List<string> domains, string addSANdomain, RadzenListBox<string>? SANs)
 	{
-		if (!domains.Contains(addSANdomain))
+		if (!String.IsNullOrWhiteSpace(addSANdomain))
 		{
-			domains.Add(addSANdomain);
+			if (!domains.Contains(addSANdomain))
+			{
+				domains.Add(addSANdomain);
 
-			// Force the listbox to refresh
-			SANs?.Reset();
+				// Force the listbox to refresh
+				SANs?.Reset();
+			}
+			else
+				layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
 		}
-		else
-			layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
 	}
 
 	private void DeleteSAN(List<string> domains, string selectedSAN, RadzenListBox<string>? SANs)
