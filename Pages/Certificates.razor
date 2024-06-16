@@ -100,6 +100,11 @@ else
 		if (!(result is null) && result)
 		{
 			// Create new certificate
+			if (exportToPFX && String.IsNullOrWhiteSpace(PFXpassword))
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!!");
+				return;
+			}
 		}
 	}
 
