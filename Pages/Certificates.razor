@@ -81,8 +81,10 @@ else
 
 	private async void AddCertificate()
 	{
-		CertificateModel certificateModel = new CertificateModel();
-		var result = await DialogService.OpenAsync("Add Certificate", ds =>
+		try
+		{
+			CertificateModel certificateModel = new CertificateModel();
+			var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenTemplateForm TItem="CertificateModel" Data=@certificateModel Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
@@ -119,29 +121,41 @@ else
 		</RadzenFieldset>
 	</RadzenTemplateForm>
 	);
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while displaying add certificate screen!");
+		}
 	}
 
 	void AddCertSubmit(CertificateModel certificateModel)
 	{
-		//console.Log($"Submit: {JsonSerializer.Serialize(model, new JsonSerializerOptions() { WriteIndented = true })}");
-
-		// Create new certificate
-
-		// Validate domain names
-		if (System.Uri.CheckHostName(certificateModel.primaryDomain) == UriHostNameType.Unknown)
+		try
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
-			return;
-		}
+			//console.Log($"Submit: {JsonSerializer.Serialize(model, new JsonSerializerOptions() { WriteIndented = true })}");
 
-		// Validate PFX password if export PFX was checked
-		if (certificateModel.exportToPFX && String.IsNullOrWhiteSpace(certificateModel.PFXpassword))
+			// Create new certificate
+
+			// Validate domain names
+			if (System.Uri.CheckHostName(certificateModel.primaryDomain) == UriHostNameType.Unknown)
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
+				return;
+			}
+
+			// Validate PFX password if export PFX was checked
+			if (certificateModel.exportToPFX && String.IsNullOrWhiteSpace(certificateModel.PFXpassword))
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
+				return;
+			}
+
+			layout?.DisplayToast(MainLayout.toastType.success, "Valid add certificate submission!");
+		}
+		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
-			return;
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while adding certificate!");
 		}
-
-		layout?.DisplayToast(MainLayout.toastType.success, "Valid add certificate submission!");
 	}
 
 	void OnInvalidCertSubmit(FormInvalidSubmitEventArgs args)
@@ -152,37 +166,51 @@ else
 
 	private void AddSAN(CertificateModel certificateModel)
 	{
-		string newDomain = certificateModel.newSANdomain;
-
-		if (!String.IsNullOrWhiteSpace(newDomain))
+		try
 		{
-			if (new Regex(fqdnRegEx).IsMatch(newDomain))
-			{
-				if (!certificateModel.SANdomains.Contains(newDomain))
-				{
-					certificateModel.SANdomains.Add(newDomain);
+			string newDomain = certificateModel.newSANdomain;
 
-					// Force the listbox to refresh
-					certificateModel.SANs?.Reset();
+			if (!String.IsNullOrWhiteSpace(newDomain))
+			{
+				if (new Regex(fqdnRegEx).IsMatch(newDomain))
+				{
+					if (!certificateModel.SANdomains.Contains(newDomain))
+					{
+						certificateModel.SANdomains.Add(newDomain);
+
+						// Force the listbox to refresh
+						certificateModel.SANs?.Reset();
+					}
+					else
+						layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
+					layout?.DisplayToast(MainLayout.toastType.error, "SAN domain must be a valid FQDN or wildcard!");
 			}
-			else
-				layout?.DisplayToast(MainLayout.toastType.error, "SAN domain must be a valid FQDN or wildcard!");
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while adding SAN domain!");
 		}
 	}
 
 	private void DeleteSAN(CertificateModel certificateModel)
 	{
-		string selectedDomain = certificateModel.selectedSAN;
-
-		if (!String.IsNullOrWhiteSpace(selectedDomain) && certificateModel.SANdomains.Contains(selectedDomain))
+		try
 		{
-			certificateModel.SANdomains.Remove(selectedDomain);
+			string selectedDomain = certificateModel.selectedSAN;
 
-			// Force the listbox to refresh
-			certificateModel.SANs?.Reset();
+			if (!String.IsNullOrWhiteSpace(selectedDomain) && certificateModel.SANdomains.Contains(selectedDomain))
+			{
+				certificateModel.SANdomains.Remove(selectedDomain);
+
+				// Force the listbox to refresh
+				certificateModel.SANs?.Reset();
+			}
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while deleting SAN domain!");
 		}
 	}
 }
