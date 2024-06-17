@@ -1,5 +1,7 @@
 ﻿@page "/certificates"
 
+@using System.Text.RegularExpressions;
+
 @inject DialogService DialogService;
 @inject Services.ACME acme;
 
@@ -39,6 +41,8 @@ else
 	private MainLayout? layout { get; set; }
 
 	private bool busyRefreshing = false;
+
+	private string fqdnRegEx = @"^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$";
 
 	private async void RefreshCertificates(bool notifyUser)
 	{
@@ -136,6 +140,8 @@ else
 			layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
 			return;
 		}
+
+		layout?.DisplayToast(MainLayout.toastType.success, "Valid submission!");
 	}
 
 	void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
@@ -148,15 +154,20 @@ else
 	{
 		if (!String.IsNullOrWhiteSpace(addSANdomain))
 		{
-			if (!domains.Contains(addSANdomain))
+			if (new Regex(fqdnRegEx).IsMatch(addSANdomain))
 			{
-				domains.Add(addSANdomain);
+				if (!domains.Contains(addSANdomain))
+				{
+					domains.Add(addSANdomain);
 
-				// Force the listbox to refresh
-				SANs?.Reset();
+					// Force the listbox to refresh
+					SANs?.Reset();
+				}
+				else
+					layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
+				layout?.DisplayToast(MainLayout.toastType.error, "SAN domain must be a valid FQDN or wildcard!");
 		}
 	}
 
