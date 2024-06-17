@@ -83,7 +83,7 @@ else
 	{
 		CertificateModel certificateModel = new CertificateModel();
 		var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenTemplateForm TItem="CertificateModel" Data=@certificateModel Submit=@OnSubmit InvalidSubmit=@OnInvalidSubmit>
+	@<RadzenTemplateForm TItem="CertificateModel" Data=@certificateModel Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
@@ -97,9 +97,9 @@ else
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
 						<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 							<RadzenTextBox @bind-Value=certificateModel.newSANdomain Style="width: 300px;" />
-							<RadzenButton Click=@(() => AddSAN(certificateModel.SANdomains, certificateModel.newSANdomain, certificateModel.SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+							<RadzenButton Click=@(() => AddSAN(certificateModel)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
 						</RadzenStack>
-						<RadzenButton Click=@(() => DeleteSAN(certificateModel.SANdomains, certificateModel.selectedSAN, certificateModel.SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
+						<RadzenButton Click=@(() => DeleteSAN(certificateModel)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
 					</RadzenStack>
 					<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 						<RadzenListBox @ref=certificateModel.SANs @bind-Value=certificateModel.selectedSAN Data="@certificateModel.SANdomains" Style="height: 185px;" />
@@ -121,7 +121,7 @@ else
 	);
 	}
 
-	void OnSubmit(CertificateModel certificateModel)
+	void AddCertSubmit(CertificateModel certificateModel)
 	{
 		//console.Log($"Submit: {JsonSerializer.Serialize(model, new JsonSerializerOptions() { WriteIndented = true })}");
 
@@ -141,27 +141,29 @@ else
 			return;
 		}
 
-		layout?.DisplayToast(MainLayout.toastType.success, "Valid submission!");
+		layout?.DisplayToast(MainLayout.toastType.success, "Valid add certificate submission!");
 	}
 
-	void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+	void OnInvalidCertSubmit(FormInvalidSubmitEventArgs args)
 	{
-		layout?.DisplayToast(MainLayout.toastType.error, "Invalid submission!");
+		layout?.DisplayToast(MainLayout.toastType.error, "Invalid add certificate submission!");
 		//console.Log($"InvalidSubmit: {JsonSerializer.Serialize(args, new JsonSerializerOptions() { WriteIndented = true })}");
 	}
 
-	private void AddSAN(List<string> domains, string addSANdomain, RadzenListBox<string>? SANs)
+	private void AddSAN(CertificateModel certificateModel)
 	{
-		if (!String.IsNullOrWhiteSpace(addSANdomain))
+		string newDomain = certificateModel.newSANdomain;
+
+		if (!String.IsNullOrWhiteSpace(newDomain))
 		{
-			if (new Regex(fqdnRegEx).IsMatch(addSANdomain))
+			if (new Regex(fqdnRegEx).IsMatch(newDomain))
 			{
-				if (!domains.Contains(addSANdomain))
+				if (!certificateModel.SANdomains.Contains(newDomain))
 				{
-					domains.Add(addSANdomain);
+					certificateModel.SANdomains.Add(newDomain);
 
 					// Force the listbox to refresh
-					SANs?.Reset();
+					certificateModel.SANs?.Reset();
 				}
 				else
 					layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
@@ -171,14 +173,16 @@ else
 		}
 	}
 
-	private void DeleteSAN(List<string> domains, string selectedSAN, RadzenListBox<string>? SANs)
+	private void DeleteSAN(CertificateModel certificateModel)
 	{
-		if (!String.IsNullOrWhiteSpace(selectedSAN) && domains.Contains(selectedSAN))
+		string selectedDomain = certificateModel.selectedSAN;
+
+		if (!String.IsNullOrWhiteSpace(selectedDomain) && certificateModel.SANdomains.Contains(selectedDomain))
 		{
-			domains.Remove(selectedSAN);
+			certificateModel.SANdomains.Remove(selectedDomain);
 
 			// Force the listbox to refresh
-			SANs?.Reset();
+			certificateModel.SANs?.Reset();
 		}
 	}
 }
