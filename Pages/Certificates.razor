@@ -90,16 +90,18 @@ else
 				</div>
 				<div>
 					<RadzenLabel Text="Please enter the subject alternative domains (SANs):" />
-					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
-						<RadzenTextBox @bind-Value=certificateModel.newSANdomain class="w-50" />
-						<RadzenButton Click=@(() => AddSAN(certificateModel.SANdomains, certificateModel.newSANdomain, certificateModel.SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+							<RadzenTextBox @bind-Value=certificateModel.newSANdomain Style="width: 300px;" />
+							<RadzenButton Click=@(() => AddSAN(certificateModel.SANdomains, certificateModel.newSANdomain, certificateModel.SANs)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+						</RadzenStack>
+						<RadzenButton Click=@(() => DeleteSAN(certificateModel.SANdomains, certificateModel.selectedSAN, certificateModel.SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
 					</RadzenStack>
 					<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 						<RadzenListBox @ref=certificateModel.SANs @bind-Value=certificateModel.selectedSAN Data="@certificateModel.SANdomains" Style="height: 185px;" />
-						<RadzenButton Click=@(() => DeleteSAN(certificateModel.SANdomains, certificateModel.selectedSAN, certificateModel.SANs)) Icon="delete" ButtonStyle="ButtonStyle.Danger" />
 					</RadzenStack>
 				</div>
-				<span class="rz-text-align-left rz-mt-5 rz-mb-5">
+				<span class="rz-text-align-left rz-mt-3 rz-mb-5">
 					<RadzenCheckBox @bind-Value=certificateModel.exportToPFX Name="chkExportPFX" />
 					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
 					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
