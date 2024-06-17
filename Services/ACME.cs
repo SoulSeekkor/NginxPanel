@@ -79,6 +79,30 @@
 			}
 		}
 
+		public void InstallCertificate(List<string> domains, string PFXpassword)
+		{
+			try
+			{
+				// Build list of domains portion of the command
+				string domainsCmd = "";
+				foreach (string domain in domains)
+				{
+					domainsCmd += $" -d '{domain}'";
+				}
+
+				// Build location to save certificate files to (private/public keys)
+
+				// Build reload command, include PFX export if included
+
+				// Execute command to install certificate
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --installcert {domainsCmd}", sudo: false);
+			}
+			catch
+			{
+				// Placeholder
+			}
+		}
+
 		public void RefreshCertificates()
 		{
 			_certificates.Clear();

@@ -64,7 +64,7 @@ else
 		}
 	}
 
-	private class CertificateModel
+	private class AddCertificateModel
 	{
 		public string primaryDomain = string.Empty;
 
@@ -83,14 +83,14 @@ else
 	{
 		try
 		{
-			CertificateModel certificateModel = new CertificateModel();
+			AddCertificateModel cert = new AddCertificateModel();
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenTemplateForm TItem="CertificateModel" Data=@certificateModel Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
+	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
 					<RadzenLabel Text="Please enter the primary certificate domain:" />
-					<RadzenTextBox Name="PrimaryDomain" @bind-Value=certificateModel.primaryDomain class="w-50" style="display: block" />
+					<RadzenTextBox Name="PrimaryDomain" @bind-Value=cert.primaryDomain class="w-50" style="display: block" />
 					<RadzenRequiredValidator Component="PrimaryDomain" Text="Primary domain is required" Popup=false Style="position: absolute" />
 					<RadzenRegexValidator Component="PrimaryDomain" Text="Must be a valid domain or wildcard FQDN" Pattern="^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$" Popup=false Style="position: absolute" />
 				</div>
@@ -98,20 +98,20 @@ else
 					<RadzenLabel Text="Please enter the subject alternative domains (SANs):" />
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
 						<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
-							<RadzenTextBox @bind-Value=certificateModel.newSANdomain Style="width: 300px;" />
-							<RadzenButton Click=@(() => AddSAN(certificateModel)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+							<RadzenTextBox @bind-Value=cert.newSANdomain Style="width: 300px;" />
+							<RadzenButton Click=@(() => AddSANDomain(cert)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
 						</RadzenStack>
-						<RadzenButton Click=@(() => DeleteSAN(certificateModel)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
+						<RadzenButton Click=@(() => DeleteSANDomain(cert)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
 					</RadzenStack>
 					<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenListBox @ref=certificateModel.SANs @bind-Value=certificateModel.selectedSAN Data="@certificateModel.SANdomains" Style="height: 185px;" />
+						<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
 					</RadzenStack>
 				</div>
 				<span class="rz-text-align-left rz-mt-3 rz-mb-5">
-					<RadzenCheckBox @bind-Value=certificateModel.exportToPFX Name="chkExportPFX" />
+					<RadzenCheckBox @bind-Value=cert.exportToPFX Name="chkExportPFX" />
 					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
 					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
-					<RadzenTextBox @bind-Value=certificateModel.PFXpassword class="w-20" />
+					<RadzenTextBox @bind-Value=cert.PFXpassword class="w-20" />
 				</span>
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
@@ -128,7 +128,7 @@ else
 		}
 	}
 
-	void AddCertSubmit(CertificateModel certificateModel)
+	void AddCertSubmit(AddCertificateModel cert)
 	{
 		try
 		{
@@ -137,20 +137,26 @@ else
 			// Create new certificate
 
 			// Validate domain names
-			if (System.Uri.CheckHostName(certificateModel.primaryDomain) == UriHostNameType.Unknown)
+			if (System.Uri.CheckHostName(cert.primaryDomain) == UriHostNameType.Unknown)
 			{
 				layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
 				return;
 			}
 
 			// Validate PFX password if export PFX was checked
-			if (certificateModel.exportToPFX && String.IsNullOrWhiteSpace(certificateModel.PFXpassword))
+			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
 			{
 				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
 				return;
 			}
 
-			layout?.DisplayToast(MainLayout.toastType.success, "Valid add certificate submission!");
+			// Build domain list
+			List<string> domains = cert.SANdomains.ToList();
+			domains.Insert(0, cert.primaryDomain);
+
+			acme.InstallCertificate(domains, cert.PFXpassword);
+
+			layout?.DisplayToast(MainLayout.toastType.success, "Certificate added successfully!");
 		}
 		catch
 		{
@@ -164,22 +170,22 @@ else
 		//console.Log($"InvalidSubmit: {JsonSerializer.Serialize(args, new JsonSerializerOptions() { WriteIndented = true })}");
 	}
 
-	private void AddSAN(CertificateModel certificateModel)
+	private void AddSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
-			string newDomain = certificateModel.newSANdomain;
+			string newDomain = cert.newSANdomain;
 
 			if (!String.IsNullOrWhiteSpace(newDomain))
 			{
 				if (new Regex(fqdnRegEx).IsMatch(newDomain))
 				{
-					if (!certificateModel.SANdomains.Contains(newDomain))
+					if (!cert.SANdomains.Contains(newDomain))
 					{
-						certificateModel.SANdomains.Add(newDomain);
+						cert.SANdomains.Add(newDomain);
 
 						// Force the listbox to refresh
-						certificateModel.SANs?.Reset();
+						cert.SANs?.Reset();
 					}
 					else
 						layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
@@ -194,18 +200,18 @@ else
 		}
 	}
 
-	private void DeleteSAN(CertificateModel certificateModel)
+	private void DeleteSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
-			string selectedDomain = certificateModel.selectedSAN;
+			string selectedDomain = cert.selectedSAN;
 
-			if (!String.IsNullOrWhiteSpace(selectedDomain) && certificateModel.SANdomains.Contains(selectedDomain))
+			if (!String.IsNullOrWhiteSpace(selectedDomain) && cert.SANdomains.Contains(selectedDomain))
 			{
-				certificateModel.SANdomains.Remove(selectedDomain);
+				cert.SANdomains.Remove(selectedDomain);
 
 				// Force the listbox to refresh
-				certificateModel.SANs?.Reset();
+				cert.SANs?.Reset();
 			}
 		}
 		catch
