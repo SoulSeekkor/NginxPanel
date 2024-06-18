@@ -91,11 +91,20 @@
 				}
 
 				// Build location to save certificate files to (private/public keys)
+				string command = $" --installcert {domainsCmd}";
+
+				command += $" --key-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.key";
+				command += $" --fullchain-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.cert";
 
 				// Build reload command, include PFX export if included
+				command += " --reloadcmd \"service nginx force-reload";
+				if (!String.IsNullOrWhiteSpace(PFXpassword))
+					command += $" && /root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {PFXpassword}";
+				
+				command += "\"";
 
 				// Execute command to install certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --installcert {domainsCmd}", sudo: false);
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh {command}", sudo: false);
 			}
 			catch
 			{
