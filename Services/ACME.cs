@@ -79,6 +79,27 @@
 			}
 		}
 
+		public void IssueCertificate(List<string> domains)
+		{
+			try
+			{
+				// Build list of domains portion of the command
+				string domainsCmd = "";
+				foreach (string domain in domains)
+				{
+					domainsCmd += $" -d {domain}";
+				}
+				domainsCmd = domainsCmd.Trim();
+
+				// Execute command to install certificate
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --issue {domainsCmd}", sudo: false);
+			}
+			catch
+			{
+				// Placeholder
+			}
+		}
+
 		public void InstallCertificate(List<string> domains, string PFXpassword)
 		{
 			try
@@ -87,11 +108,12 @@
 				string domainsCmd = "";
 				foreach (string domain in domains)
 				{
-					domainsCmd += $" -d '{domain}'";
+					domainsCmd += $" -d {domain}";
 				}
+				domainsCmd = domainsCmd.Trim();
 
 				// Build location to save certificate files to (private/public keys)
-				string command = $" --installcert {domainsCmd}";
+				string command = $"--installcert {domainsCmd}";
 
 				command += $" --key-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.key";
 				command += $" --fullchain-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.cert";
@@ -104,7 +126,7 @@
 				command += "\"";
 
 				// Execute command to install certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh {command}", sudo: false);
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test {command}", sudo: false);
 			}
 			catch
 			{

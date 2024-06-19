@@ -154,7 +154,8 @@ else
 			List<string> domains = cert.SANdomains.ToList();
 			domains.Insert(0, cert.primaryDomain);
 
-			acme.InstallCertificate(domains, cert.PFXpassword);
+			// First, attempt to issue the certificate
+			acme.IssueCertificate(domains);
 
 			layout?.DisplayToast(MainLayout.toastType.success, "Certificate added successfully!");
 		}
