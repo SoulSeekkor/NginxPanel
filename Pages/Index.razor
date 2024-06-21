@@ -1,18 +1,71 @@
 ﻿@page "/"
 
+@using static Services.ACME;
+
 @inject Services.ACME acme;
 @inject Services.Nginx nginx;
 
 <PageTitle>Index</PageTitle>
 <br />
 <br />
-<h3>Nginx Version: @nginx.Version</h3>
-<h4>Last config test results:</h4>
-@((MarkupString)nginx.LastTestResults)
+@if (nginx.Installed)
+{
+	<h3>Nginx Version: @nginx.Version</h3>
+	<h5>Last config test results:</h5>
+	@((MarkupString)nginx.LastTestResults)
+}
+else
+{
+	<h5>
+		Nginx is not installed, see <RadzenLink Icon="settings" Path="Settings" Text="Settings" /> screen for more information.
+	</h5>
+}
 <br />
 <br />
 <br />
-<h3>ACME Version: @acme.Version</h3>
+@if (acme.Installed)
+{
+	<h3>ACME Version: @acme.Version</h3>
+	<h5>
+		Log File:&nbsp;
+		@{
+			string logFile = acme.GetAccountConfValue(enuAccountConfKey.LOG_FILE);
+
+			if (String.IsNullOrWhiteSpace(logFile))
+			{
+				<span>None</span>
+			}
+			else
+			{
+				<span>@logFile</span>
+			}
+		}
+	</h5>
+	<h5>
+		Auto-upgrade:&nbsp;
+		@{
+			string upgrade = acme.GetAccountConfValue(enuAccountConfKey.AUTO_UPGRADE);
+
+			if (upgrade == "1")
+			{
+				<span>Yes</span>
+			}
+			else
+			{
+				<span>No</span>
+			}
+		}
+		<br />
+		<br />
+		<RadzenTextArea Value="@acme.AccountConf" Cols="85" Rows="15" />
+	</h5>
+}
+else
+{
+	<h5>
+		ACME is not installed, see <RadzenLink Icon="settings" Path="Settings" Text="Settings" /> screen for more information.
+	</h5>
+}
 
 @code {
 }
