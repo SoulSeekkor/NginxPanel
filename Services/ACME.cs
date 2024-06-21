@@ -79,7 +79,7 @@
 			}
 		}
 
-		public void IssueCertificate(List<string> domains)
+		public void IssueCertificate(List<string> domains, string CFToken)
 		{
 			try
 			{
@@ -91,8 +91,13 @@
 				}
 				domainsCmd = domainsCmd.Trim();
 
+				// Set environment variable(s)
+				Environment.SetEnvironmentVariable("CF_TOKEN", CFToken);
+				//_CLI.RunCommand("printenv CF_TOKEN", sudo: false);  // testing only
+
 				// Execute command to install certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --issue {domainsCmd}", sudo: false);
+				//_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --issue --dns dns_cf {domainsCmd}", sudo: false);
+				_CLI.RunCommand($"CF_TOKEN={CFToken} bash -c '{_CLI.HomePath}/.acme.sh/acme.sh --test --issue --dns dns_cf {domainsCmd}'", sudo: false, parseArgs: false);
 			}
 			catch
 			{

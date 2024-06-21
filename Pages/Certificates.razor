@@ -137,11 +137,11 @@ else
 			// Create new certificate
 
 			// Validate domain names
-			if (System.Uri.CheckHostName(cert.primaryDomain) == UriHostNameType.Unknown)
-			{
-				layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
-				return;
-			}
+			// if (System.Uri.CheckHostName(cert.primaryDomain) == UriHostNameType.Unknown)
+			// {
+			// 	layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
+			// 	return;
+			// }
 
 			// Validate PFX password if export PFX was checked
 			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
@@ -155,7 +155,7 @@ else
 			domains.Insert(0, cert.primaryDomain);
 
 			// First, attempt to issue the certificate
-			acme.IssueCertificate(domains);
+			acme.IssueCertificate(domains, "");
 
 			layout?.DisplayToast(MainLayout.toastType.success, "Certificate added successfully!");
 		}
