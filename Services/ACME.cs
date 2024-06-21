@@ -16,6 +16,24 @@
 
 		#endregion
 
+		#region Enums
+
+		public enum enuAccountConfKey
+		{
+			LOG_FILE,
+			AUTO_UPGRADE,
+			SAVED_CF_Token,
+			SAVED_CF_Account_ID,
+			SAVED_SMTP_BIN,
+			SAVED_SMTP_FROM,
+			SAVED_SMTP_TO,
+			SAVED_SMTP_HOST,
+			SAVED_SMTP_SECURE,
+			NOTIFY_HOOK
+		}
+
+		#endregion
+
 		#region Variables
 
 		private CLI _CLI;
@@ -23,6 +41,8 @@
 		private string _version = "";
 
 		private List<Certificate> _certificates = new List<Certificate>();
+		private string _accountConf = string.Empty;
+		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
 
 		#endregion
 
@@ -43,6 +63,11 @@
 			get { return _certificates; }
 		}
 
+		public string AccountConf
+		{
+			get { return _accountConf; }
+		}
+
 		#endregion
 
 		#region Constructors
@@ -51,6 +76,7 @@
 		{
 			_CLI = CLI;
 			Refresh();
+			ParseAccountConf();
 		}
 
 		#endregion
@@ -75,8 +101,52 @@
 				catch
 				{
 					_version = "Unknown";
-				}	
+				}
 			}
+		}
+
+		public void ParseAccountConf()
+		{
+			_accountConfDic.Clear();
+
+			if (Installed)
+			{
+				string confPath = $"{_CLI.HomePath}/.acme.sh/account.conf";
+
+				// Attempt to parse config files
+				if (File.Exists(confPath))
+				{
+					_accountConf = File.ReadAllText(confPath);
+
+					string[] lines = File.ReadAllLines(confPath);
+					string[] split;
+
+					foreach (string line in lines)
+					{
+						if (!String.IsNullOrWhiteSpace(line))
+						{
+							split = line.Split("=", 2);
+							_accountConfDic.Add(split[0].Trim(), split[1].Trim());
+						}
+					}
+				}
+			}
+		}
+
+		public string GetAccountConfValue(enuAccountConfKey key)
+		{
+			if (_accountConfDic.ContainsKey(key.ToString()))
+				return _accountConfDic[key.ToString()];
+
+			return string.Empty;
+		}
+
+		public void SetAccountConfValue(enuAccountConfKey key, string value)
+		{
+			if (_accountConfDic.ContainsKey(key.ToString()))
+				 _accountConfDic[key.ToString()] = value;
+			else
+				_accountConfDic.Add(key.ToString(), value);
 		}
 
 		public void IssueCertificate(List<string> domains, string CFToken)
