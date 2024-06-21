@@ -39,22 +39,30 @@ namespace NginxPanel.Services
 			_homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 		}
 
-		public void RunCommand(string command, string working_dir = "", bool sudo = true)
+		public void RunCommand(string command, string working_dir = "", bool sudo = true, bool parseArgs = true)
 		{
 			_standardOut = string.Empty;
 			_standardError = string.Empty;
 
 			string arguments = string.Empty;
 
-			if (sudo)
+			if (parseArgs)
+			{
+				if (sudo)
+				{
+					arguments = command;
+					command = "sudo";
+				}
+				else if (command.Contains(" "))
+				{
+					arguments = command.Substring(command.IndexOf(" ") + 1);
+					command = command.Substring(0, command.IndexOf(" "));
+				}
+			}
+			else if (sudo)
 			{
 				arguments = command;
 				command = "sudo";
-			}
-			else if (command.Contains(" "))
-			{
-				arguments = command.Substring(command.IndexOf(" ") + 1);
-				command = command.Substring(0, command.IndexOf(" "));
 			}
 
 			using (Process p = new Process())
