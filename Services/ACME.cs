@@ -122,7 +122,15 @@ namespace NginxPanel.Services
 				{
 					_accountConf = File.ReadAllText(_accountConfPath);
 
-					string[] lines = File.ReadAllLines(_accountConfPath);
+					// Cleanup file a bit first
+					while (_accountConf.Contains("\n\n"))
+					{
+						_accountConf = _accountConf.Replace("\n\n", "\n");
+					}
+					_accountConf = _accountConf.Trim();
+
+					// Split into lines and parse key/value pairs
+					string[] lines = _accountConf.Split("\n");
 					string[] split;
 					string key;
 
@@ -156,23 +164,41 @@ namespace NginxPanel.Services
 			try
 			{
 				// Update local tracking
-				if (_accountConfDic.ContainsKey(key.ToString()))
-					_accountConfDic[key.ToString()] = value;
+				if (!String.IsNullOrWhiteSpace(value))
+				{
+					// Add/Update the value
+					if (_accountConfDic.ContainsKey(key.ToString()))
+						_accountConfDic[key.ToString()] = value;
+					else
+						_accountConfDic.Add(key.ToString(), value);
+				}
 				else
-					_accountConfDic.Add(key.ToString(), value);
+				{
+					// Remove the value
+					_accountConfDic.Remove(key.ToString());
+				}
 
 				// Update config file
 				Regex configKey = new Regex($"({key.ToString()}='[^']*')");
 
-				if (configKey.Match(_accountConf).Success)
+				if (!String.IsNullOrWhiteSpace(value))
 				{
-					// Key exists in config, update it
-					_accountConf = configKey.Replace(_accountConf, $"{key.ToString()}='{value}'");
+					// Update config file
+					if (configKey.Match(_accountConf).Success)
+					{
+						// Key exists in config, update it
+						_accountConf = configKey.Replace(_accountConf, $"{key.ToString()}='{value}'");
+					}
+					else
+					{
+						// Add new key to the config
+						_accountConf += $"\n{key.ToString()}='{value}'\n";
+					}
 				}
 				else
 				{
-					// Add new key to the config
-					_accountConf += $"\n{key.ToString()}='{value}'\n";
+					// Remove value from config file entirely
+					_accountConf = configKey.Replace(_accountConf, string.Empty);
 				}
 
 				// Output new config to file
