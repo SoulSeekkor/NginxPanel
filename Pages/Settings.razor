@@ -262,7 +262,7 @@ else
 	{
 		try
 		{
-			string token = string.Empty;
+			string token = acme.GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token);
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
 	@<RadzenStack>
 		<span>Please enter your Cloudflare API token below:</span>

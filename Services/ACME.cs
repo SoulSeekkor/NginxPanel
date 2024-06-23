@@ -130,7 +130,7 @@ namespace NginxPanel.Services
 						if (!String.IsNullOrWhiteSpace(line))
 						{
 							split = line.Split("=", 2);
-							_accountConfDic.Add(split[0].Trim(), split[1].Trim());
+							_accountConfDic.Add(split[0].Trim(), split[1].Trim().Trim('\''));
 						}
 					}
 				}
