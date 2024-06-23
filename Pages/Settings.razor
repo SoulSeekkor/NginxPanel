@@ -265,8 +265,11 @@ else
 			string token = acme.GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token);
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
 	@<RadzenStack>
-		<span>Please enter your Cloudflare API token below:</span>
-		<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-top: -8px;" />
+		<div>
+			<span>Please enter your Cloudflare API token below:</span>
+			<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px;" />
+			<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
+		</div>
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">
 				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
@@ -283,8 +286,10 @@ else
 
 				if (String.IsNullOrWhiteSpace(token))
 				{
-					layout?.DisplayToast(MainLayout.toastType.warning, "Cloudflare token cannot be blank!");
-					return;
+					bool? confirm = await DialogService.Confirm("Are you sure you want to clear the Cloudflare API token?", "Clear ACME Cloudflare Token", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+					if (confirm.HasValue && !confirm.Value)
+						return;
 				}
 
 				await Task.Run(() =>
@@ -294,11 +299,11 @@ else
 
 				if (result)
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME Cloudflare API token set successfully!");
+					layout?.DisplayToast(MainLayout.toastType.success, $"ACME Cloudflare API token {(String.IsNullOrWhiteSpace(token) ? "cleared" : "set")} successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME Cloudflare API token!");
+					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to {(String.IsNullOrWhiteSpace(token) ? "clear" : "set")} ACME Cloudflare API token!");
 				}
 			}
 		}

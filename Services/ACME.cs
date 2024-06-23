@@ -124,13 +124,17 @@ namespace NginxPanel.Services
 
 					string[] lines = File.ReadAllLines(_accountConfPath);
 					string[] split;
+					string key;
 
 					foreach (string line in lines)
 					{
 						if (!String.IsNullOrWhiteSpace(line))
 						{
 							split = line.Split("=", 2);
-							_accountConfDic.Add(split[0].Trim(), split[1].Trim().Trim('\''));
+							key = split[0].Trim();
+
+							if (!_accountConfDic.ContainsKey(key))
+								_accountConfDic.Add(key, split[1].Trim().Trim('\''));
 						}
 					}
 				}
@@ -158,12 +162,12 @@ namespace NginxPanel.Services
 					_accountConfDic.Add(key.ToString(), value);
 
 				// Update config file
-				Regex configKey = new Regex($"({key.ToString()}='[^']+')");
+				Regex configKey = new Regex($"({key.ToString()}='[^']*')");
 
 				if (configKey.Match(_accountConf).Success)
 				{
 					// Key exists in config, update it
-					_accountConf = new Regex($"({key.ToString()}='[^']+')").Replace(_accountConf, $"{key.ToString()}='{value}'");
+					_accountConf = configKey.Replace(_accountConf, $"{key.ToString()}='{value}'");
 				}
 				else
 				{
