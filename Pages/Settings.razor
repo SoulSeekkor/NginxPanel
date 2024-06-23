@@ -1,5 +1,7 @@
 ﻿@page "/settings"
 
+@using static Services.ACME;
+
 @inject DialogService DialogService;
 @inject Services.ACME acme;
 @inject Services.CLI cli;
@@ -37,6 +39,11 @@ else
 	<span>Upgrade ACME:</span>
 	<br />
 	<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+	<br />
+	<br />
+	<span>Set ACME Cloudflare Token:</span>
+	<br />
+	<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 }
 
 @code {
@@ -247,6 +254,57 @@ else
 		{
 			busyInstallReset = false;
 			acme.Refresh();
+			StateHasChanged();
+		}
+	}
+
+	private async void SetACMECloudflareToken()
+	{
+		try
+		{
+			string token = string.Empty;
+			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
+	@<RadzenStack>
+		<span>Please enter your Cloudflare API token below:</span>
+		<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-top: -8px;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				if (String.IsNullOrWhiteSpace(token))
+				{
+					layout?.DisplayToast(MainLayout.toastType.warning, "Cloudflare token cannot be blank!");
+					return;
+				}
+
+				await Task.Run(() =>
+				{
+					result = acme.SetAccountConfValue(enuAccountConfKey.SAVED_CF_Token, token);
+				});
+
+				if (result)
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME Cloudflare API token set successfully!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME Cloudflare API token!");
+				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
 			StateHasChanged();
 		}
 	}

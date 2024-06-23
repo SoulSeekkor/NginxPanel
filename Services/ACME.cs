@@ -1,4 +1,6 @@
-﻿namespace NginxPanel.Services
+﻿using System.Text.RegularExpressions;
+
+namespace NginxPanel.Services
 {
 	public class ACME
 	{
@@ -41,6 +43,8 @@
 		private string _version = "";
 
 		private List<Certificate> _certificates = new List<Certificate>();
+
+		private string _accountConfPath = string.Empty;
 		private string _accountConf = string.Empty;
 		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
 
@@ -111,14 +115,14 @@
 
 			if (Installed)
 			{
-				string confPath = $"{_CLI.HomePath}/.acme.sh/account.conf";
+				_accountConfPath = $"{_CLI.HomePath}/.acme.sh/account.conf";
 
 				// Attempt to parse config files
-				if (File.Exists(confPath))
+				if (File.Exists(_accountConfPath))
 				{
-					_accountConf = File.ReadAllText(confPath);
+					_accountConf = File.ReadAllText(_accountConfPath);
 
-					string[] lines = File.ReadAllLines(confPath);
+					string[] lines = File.ReadAllLines(_accountConfPath);
 					string[] split;
 
 					foreach (string line in lines)
@@ -141,12 +145,43 @@
 			return string.Empty;
 		}
 
-		public void SetAccountConfValue(enuAccountConfKey key, string value)
+		public bool SetAccountConfValue(enuAccountConfKey key, string value)
 		{
-			if (_accountConfDic.ContainsKey(key.ToString()))
-				 _accountConfDic[key.ToString()] = value;
-			else
-				_accountConfDic.Add(key.ToString(), value);
+			bool result = false;
+
+			try
+			{
+				// Update local tracking
+				if (_accountConfDic.ContainsKey(key.ToString()))
+					_accountConfDic[key.ToString()] = value;
+				else
+					_accountConfDic.Add(key.ToString(), value);
+
+				// Update config file
+				Regex configKey = new Regex($"({key.ToString()}='[^']+')");
+
+				if (configKey.Match(_accountConf).Success)
+				{
+					// Key exists in config, update it
+					_accountConf = new Regex($"({key.ToString()}='[^']+')").Replace(_accountConf, $"{key.ToString()}='{value}'");
+				}
+				else
+				{
+					// Add new key to the config
+					_accountConf += $"\n{key.ToString()}='{value}'\n";
+				}
+
+				// Output new config to file
+				File.WriteAllText(_accountConfPath, _accountConf);
+
+				result = true;
+			}
+			catch
+			{
+				// Placeholder
+			}
+
+			return result;
 		}
 
 		public void IssueCertificate(List<string> domains, string CFToken)
