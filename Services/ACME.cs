@@ -157,6 +157,11 @@ namespace NginxPanel.Services
 			return string.Empty;
 		}
 
+		public bool HasAccountConfValue(enuAccountConfKey key)
+		{
+			return _accountConfDic.ContainsKey(key.ToString());
+		}
+
 		public bool SetAccountConfValue(enuAccountConfKey key, string value)
 		{
 			bool result = false;

@@ -48,6 +48,10 @@ else
 	<br />
 	<span>Set ACME Email Notifications:</span>
 	<br />
+	<RadzenCheckBox TValue="bool" Value="!(acme.GetAccountConfValue(enuAccountConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST) == string.Empty" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+	<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
+	<br />
+	<br />
 	<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 }
 
@@ -390,6 +394,36 @@ else
 				{
 					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME email notifications!");
 				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			StateHasChanged();
+		}
+	}
+
+	private async void ToggleACMENotifyHook()
+	{
+		try
+		{
+			busyInstallReset = true;
+			StateHasChanged();
+
+			bool hookEnabled = acme.HasAccountConfValue(enuAccountConfKey.NOTIFY_HOOK);
+			bool result = false;
+			await Task.Run(() =>
+			{
+				result = acme.SetAccountConfValue(enuAccountConfKey.NOTIFY_HOOK, hookEnabled ? "" : "smtp");
+			});
+
+			if (result)
+			{
+				layout?.DisplayToast(MainLayout.toastType.success, $"ACME SMTP notify hook {(hookEnabled ? "cleared" : "set")} successfully!");
+			}
+			else
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to {(hookEnabled ? "clear" : "set")} ACME SMTP notify hook!");
 			}
 		}
 		finally
