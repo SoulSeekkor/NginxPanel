@@ -44,6 +44,11 @@ else
 	<span>Set ACME Cloudflare Token:</span>
 	<br />
 	<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+	<br />
+	<br />
+	<span>Set ACME Email Notifications:</span>
+	<br />
+	<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 }
 
 @code {
@@ -263,11 +268,12 @@ else
 		try
 		{
 			string token = acme.GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token);
+
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
 	@<RadzenStack>
 		<div>
 			<span>Please enter your Cloudflare API token below:</span>
-			<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px;" />
+			<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
 			<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
 		</div>
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -304,6 +310,85 @@ else
 				else
 				{
 					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to {(String.IsNullOrWhiteSpace(token) ? "clear" : "set")} ACME Cloudflare API token!");
+				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			StateHasChanged();
+		}
+	}
+
+	private async void SetACMEEmailNotifications()
+	{
+		try
+		{
+			string bin = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_BIN);
+			string host = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST);
+			string secure = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_SECURE);
+			string from = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_FROM);
+			string to = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_TO);
+
+			#if DEBUG
+			host = "10.12.1.16";
+			from = "ajenti@soulseekkor.net";
+			to = "mewert@soulseekkor.net";
+			#endif
+
+			var result = await DialogService.OpenAsync("Set ACME Email Notifications", ds =>
+	@<RadzenStack>
+		<div>
+			<span>Please enter your SMTP server below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@host Style="width: 310px; margin-right: 4px;" />
+		</div>
+		<div>
+			<span>Please enter the sender email address below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@from Style="width: 310px; margin-right: 4px;" />
+		</div>
+		<div>
+			<span>Please enter the email address to send notifications to below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@to Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		</div>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				if (String.IsNullOrWhiteSpace(host) || String.IsNullOrWhiteSpace(from) || String.IsNullOrWhiteSpace(to))
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "All email settings must be entered!");
+					return;
+				}
+
+				await Task.Run(() =>
+				{
+					result = acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_BIN, (String.IsNullOrWhiteSpace(bin) ? "python3" : bin)) &&
+						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST, host) &&
+						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_SECURE, (String.IsNullOrWhiteSpace(secure) ? "none" : secure)) &&
+						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_FROM, from) &&
+						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_TO, to);
+				});
+
+				if (result)
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME email notifications set successfully!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME email notifications!");
 				}
 			}
 		}

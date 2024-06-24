@@ -123,14 +123,14 @@ namespace NginxPanel.Services
 					_accountConf = File.ReadAllText(_accountConfPath);
 
 					// Cleanup file a bit first
-					while (_accountConf.Contains("\n\n"))
+					while (_accountConf.Contains(Environment.NewLine + Environment.NewLine))
 					{
-						_accountConf = _accountConf.Replace("\n\n", "\n");
+						_accountConf = _accountConf.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
 					}
 					_accountConf = _accountConf.Trim();
 
 					// Split into lines and parse key/value pairs
-					string[] lines = _accountConf.Split("\n");
+					string[] lines = _accountConf.Split(Environment.NewLine);
 					string[] split;
 					string key;
 
@@ -192,7 +192,7 @@ namespace NginxPanel.Services
 					else
 					{
 						// Add new key to the config
-						_accountConf += $"\n{key.ToString()}='{value}'\n";
+						_accountConf += Environment.NewLine + $"{key.ToString()}='{value}'";
 					}
 				}
 				else
