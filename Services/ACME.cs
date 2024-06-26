@@ -12,8 +12,18 @@ namespace NginxPanel.Services
 			public string SANDomains = string.Empty;
 			public string KeyLength = string.Empty;
 			public string CA = string.Empty;
-			public DateTime Created;
-			public DateTime Renew;
+			public DateTime? Created;
+			public DateTime? Renew;
+
+			public Certificate(string mainDomain, string sanDomains, string keyLength, string ca, DateTime? created, DateTime? renew)
+			{
+				MainDomain = mainDomain;
+				SANDomains = sanDomains;
+				KeyLength = keyLength;
+				CA = ca;
+				Created = created;
+				Renew = renew;
+			}
 		}
 
 		#endregion
@@ -219,30 +229,47 @@ namespace NginxPanel.Services
 			return result;
 		}
 
-		public void IssueCertificate(List<string> domains, string CFToken)
+		public bool IssueCertificate(List<string> domains)
 		{
+			bool result = false;
+
 			try
 			{
+				// Build issue certificate command
+				string cmd = $"{_CLI.HomePath}/.acme.sh/acme.sh";
+
+#if DEBUG
+				cmd += " --test";
+#endif
+
+				// Check if we are using a Cloudflare API token
+				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
+				{
+					cmd += " --dns dns_cf";
+				}
+
 				// Build list of domains portion of the command
-				string domainsCmd = "";
+				cmd += " --issue";
 				foreach (string domain in domains)
 				{
-					domainsCmd += $" -d {domain}";
+					cmd += $" -d {domain}";
 				}
-				domainsCmd = domainsCmd.Trim();
 
-				// Set environment variable(s)
-				Environment.SetEnvironmentVariable("CF_TOKEN", CFToken);
-				//_CLI.RunCommand("printenv CF_TOKEN", sudo: false);  // testing only
+				// Execute command to issue certificate
+				_CLI.RunCommand(cmd, sudo: false);
 
-				// Execute command to install certificate
-				//_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --issue --dns dns_cf {domainsCmd}", sudo: false);
-				_CLI.RunCommand($"CF_TOKEN={CFToken} bash -c '{_CLI.HomePath}/.acme.sh/acme.sh --test --issue --dns dns_cf {domainsCmd}'", sudo: false, parseArgs: false);
+				if (_CLI.StandardOut.Contains("Cert success."))
+				{
+					result = true;
+					RefreshCertificates();
+				}
 			}
 			catch
 			{
 				// Placeholder
 			}
+
+			return result;
 		}
 
 		public void InstallCertificate(List<string> domains, string PFXpassword)
@@ -290,7 +317,7 @@ namespace NginxPanel.Services
 
 				string listing = _CLI.StandardOut;
 				
-				if (!listing.StartsWith("Main_Domain  KeyLength  SAN_Domains  CA  Created  Renew"))
+				if (!listing.StartsWith("Main_Domain        KeyLength  SAN_Domains        CA                    Created               Renew"))
 				{
 					// Unable to parse, headers are not as expected!
 					return;
@@ -301,9 +328,25 @@ namespace NginxPanel.Services
 					// First line are headers, remove it
 					listing = listing.Substring(listing.IndexOf(Environment.NewLine)).Trim();
 
+					List<string> split;
+					DateTime? created = null;
+					DateTime? renew = null;
 					foreach (string line in listing.Split(Environment.NewLine))
 					{
+						split = line.Split(" ").ToList();
+						split.RemoveAll((x) => String.IsNullOrWhiteSpace(x));
 
+						if (split.Count == 4 || String.IsNullOrWhiteSpace(split[4]))
+							created = null;
+						else
+							created = DateTime.Parse(split[4]);
+
+						if (split.Count == 4 || String.IsNullOrWhiteSpace(split[5]))
+							renew = null;
+						else
+							renew = DateTime.Parse(split[5]);
+
+						_certificates.Add(new Certificate(split[0], split[2], split[1], split[3], created, renew));
 					}
 				}
 			}
