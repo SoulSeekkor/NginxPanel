@@ -18,8 +18,8 @@ namespace NginxPanel.Services
 			public Certificate(string mainDomain, string sanDomains, string keyLength, string ca, DateTime? created, DateTime? renew)
 			{
 				MainDomain = mainDomain;
-				SANDomains = sanDomains;
-				KeyLength = keyLength;
+				SANDomains = (sanDomains == "no" ? "" : sanDomains);
+				KeyLength = keyLength.Trim('\"');
 				CA = ca;
 				Created = created;
 				Renew = renew;

@@ -8,7 +8,7 @@
 <PageTitle>Certificates</PageTitle>
 <br />
 <br />
-<h3>Certificates</h3>
+<h3>Certificates@(acme.Installed ? $" ({acme.Certificates.Count})" : "")</h3>
 
 @if (acme.Installed)
 {
@@ -27,7 +27,45 @@
 	{
 		foreach (Services.ACME.Certificate cert in acme.Certificates)
 		{
-			
+			<RadzenCard Class="rz-my-8" Style="max-width: 420px">
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
+					<!--<RadzenImage Path="" Style="width: 100px; height: 100px; border-radius: 50%;" />-->
+					<!--<RadzenIcon Icon="@(String.IsNullOrWhiteSpace(cert.SANDomains) ? "contextual_token" : "add_notes")" Style="font-size: 16px;" />-->
+					<RadzenStack Gap="0">
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Main Domain</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.MainDomain</b></RadzenText>
+						@if (!String.IsNullOrWhiteSpace(cert.SANDomains))
+						{
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">SAN Domains</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1"><b>@cert.SANDomains</b></RadzenText>
+						}
+					</RadzenStack>
+				</RadzenStack>
+				<RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-5" style="margin: 0.25rem calc(.75 * var(--rz-card-padding));">
+					<RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>More Details</strong></RadzenText>
+					<RadzenRow RowGap="0">
+						<RadzenColumn SizeSM="8">
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">CA</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.CA</b></RadzenText>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
+						</RadzenColumn>
+						@if (cert.Created.HasValue)
+						{
+							<RadzenColumn SizeSM="8">
+								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
+								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created</b></RadzenText>
+								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
+								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew</b></RadzenText>
+							</RadzenColumn>
+						}
+					</RadzenRow>
+				</RadzenCard>
+					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Renew" />
+						<RadzenButton Variant="Variant.Text" Text="Delete" />
+					</RadzenStack>
+			</RadzenCard>
 		}
 	}
 }
@@ -155,9 +193,13 @@ else
 			domains.Insert(0, cert.primaryDomain);
 
 			// First, attempt to issue the certificate
-			acme.IssueCertificate(domains);
-
-			layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
+			if (acme.IssueCertificate(domains))
+			{
+				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
+				RefreshCertificates(true);
+			}
+			else
+				layout?.DisplayToast(MainLayout.toastType.error, "Failed to issue certificate!");
 		}
 		catch
 		{
