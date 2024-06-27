@@ -357,8 +357,13 @@ namespace NginxPanel.Services
 				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --list", sudo: false);
 
 				string listing = _CLI.StandardOut;
-				
-				if (!listing.StartsWith("Main_Domain        KeyLength  SAN_Domains        CA                    Created               Renew"))
+				string header = listing.Substring(0, listing.IndexOf(Environment.NewLine));
+
+				// Cleanup the header
+				while (header.Contains("  "))
+					header = header.Replace("  ", " ");
+
+				if (header != "Main_Domain KeyLength SAN_Domains CA Created Renew")
 				{
 					// Unable to parse, headers are not as expected!
 					return;
