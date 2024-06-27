@@ -306,6 +306,26 @@ namespace NginxPanel.Services
 			}
 		}
 
+		public bool DeleteCertificate(Certificate cert)
+		{
+			bool result = false;
+
+			try
+			{
+				// Execute command to delete certificate
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
+
+				if (_CLI.StandardOut.Contains($"{cert.MainDomain} is removed"))
+					result = true;
+			}
+			catch
+			{
+				// Placeholder
+			}
+
+			return result;
+		}
+
 		public void RefreshCertificates()
 		{
 			_certificates.Clear();

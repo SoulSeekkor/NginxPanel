@@ -29,8 +29,6 @@
 		{
 			<RadzenCard Class="rz-my-8" Style="max-width: 420px">
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
-					<!--<RadzenImage Path="" Style="width: 100px; height: 100px; border-radius: 50%;" />-->
-					<!--<RadzenIcon Icon="@(String.IsNullOrWhiteSpace(cert.SANDomains) ? "contextual_token" : "add_notes")" Style="font-size: 16px;" />-->
 					<RadzenStack Gap="0">
 						<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Main Domain</RadzenText>
 						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.MainDomain</b></RadzenText>
@@ -62,8 +60,8 @@
 					</RadzenRow>
 				</RadzenCard>
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
-						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Renew" />
-						<RadzenButton Variant="Variant.Text" Text="Delete" />
+						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Renew" Disabled="true" />
+						<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
 					</RadzenStack>
 			</RadzenCard>
 		}
@@ -115,6 +113,25 @@ else
 		// PFX related variables
 		public bool exportToPFX = false;
 		public string PFXpassword = string.Empty;
+	}
+
+	private async void DeleteCertificate(Services.ACME.Certificate cert)
+	{
+		bool? confirm = await DialogService.Confirm($"Are you sure you want to delete certificate <span style='color: DeepSkyBlue; font-style: italic;'>{cert.MainDomain}</span>?", "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+		if (confirm.HasValue && confirm.Value)
+		{
+			await Task.Run(() =>
+		{
+			if (acme.DeleteCertificate(cert))
+			{
+				layout?.DisplayToast(MainLayout.toastType.success, "Certificate deleted successfully!");
+				RefreshCertificates(false);
+			}
+		});
+
+			layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='color: DarkRed; font-style: italic;'>{cert.MainDomain}</span> has been deleted!");
+		}
 	}
 
 	private async void AddCertificate()
@@ -196,7 +213,7 @@ else
 			if (acme.IssueCertificate(domains))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
-				RefreshCertificates(true);
+				RefreshCertificates(false);
 			}
 			else
 				layout?.DisplayToast(MainLayout.toastType.error, "Failed to issue certificate!");
