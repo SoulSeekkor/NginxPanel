@@ -326,6 +326,27 @@ namespace NginxPanel.Services
 			return result;
 		}
 
+		public bool RenewCertificate(Certificate cert)
+		{
+			bool result = false;
+
+			try
+			{
+				// Execute command to delete certificate
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --renew --domain {cert.MainDomain}", sudo: false);
+
+				// TODO Check what a success message looks like
+				if (_CLI.StandardOut.Contains("Skip, Next renewal time"))
+					result = true;
+			}
+			catch
+			{
+				// Placeholder
+			}
+
+			return result;
+		}
+
 		public void RefreshCertificates()
 		{
 			_certificates.Clear();
