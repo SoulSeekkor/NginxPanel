@@ -60,7 +60,7 @@
 					</RadzenRow>
 				</RadzenCard>
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
-						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Renew" Click="() => RenewCertificate(cert)" />
+						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" />
 						<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
 					</RadzenStack>
 			</RadzenCard>
@@ -134,21 +134,21 @@ else
 		}
 	}
 
-	private async void RenewCertificate(Services.ACME.Certificate cert)
+	private async void ForceRenewCertificate(Services.ACME.Certificate cert)
 	{
-		bool? confirm = await DialogService.Confirm($"Are you sure you want to renew certificate <span style='color: DeepSkyBlue; font-style: italic;'>{cert.MainDomain}</span>?", "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+		bool? confirm = await DialogService.Confirm($"Are you sure you want to force renewal for certificate <span style='color: DeepSkyBlue; font-style: italic;'>{cert.MainDomain}</span>?", "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
 			await Task.Run(() =>
 			{
-				if (acme.RenewCertificate(cert))
+				if (acme.ForceRenewCertificate(cert))
 				{
 					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='color: DarkRed; font-style: italic;'>{cert.MainDomain}</span> has been renewed!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to renew certificate!");
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to force certificate renewal!");
 			});
 
 		}

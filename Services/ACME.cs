@@ -326,17 +326,17 @@ namespace NginxPanel.Services
 			return result;
 		}
 
-		public bool RenewCertificate(Certificate cert)
+		public bool ForceRenewCertificate(Certificate cert)
 		{
 			bool result = false;
 
 			try
 			{
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --renew --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --renew --force --domain {cert.MainDomain}", sudo: false);
 
-				// TODO Check what a success message looks like
-				if (_CLI.StandardOut.Contains("Skip, Next renewal time"))
+				// Check if the renewal was successful
+				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
 					result = true;
 			}
 			catch
