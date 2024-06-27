@@ -52,9 +52,9 @@
 						{
 							<RadzenColumn SizeSM="8">
 								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
-								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created</b></RadzenText>
+								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
 								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
-								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew</b></RadzenText>
+								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
 							</RadzenColumn>
 						}
 					</RadzenRow>
@@ -142,13 +142,15 @@ else
 		{
 			await Task.Run(() =>
 			{
-				if (acme.ForceRenewCertificate(cert))
+				string response = string.Empty;
+
+				if (acme.ForceRenewCertificate(cert, ref response))
 				{
 					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='color: DarkRed; font-style: italic;'>{cert.MainDomain}</span> has been renewed!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to force certificate renewal!");
+					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to force certificate renewal: {response}");
 			});
 
 		}
