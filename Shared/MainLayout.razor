@@ -14,7 +14,7 @@
         </div>
 
         <main>
-            <div class="top-row px-4">
+            <div class="top-row px-4" style="width: 100%;">
                 <span style="padding-right: 50px;">
                     User: @cli.RunningAsUser
                     <br />
@@ -35,6 +35,9 @@
                         }
                         <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
                     }
+                </span>
+                <span style="margin-left: 100px;">
+                    Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
                 </span>
             </div>
 
