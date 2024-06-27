@@ -290,6 +290,10 @@ namespace NginxPanel.Services
 				command += $" --key-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.key";
 				command += $" --fullchain-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.cert";
 
+#if DEBUG
+				command += " --test";
+#endif
+
 				// Build reload command, include PFX export if included
 				command += " --reloadcmd \"service nginx force-reload";
 				if (!String.IsNullOrWhiteSpace(PFXpassword))
@@ -298,7 +302,7 @@ namespace NginxPanel.Services
 				command += "\"";
 
 				// Execute command to install certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test {command}", sudo: false);
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh {command}", sudo: false);
 			}
 			catch
 			{
@@ -332,8 +336,14 @@ namespace NginxPanel.Services
 
 			try
 			{
+				string cmd = $"{_CLI.HomePath}/.acme.sh/acme.sh --renew --force --domain {cert.MainDomain}";
+
+#if DEBUG
+				cmd += " --test";
+#endif
+
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --test --renew --force --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand(cmd, sudo: false);
 
 				// Check if the renewal was successful
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
