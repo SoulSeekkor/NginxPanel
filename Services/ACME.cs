@@ -364,6 +364,13 @@ namespace NginxPanel.Services
 				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --list", sudo: false);
 
 				string listing = _CLI.StandardOut;
+
+				if (listing.IndexOf(Environment.NewLine) == -1)
+				{
+					// No certificates currently
+					return;
+				}
+
 				string header = listing.Substring(0, listing.IndexOf(Environment.NewLine));
 
 				// Cleanup the header
