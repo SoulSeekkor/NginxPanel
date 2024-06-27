@@ -18,7 +18,7 @@ namespace NginxPanel.Services
 			public Certificate(string mainDomain, string sanDomains, string keyLength, string ca, DateTime? created, DateTime? renew)
 			{
 				MainDomain = mainDomain;
-				SANDomains = (sanDomains == "no" ? "" : sanDomains);
+				SANDomains = (sanDomains == "no" ? "" : sanDomains.Replace(",", ", "));
 				KeyLength = keyLength.Trim('\"');
 				CA = ca;
 				Created = created;
@@ -245,7 +245,7 @@ namespace NginxPanel.Services
 				// Check if we are using a Cloudflare API token
 				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
 				{
-					cmd += " --dns dns_cf";
+					cmd += " --force --dns dns_cf";
 				}
 
 				// Build list of domains portion of the command
