@@ -262,14 +262,10 @@ namespace NginxPanel.Services
 				// Build issue certificate command
 				string cmd = $"{_CLI.HomePath}/.acme.sh/acme.sh";
 
-#if DEBUG
-				cmd += " --test";
-#endif
-
 				// Check if we are using a Cloudflare API token
 				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
 				{
-					cmd += " --force --dns dns_cf";
+					cmd += " --dns dns_cf";
 				}
 
 				// Build list of domains portion of the command
@@ -314,10 +310,6 @@ namespace NginxPanel.Services
 				command += $" --key-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.key";
 				command += $" --fullchain-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.cert";
 
-#if DEBUG
-				command += " --test";
-#endif
-
 				// Build reload command, include PFX export if included
 				command += " --reloadcmd \"service nginx force-reload";
 				if (!String.IsNullOrWhiteSpace(PFXpassword))
@@ -360,14 +352,8 @@ namespace NginxPanel.Services
 
 			try
 			{
-				string cmd = $"{_CLI.HomePath}/.acme.sh/acme.sh --renew --force --domain {cert.MainDomain}";
-
-#if DEBUG
-				cmd += " --test";
-#endif
-
 				// Execute command to delete certificate
-				_CLI.RunCommand(cmd, sudo: false);
+				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --renew --force --domain {cert.MainDomain}", sudo: false);
 
 				// Check if the renewal was successful
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
