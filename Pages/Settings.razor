@@ -53,6 +53,11 @@ else
 	<br />
 	<br />
 	<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+	<br />
+	<br />
+	<span>Set ACME CA:</span>
+	<br />
+	<RadzenButton Click=@(() => SetACMECA()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 }
 
 @code {
@@ -393,6 +398,71 @@ else
 				else
 				{
 					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME email notifications!");
+				}
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			StateHasChanged();
+		}
+	}
+	
+	private async void SetACMECA()
+	{
+		try
+		{
+			int value = -1;
+
+			var result = await DialogService.OpenAsync("Set ACME CA", ds =>
+	@<RadzenStack>
+		<div>
+			<RadzenText Text="Select the CA you would like to use below:" />
+			<RadzenRadioButtonList @bind-Value=@value TValue="int" Orientation=Orientation.Vertical class="mb-5">
+				<Items>
+					<RadzenRadioButtonListItem Text="ZeroSSL" Value="1" />
+					<RadzenRadioButtonListItem Text="LetsEncrypt" Value="2" />
+				</Items>
+			</RadzenRadioButtonList>
+		</div>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				string CA = string.Empty;
+
+				switch (value)
+				{
+					case 1:
+						CA = "zerossl";
+						break;
+					case 2:
+						CA="letsencrypt";
+						break;
+				}
+
+				await Task.Run(() =>
+				{
+					result = acme.SetDefaultCA(CA);
+				});
+
+				if (result)
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME default CA set successfully!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME default CA!");
 				}
 			}
 		}

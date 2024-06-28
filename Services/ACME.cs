@@ -229,6 +229,26 @@ namespace NginxPanel.Services
 			return result;
 		}
 
+		public bool SetDefaultCA(string CA)
+		{
+			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
+			{
+				try
+				{
+					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --set-default-ca --server {CA}", sudo: false);
+
+					if (_CLI.StandardOut.Contains("Changed default CA"))
+						return true;
+				}
+				catch
+				{
+					// Placeholder
+				}
+			}
+
+			return false;
+		}
+
 		public bool IssueCertificate(List<string> domains)
 		{
 			bool result = false;
