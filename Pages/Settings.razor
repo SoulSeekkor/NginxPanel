@@ -412,16 +412,22 @@ else
 	{
 		try
 		{
-			int value = -1;
+			string CA = string.Empty;
 
 			var result = await DialogService.OpenAsync("Set ACME CA", ds =>
 	@<RadzenStack>
 		<div>
 			<RadzenText Text="Select the CA you would like to use below:" />
-			<RadzenRadioButtonList @bind-Value=@value TValue="int" Orientation=Orientation.Vertical class="mb-5">
+			<RadzenRadioButtonList @bind-Value=@CA TValue="string" Orientation=Orientation.Vertical class="mb-5">
 				<Items>
-					<RadzenRadioButtonListItem Text="ZeroSSL" Value="1" />
-					<RadzenRadioButtonListItem Text="LetsEncrypt" Value="2" />
+					<RadzenRadioButtonListItem Text="ZeroSSL" Value="@("zerossl")" />
+					<RadzenRadioButtonListItem Text="LetsEncrypt" Value="@("letsencrypt")" />
+					<RadzenRadioButtonListItem Text="LetsEncrypt Test" Value="@("letsencrypt_test")" />
+					<RadzenRadioButtonListItem Text="BuyPass" Value="@("buypass")" />
+					<RadzenRadioButtonListItem Text="BuyPass Test" Value="@("buypass_test")" />
+					<RadzenRadioButtonListItem Text="SSLCom" Value="@("sslcom")" />
+					<RadzenRadioButtonListItem Text="Google" Value="@("google")" />
+					<RadzenRadioButtonListItem Text="Google Test" Value="@("googletest")" />
 				</Items>
 			</RadzenRadioButtonList>
 		</div>
@@ -438,18 +444,6 @@ else
 			{
 				busyInstallReset = true;
 				StateHasChanged();
-
-				string CA = string.Empty;
-
-				switch (value)
-				{
-					case 1:
-						CA = "zerossl";
-						break;
-					case 2:
-						CA="letsencrypt";
-						break;
-				}
 
 				await Task.Run(() =>
 				{
