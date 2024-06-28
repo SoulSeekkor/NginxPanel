@@ -12,7 +12,6 @@
 <br />
 <h3>Settings</h3>
 <br />
-<br />
 Install or reinstall Nginx, leaves configs and gives the option of stable or mainline:
 <br />
 <RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="@installText" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
@@ -57,7 +56,7 @@ else
 	<br />
 	<span>Set ACME CA:</span>
 	<br />
-	<RadzenButton Click=@(() => SetACMECA()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+	<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 }
 
 @code {
@@ -407,14 +406,26 @@ else
 			StateHasChanged();
 		}
 	}
-	
-	private async void SetACMECA()
+
+	private async void SetACMECertAuthority()
 	{
 		try
 		{
 			string CA = string.Empty;
+			string confVal = acme.GetAccountConfValue(enuAccountConfKey.DEFAULT_ACME_SERVER);
 
-			var result = await DialogService.OpenAsync("Set ACME CA", ds =>
+			// Check current value
+			if (String.IsNullOrWhiteSpace(confVal) || confVal.Contains("zerossl"))
+				CA = "zerossl";
+			else if (confVal.Contains("letsencrypt"))
+			{
+				if (confVal.Contains("staging"))
+					CA = "letsencrypt_test";
+				else
+					CA = "letsencrypt";
+			}
+
+			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
 	@<RadzenStack>
 		<div>
 			<RadzenText Text="Select the CA you would like to use below:" />
@@ -452,11 +463,11 @@ else
 
 				if (result)
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME default CA set successfully!");
+					layout?.DisplayToast(MainLayout.toastType.success, "ACME default certificate authority set successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME default CA!");
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME default certificate authority!");
 				}
 			}
 		}

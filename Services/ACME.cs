@@ -41,7 +41,8 @@ namespace NginxPanel.Services
 			SAVED_SMTP_TO,
 			SAVED_SMTP_HOST,
 			SAVED_SMTP_SECURE,
-			NOTIFY_HOOK
+			NOTIFY_HOOK,
+			DEFAULT_ACME_SERVER
 		}
 
 		#endregion
@@ -238,7 +239,10 @@ namespace NginxPanel.Services
 					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --set-default-ca --server {CA}", sudo: false);
 
 					if (_CLI.StandardOut.Contains("Changed default CA"))
+					{
+						ParseAccountConf();
 						return true;
+					}
 				}
 				catch
 				{
