@@ -124,11 +124,11 @@ namespace NginxPanel.Services
 			_certAuthorities.Add(new CertAuthority("ZeroSSL", "zerossl", false));
 			_certAuthorities.Add(new CertAuthority("LetsEncrypt", "letsencrypt", false));
 			_certAuthorities.Add(new CertAuthority("LetsEncrypt Test", "letsencrypt_test", false));
-			_certAuthorities.Add(new CertAuthority("BuyPass", "buypass", true));
-			_certAuthorities.Add(new CertAuthority("BuyPass Test", "buypass_test", true));
-			_certAuthorities.Add(new CertAuthority("SSLCom", "sslcom", true));
-			_certAuthorities.Add(new CertAuthority("Google", "google", true));
-			_certAuthorities.Add(new CertAuthority("Google Test", "googletest", true));
+			_certAuthorities.Add(new CertAuthority("BuyPass", "buypass", false));
+			_certAuthorities.Add(new CertAuthority("BuyPass Test", "buypass_test", false));
+			_certAuthorities.Add(new CertAuthority("SSLCom", "sslcom", false));
+			_certAuthorities.Add(new CertAuthority("Google", "google", false));
+			_certAuthorities.Add(new CertAuthority("Google Test", "googletest", false));
 		}
 
 		public void Refresh()
