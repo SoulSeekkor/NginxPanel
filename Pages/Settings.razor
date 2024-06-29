@@ -429,18 +429,7 @@ else
 	@<RadzenStack>
 		<div>
 			<RadzenText Text="Select the CA you would like to use below:" />
-			<RadzenRadioButtonList @bind-Value=@CA TValue="string" Orientation=Orientation.Vertical class="mb-5">
-				<Items>
-					<RadzenRadioButtonListItem Text="ZeroSSL" Value="@("zerossl")" />
-					<RadzenRadioButtonListItem Text="LetsEncrypt" Value="@("letsencrypt")" />
-					<RadzenRadioButtonListItem Text="LetsEncrypt Test" Value="@("letsencrypt_test")" />
-					<RadzenRadioButtonListItem Text="BuyPass" Value="@("buypass")" Disabled="true" />
-					<RadzenRadioButtonListItem Text="BuyPass Test" Value="@("buypass_test")" Disabled="true" />
-					<RadzenRadioButtonListItem Text="SSLCom" Value="@("sslcom")" Disabled="true" />
-					<RadzenRadioButtonListItem Text="Google" Value="@("google")" Disabled="true" />
-					<RadzenRadioButtonListItem Text="Google Test" Value="@("googletest")" Disabled="true" />
-				</Items>
-			</RadzenRadioButtonList>
+			<RadzenRadioButtonList Data="acme.CertAuthorities" @bind-Value=@CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" Orientation=Orientation.Vertical class="mb-5" />
 		</div>
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">

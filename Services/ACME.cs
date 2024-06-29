@@ -26,6 +26,20 @@ namespace NginxPanel.Services
 			}
 		}
 
+		public class CertAuthority
+		{
+			public string DisplayName { get; set; }
+			public string CmdValue { get; set; }
+			public bool Disabled { get; set; }
+
+			public CertAuthority(string displayName, string cmdValue, bool disabled)
+			{
+				DisplayName = displayName;
+				CmdValue = cmdValue;
+				Disabled = disabled;
+			}
+		}
+
 		#endregion
 
 		#region Enums
@@ -55,6 +69,8 @@ namespace NginxPanel.Services
 
 		private List<Certificate> _certificates = new List<Certificate>();
 
+		private List<CertAuthority> _certAuthorities = new List<CertAuthority>();
+
 		private string _accountConfPath = string.Empty;
 		private string _accountConf = string.Empty;
 		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
@@ -78,6 +94,11 @@ namespace NginxPanel.Services
 			get { return _certificates; }
 		}
 
+		public List<CertAuthority> CertAuthorities
+		{
+			get { return _certAuthorities; }
+		}
+
 		public string AccountConf
 		{
 			get { return _accountConf; }
@@ -90,11 +111,25 @@ namespace NginxPanel.Services
 		public ACME(CLI CLI)
 		{
 			_CLI = CLI;
+			BuildAvailableCAs();
 			Refresh();
 			ParseAccountConf();
 		}
 
 		#endregion
+
+		private void BuildAvailableCAs()
+		{
+			_certAuthorities.Clear();
+			_certAuthorities.Add(new CertAuthority("ZeroSSL", "zerossl", false));
+			_certAuthorities.Add(new CertAuthority("LetsEncrypt", "letsencrypt", false));
+			_certAuthorities.Add(new CertAuthority("LetsEncrypt Test", "letsencrypt_test", false));
+			_certAuthorities.Add(new CertAuthority("BuyPass", "buypass", true));
+			_certAuthorities.Add(new CertAuthority("BuyPass Test", "buypass_test", true));
+			_certAuthorities.Add(new CertAuthority("SSLCom", "sslcom", true));
+			_certAuthorities.Add(new CertAuthority("Google", "google", true));
+			_certAuthorities.Add(new CertAuthority("Google Test", "googletest", true));
+		}
 
 		public void Refresh()
 		{

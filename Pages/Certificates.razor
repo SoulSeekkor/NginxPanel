@@ -102,6 +102,7 @@ else
 
 	private class AddCertificateModel
 	{
+		public string CA = "Default CA";
 		public string primaryDomain = string.Empty;
 
 		// SAN listbox related variables
@@ -161,10 +162,19 @@ else
 		try
 		{
 			AddCertificateModel cert = new AddCertificateModel();
+			List<Services.ACME.CertAuthority> CAs = acme.CertAuthorities.ToList();
+
+			// Add default CA
+			CAs.Insert(0, new Services.ACME.CertAuthority(cert.CA, cert.CA, false));
+
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+				<div>
+					<RadzenLabel Text="Certificate authority:" />
+					<RadzenDropDown Data=CAs @bind-Value=cert.CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" class="w-50" style="display: block" />
+				</div>
 				<div>
 					<RadzenLabel Text="Please enter the primary certificate domain:" />
 					<RadzenTextBox Name="PrimaryDomain" @bind-Value=cert.primaryDomain class="w-50" style="display: block" />
@@ -184,12 +194,12 @@ else
 						<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
 					</RadzenStack>
 				</div>
-				<span class="rz-text-align-left rz-mt-3 rz-mb-5">
+				<div class="rz-text-align-left rz-mt-3 rz-mb-5">
 					<RadzenCheckBox @bind-Value=cert.exportToPFX Name="chkExportPFX" />
 					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
 					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
 					<RadzenTextBox @bind-Value=cert.PFXpassword class="w-20" />
-				</span>
+				</div>
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
 					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
