@@ -60,6 +60,7 @@
 					</RadzenRow>
 				</RadzenCard>
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Install" Click="() => InstallCertificate(cert)" />
 						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" />
 						<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
 					</RadzenStack>
@@ -114,6 +115,12 @@ else
 		// PFX related variables
 		public bool exportToPFX = false;
 		public string PFXpassword = string.Empty;
+	}
+
+	private class InstallCertificateModel
+	{
+		public string KeyPath = string.Empty;
+		public string FullChainPath = string.Empty;
 	}
 
 	private async void DeleteCertificate(Services.ACME.Certificate cert)
@@ -261,6 +268,25 @@ else
 		}
 	}
 
+	void InstallCertSubmit(InstallCertificateModel cert)
+	{
+		try
+		{
+			// First, attempt to install the certificate
+			if (acme.InstallCertificate(new List<string>(), cert.KeyPath, cert.FullChainPath))
+			{
+				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
+				RefreshCertificates(false);
+			}
+			else
+				layout?.DisplayToast(MainLayout.toastType.error, "Failed to install certificate!");
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate!");
+		}
+	}
+
 	void OnInvalidCertSubmit(FormInvalidSubmitEventArgs args)
 	{
 		layout?.DisplayToast(MainLayout.toastType.error, "Invalid add certificate submission!");
@@ -314,6 +340,40 @@ else
 		catch
 		{
 			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while deleting SAN domain!");
+		}
+	}
+
+	private async void InstallCertificate(Services.ACME.Certificate cert)
+	{
+		try
+		{
+			InstallCertificateModel installCert = new InstallCertificateModel();
+			var result = await DialogService.OpenAsync("Install Certificate", ds =>
+	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@InstallCertSubmit>
+		<RadzenFieldset Text="Install Information">
+			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+				<div>
+					<RadzenLabel Text="Please enter the key path below:" />
+					<RadzenTextBox Name="KeyPath" @bind-Value=installCert.KeyPath class="w-100" style="display: block" />
+					<RadzenRequiredValidator Component="KeyPath" Text="Key path is required" Popup=false Style="position: absolute" />
+				</div>
+				<div>
+					<RadzenLabel Text="Please enter the full chain path below:" />
+					<RadzenTextBox Name="FullChainPath" @bind-Value=installCert.FullChainPath class="w-100" style="display: block" />
+					<RadzenRequiredValidator Component="FullChainPath" Text="Full chain path is required" Popup=false Style="position: absolute" />
+				</div>
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
+					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+				</RadzenStack>
+			</RadzenStack>
+		</RadzenFieldset>
+	</RadzenTemplateForm>
+	);
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while displaying install certificate screen!");
 		}
 	}
 }

@@ -23,7 +23,10 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
 ```
 sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-8.0
 ```
-2) Download publish.tar.
+2) Download publish.tar from releases page.
+```
+wget <url to asset on releases page>
+```
 3) Extract to folder:
 ```
 tar -xvf publish.tar -C /opt/nginxpanel
@@ -49,6 +52,7 @@ systemctl edit --full nginxpanel
 Description=NginxPanel Service
 Wants=network-online.target
 After=network-online.target
+
 [Service]
 WorkingDirectory=/opt/nginxpanel
 ExecStart=/opt/nginxpanel/NginxPanel

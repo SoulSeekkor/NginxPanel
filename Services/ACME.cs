@@ -59,6 +59,31 @@ namespace NginxPanel.Services
 			DEFAULT_ACME_SERVER
 		}
 
+		public enum enuCertConfKey
+		{
+			Le_Domain,
+			Le_Alt,
+			Le_Webroot,
+			Le_PreHook,
+			Le_PostHook,
+			Le_RenewHook,
+			Le_API,
+			Le_Keylength,
+			Le_OrderFinalize,
+			Le_LinkOrder,
+			Le_LinkCert,
+			Le_CertCreateTime,
+			Le_CertCreateTimeStr,
+			Le_NextRenewTimeStr,
+			Le_NextRenewTime,
+			Le_RealCertPath,
+			Le_RealCACertPath,
+			Le_RealKeyPath,
+			Le_ReloadCmd,
+			Le_RealFullChainPath,
+			Le_PFXPassword
+		}
+
 		#endregion
 
 		#region Variables
@@ -74,6 +99,9 @@ namespace NginxPanel.Services
 		private string _accountConfPath = string.Empty;
 		private string _accountConf = string.Empty;
 		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
+
+		private string _certBase64Prefix = "__ACME_BASE64__START_";
+		private string _certBase64Suffix = "__ACME_BASE64__END_";
 
 		#endregion
 
@@ -210,8 +238,6 @@ namespace NginxPanel.Services
 
 		public bool SetAccountConfValue(enuAccountConfKey key, string value)
 		{
-			bool result = false;
-
 			try
 			{
 				// Update local tracking
@@ -255,14 +281,14 @@ namespace NginxPanel.Services
 				// Output new config to file
 				File.WriteAllText(_accountConfPath, _accountConf);
 
-				result = true;
+				return true;
 			}
 			catch
 			{
 				// Placeholder
 			}
 
-			return result;
+			return false;
 		}
 
 		public bool SetDefaultCA(string CA)
@@ -290,7 +316,7 @@ namespace NginxPanel.Services
 
 		public bool IssueCertificate(List<string> domains, string CA)
 		{
-			bool result = false;
+			return false;
 
 			try
 			{
@@ -320,8 +346,8 @@ namespace NginxPanel.Services
 
 				if (_CLI.StandardOut.Contains("Cert success."))
 				{
-					result = true;
 					RefreshCertificates();
+					return true;
 				}
 			}
 			catch
@@ -329,10 +355,10 @@ namespace NginxPanel.Services
 				// Placeholder
 			}
 
-			return result;
+			return false;
 		}
 
-		public void InstallCertificate(List<string> domains, string PFXpassword)
+		public bool InstallCertificate(List<string> domains, string KeyPath, string FullChainPath)
 		{
 			try
 			{
@@ -352,44 +378,44 @@ namespace NginxPanel.Services
 
 				// Build reload command, include PFX export if included
 				command += " --reloadcmd \"service nginx force-reload";
-				if (!String.IsNullOrWhiteSpace(PFXpassword))
-					command += $" && /root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {PFXpassword}";
+				//if (!String.IsNullOrWhiteSpace(PFXpassword))
+				//	command += $" && /root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {PFXpassword}";
 				
 				command += "\"";
 
 				// Execute command to install certificate
 				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh {command}", sudo: false);
+
+				return true;
 			}
 			catch
 			{
 				// Placeholder
 			}
+
+			return false;
 		}
 
 		public bool DeleteCertificate(Certificate cert)
 		{
-			bool result = false;
-
 			try
 			{
 				// Execute command to delete certificate
 				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
 
 				if (_CLI.StandardOut.Contains($"{cert.MainDomain} is removed"))
-					result = true;
+					return true;
 			}
 			catch
 			{
 				// Placeholder
 			}
 
-			return result;
+			return false;
 		}
 
 		public bool ForceRenewCertificate(Certificate cert, ref string response)
 		{
-			bool result = false;
-
 			try
 			{
 				// Execute command to delete certificate
@@ -399,7 +425,7 @@ namespace NginxPanel.Services
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
 				{
 					response = "Renewal success.";
-					result = true;
+					return true;
 				}
 				else if (_CLI.StandardError.Contains("rateLimited"))
 				{
@@ -411,7 +437,7 @@ namespace NginxPanel.Services
 				// Placeholder
 			}
 
-			return result;
+			return false;
 		}
 
 		public void RefreshCertificates()
