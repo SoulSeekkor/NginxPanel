@@ -111,16 +111,18 @@ else
 		public List<string> SANdomains = new List<string>();
 		public string selectedSAN = string.Empty;
 		public string newSANdomain = string.Empty;
-
-		// PFX related variables
-		public bool exportToPFX = false;
-		public string PFXpassword = string.Empty;
 	}
 
 	private class InstallCertificateModel
 	{
-		public string KeyPath = string.Empty;
-		public string FullChainPath = string.Empty;
+		public string keyPath = string.Empty;
+		public string fullChainPath = string.Empty;
+		public bool reloadNginx = true;
+		public string reloadCmd = string.Empty;
+
+		// PFX related variables
+		public bool exportToPFX = false;
+		public string PFXpassword = string.Empty;
 	}
 
 	private async void DeleteCertificate(Services.ACME.Certificate cert)
@@ -201,12 +203,6 @@ else
 						<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
 					</RadzenStack>
 				</div>
-				<div class="rz-text-align-left rz-mt-3 rz-mb-5">
-					<RadzenCheckBox @bind-Value=cert.exportToPFX Name="chkExportPFX" />
-					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
-					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
-					<RadzenTextBox @bind-Value=cert.PFXpassword class="w-20" />
-				</div>
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
 					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
@@ -242,13 +238,6 @@ else
 			if (cert.CA == temp.CA)
 				cert.CA = string.Empty;
 
-			// Validate PFX password if export PFX was checked
-			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
-			{
-				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
-				return;
-			}
-
 			// Build domain list
 			List<string> domains = cert.SANdomains.ToList();
 			domains.Insert(0, cert.primaryDomain);
@@ -272,8 +261,15 @@ else
 	{
 		try
 		{
+			// Validate PFX password if export PFX was checked
+			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
+				return;
+			}
+
 			// First, attempt to install the certificate
-			if (acme.InstallCertificate(new List<string>(), cert.KeyPath, cert.FullChainPath))
+			if (acme.InstallCertificate(new List<string>(), cert.keyPath, cert.fullChainPath))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);
@@ -354,13 +350,27 @@ else
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
 					<RadzenLabel Text="Please enter the key path below:" />
-					<RadzenTextBox Name="KeyPath" @bind-Value=installCert.KeyPath class="w-100" style="display: block" />
+					<RadzenTextBox Name="KeyPath" @bind-Value=installCert.keyPath class="w-100" style="display: block" />
 					<RadzenRequiredValidator Component="KeyPath" Text="Key path is required" Popup=false Style="position: absolute" />
 				</div>
 				<div>
 					<RadzenLabel Text="Please enter the full chain path below:" />
-					<RadzenTextBox Name="FullChainPath" @bind-Value=installCert.FullChainPath class="w-100" style="display: block" />
+					<RadzenTextBox Name="FullChainPath" @bind-Value=installCert.fullChainPath class="w-100" style="display: block" />
 					<RadzenRequiredValidator Component="FullChainPath" Text="Full chain path is required" Popup=false Style="position: absolute" />
+				</div>
+				<div>
+					<RadzenLabel Text="Please enter the reload command below (optional):" />
+					<RadzenTextBox Name="ReloadCmd" @bind-Value=installCert.reloadCmd class="w-100" style="display: block" />
+				</div>
+				<div class="rz-text-align-left rz-mt-3">
+					<RadzenCheckBox @bind-Value=installCert.reloadNginx Name="chkReloadNginx" />
+					<RadzenLabel Text="Reload Nginx (On Renewals)" Component="chkReloadNginx" Style="margin-left: 8px; vertical-align: middle;" />
+				</div>
+				<div class="rz-text-align-left rz-mb-5">
+					<RadzenCheckBox @bind-Value=installCert.exportToPFX Name="chkExportPFX" />
+					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
+					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
+					<RadzenTextBox @bind-Value=installCert.PFXpassword class="w-20" />
 				</div>
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
