@@ -19,19 +19,32 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
  This is currently in a very **beta** state!  Some things may not function at all yet!
 
 # Install
+1) Install .NET 8:
 ```
-1) Install .NET 8: sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-8.0
+sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-8.0
+```
 2) Download publish.tar.
-3) Extract to folder: tar -xvf publish.tar -C /opt/nginxpanel
-4) Give execute rights: chmod +x /opt/nginxpanel/NginxPanel
-5) Run binary: /opt/nginxpanel/NginxPanel
+3) Extract to folder:
+```
+tar -xvf publish.tar -C /opt/nginxpanel
+```
+4) Give execute rights:
+```
+chmod +x /opt/nginxpanel/NginxPanel
+```
+5) Run binary:
+```
+/opt/nginxpanel/NginxPanel
 ```
 
 # Running as a service
 Run the following command and paste the systemd content to create a service for this application (modify paths as needed):
+1) Command to create service:
 ```
-1) systemctl edit --full nginxpanel
-2) Content:
+systemctl edit --full nginxpanel
+```
+2) Service file content:
+```
 [Unit]
 Description=NginxPanel Service
 Wants=network-online.target
