@@ -39,6 +39,8 @@ chmod +x /opt/nginxpanel/NginxPanel
 ```
 /opt/nginxpanel/NginxPanel
 ```
+6) Nginx can be installed from the application itself, it will give you the option of using the package manager, stable, or mainline versions.
+7) ACME.sh can (and should) be installed from the application itself.
 
 # Running as a service
 Run the following command and paste the systemd content to create a service for this application (modify paths as needed):

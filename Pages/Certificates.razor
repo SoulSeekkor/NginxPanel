@@ -257,32 +257,6 @@ else
 		}
 	}
 
-	void InstallCertSubmit(InstallCertificateModel cert)
-	{
-		try
-		{
-			// Validate PFX password if export PFX was checked
-			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
-			{
-				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
-				return;
-			}
-
-			// First, attempt to install the certificate
-			if (acme.InstallCertificate(new List<string>(), cert.keyPath, cert.fullChainPath))
-			{
-				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
-				RefreshCertificates(false);
-			}
-			else
-				layout?.DisplayToast(MainLayout.toastType.error, "Failed to install certificate!");
-		}
-		catch
-		{
-			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate!");
-		}
-	}
-
 	void OnInvalidCertSubmit(FormInvalidSubmitEventArgs args)
 	{
 		layout?.DisplayToast(MainLayout.toastType.error, "Invalid add certificate submission!");
@@ -384,6 +358,32 @@ else
 		catch
 		{
 			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while displaying install certificate screen!");
+		}
+	}
+
+	void InstallCertSubmit(InstallCertificateModel cert)
+	{
+		try
+		{
+			// Validate PFX password if export PFX was checked
+			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
+				return;
+			}
+
+			// First, attempt to install the certificate
+			if (acme.InstallCertificate(new List<string>(), cert.keyPath, cert.fullChainPath))
+			{
+				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
+				RefreshCertificates(false);
+			}
+			else
+				layout?.DisplayToast(MainLayout.toastType.error, "Failed to install certificate!");
+		}
+		catch
+		{
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate!");
 		}
 	}
 }
