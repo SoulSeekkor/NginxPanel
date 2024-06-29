@@ -230,6 +230,11 @@ else
 			// 	return;
 			// }
 
+			// Clear CA if it was the default
+			AddCertificateModel temp = new AddCertificateModel();
+			if (cert.CA == temp.CA)
+				cert.CA = string.Empty;
+
 			// Validate PFX password if export PFX was checked
 			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
 			{
@@ -242,7 +247,7 @@ else
 			domains.Insert(0, cert.primaryDomain);
 
 			// First, attempt to issue the certificate
-			if (acme.IssueCertificate(domains))
+			if (acme.IssueCertificate(domains, cert.CA))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
 				RefreshCertificates(false);

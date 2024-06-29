@@ -288,7 +288,7 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool IssueCertificate(List<string> domains)
+		public bool IssueCertificate(List<string> domains, string CA)
 		{
 			bool result = false;
 
@@ -308,6 +308,11 @@ namespace NginxPanel.Services
 				foreach (string domain in domains)
 				{
 					cmd += $" -d {domain}";
+				}
+
+				if (!String.IsNullOrWhiteSpace(CA))
+				{
+					cmd += $" --server {CA}";
 				}
 
 				// Execute command to issue certificate
