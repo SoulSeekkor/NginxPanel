@@ -41,12 +41,18 @@
 				</RadzenStack>
 				<RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-5" style="margin: 0.25rem calc(.75 * var(--rz-card-padding));">
 					<RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>More Details</strong></RadzenText>
-					<RadzenRow RowGap="0">
-						<RadzenColumn SizeSM="8">
+					<RadzenRow>
+						<RadzenColumn>
 							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
 							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.API</b></RadzenText>
+						</RadzenColumn>
+					</RadzenRow>
+					<RadzenRow RowGap="0">
+						<RadzenColumn SizeSM="8">
 							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
 							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Webroot</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Webroot</b></RadzenText>
 						</RadzenColumn>
 						@if (cert.Created.HasValue)
 						{
