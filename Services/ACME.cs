@@ -96,7 +96,6 @@ namespace NginxPanel.Services
 
 		private List<CertAuthority> _certAuthorities = new List<CertAuthority>();
 
-		private string _accountConfPath = string.Empty;
 		private string _accountConf = string.Empty;
 		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
 
@@ -109,7 +108,7 @@ namespace NginxPanel.Services
 
 		public bool Installed
 		{
-			get { return !(String.IsNullOrWhiteSpace(_version) && File.Exists($"{ACMEScriptPath}/acme.sh")); }
+			get { return !(String.IsNullOrWhiteSpace(_version) && File.Exists($"{ACMEPath}/acme.sh")); }
 		}
 
 		public string Version
@@ -127,9 +126,14 @@ namespace NginxPanel.Services
 			get { return _certAuthorities; }
 		}
 
-		public string ACMEScriptPath
+		public string ACMEPath
 		{
 			get { return $"{_CLI.HomePath}/.acme.sh"; }
+		}
+
+		public string AccountConfPath
+		{
+			get { return $"{ACMEPath}/account.conf"; }
 		}
 
 		public string AccountConf
@@ -145,9 +149,7 @@ namespace NginxPanel.Services
 		{
 			_CLI = CLI;
 			BuildAvailableCAs();
-
 			Refresh();
-			ParseAccountConf();
 		}
 
 		#endregion
@@ -168,18 +170,24 @@ namespace NginxPanel.Services
 		public void Refresh()
 		{
 			GetVersion();
+			RefreshAccountConf();
 			RefreshCertificates();
+		}
+
+		public void RefreshAccountConf()
+		{
+			ParseConfig(AccountConfPath, ref _accountConf, ref _accountConfDic);
 		}
 
 		public void GetVersion()
 		{
 			_version = "";
 			
-			if (File.Exists($"{ACMEScriptPath}/acme.sh"))
+			if (File.Exists($"{ACMEPath}/acme.sh"))
 			{
 				try
 				{
-					_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --version", sudo: false);
+					_CLI.RunCommand($"{ACMEPath}/acme.sh --version", sudo: false);
 					_version = _CLI.StandardOut.Split(Environment.NewLine)[1];
 				}
 				catch
@@ -189,41 +197,37 @@ namespace NginxPanel.Services
 			}
 		}
 
-		public void ParseAccountConf()
+		private void ParseConfig(string pathToConf, ref string config, ref Dictionary<string, string> dicValues)
 		{
-			_accountConfDic.Clear();
+			dicValues.Clear();
 
-			if (Installed)
+			// Check if file exists first
+			if (File.Exists(pathToConf))
 			{
-				_accountConfPath = $"{ACMEScriptPath}/account.conf";
+				// Read in entire file
+				config = File.ReadAllText(pathToConf);
 
-				// Attempt to parse config files
-				if (File.Exists(_accountConfPath))
+				// Cleanup file a bit first
+				while (config.Contains(Environment.NewLine + Environment.NewLine))
 				{
-					_accountConf = File.ReadAllText(_accountConfPath);
+					config = config.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+				}
+				config = config.Trim();
 
-					// Cleanup file a bit first
-					while (_accountConf.Contains(Environment.NewLine + Environment.NewLine))
+				// Attempt to parse config file, split into lines and parse key/value pairs
+				string[] lines = config.Split(Environment.NewLine);
+				string[] split;
+				string key;
+
+				foreach (string line in lines)
+				{
+					if (!String.IsNullOrWhiteSpace(line))
 					{
-						_accountConf = _accountConf.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-					}
-					_accountConf = _accountConf.Trim();
+						split = line.Split("=", 2);
+						key = split[0].Trim();
 
-					// Split into lines and parse key/value pairs
-					string[] lines = _accountConf.Split(Environment.NewLine);
-					string[] split;
-					string key;
-
-					foreach (string line in lines)
-					{
-						if (!String.IsNullOrWhiteSpace(line))
-						{
-							split = line.Split("=", 2);
-							key = split[0].Trim();
-
-							if (!_accountConfDic.ContainsKey(key))
-								_accountConfDic.Add(key, split[1].Trim().Trim('\''));
-						}
+						if (!dicValues.ContainsKey(key))
+							dicValues.Add(key, split[1].Trim().Trim('\''));
 					}
 				}
 			}
@@ -285,7 +289,7 @@ namespace NginxPanel.Services
 				}
 
 				// Output new config to file
-				File.WriteAllText(_accountConfPath, _accountConf);
+				File.WriteAllText(AccountConfPath, _accountConf);
 
 				return true;
 			}
@@ -303,11 +307,11 @@ namespace NginxPanel.Services
 			{
 				try
 				{
-					_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --set-default-ca --server {CA}", sudo: false);
+					_CLI.RunCommand($"{ACMEPath}/acme.sh --set-default-ca --server {CA}", sudo: false);
 
 					if (_CLI.StandardOut.Contains("Changed default CA"))
 					{
-						ParseAccountConf();
+						RefreshAccountConf();
 						return true;
 					}
 				}
@@ -325,7 +329,7 @@ namespace NginxPanel.Services
 			try
 			{
 				// Build issue certificate command
-				string cmd = $"{ACMEScriptPath}/acme.sh";
+				string cmd = $"{ACMEPath}/acme.sh";
 
 				// Check if we are using a Cloudflare API token
 				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
@@ -390,7 +394,7 @@ namespace NginxPanel.Services
 				command += "\"";
 
 				// Execute command to install certificate
-				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh {command}", sudo: false);
+				_CLI.RunCommand($"{ACMEPath}/acme.sh {command}", sudo: false);
 
 				return true;
 			}
@@ -407,7 +411,7 @@ namespace NginxPanel.Services
 			try
 			{
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand($"{ACMEPath}/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
 
 				if (_CLI.StandardOut.Contains($"{cert.MainDomain} is removed"))
 					return true;
@@ -425,7 +429,7 @@ namespace NginxPanel.Services
 			try
 			{
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --renew --force --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand($"{ACMEPath}/acme.sh --renew --force --domain {cert.MainDomain}", sudo: false);
 
 				// Check if the renewal was successful
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
@@ -453,7 +457,7 @@ namespace NginxPanel.Services
 			if (Installed)
 			{
 				// Refresh list of certificates
-				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --list", sudo: false);
+				_CLI.RunCommand($"{ACMEPath}/acme.sh --list", sudo: false);
 
 				string listing = _CLI.StandardOut;
 
