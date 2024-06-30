@@ -14,6 +14,8 @@ namespace NginxPanel.Services
 			public string KeyLength { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Keylength); } }
 			public string API { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API); } }
 			public string Webroot { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Webroot); } }
+			public string RealKeyPath { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealKeyPath); } }
+			public string RealFullChainPath { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealFullChainPath); } }
 
 			public bool Installed
 			{

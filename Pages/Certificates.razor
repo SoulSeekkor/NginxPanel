@@ -195,6 +195,21 @@ else
 			</RadzenColumn>
 		}
 		</RadzenRow>
+		@if (cert.Installed)
+		{
+			<RadzenRow>
+				<RadzenColumn>
+					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Key Path</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealKeyPath</b></RadzenText>
+				</RadzenColumn>
+			</RadzenRow>
+			<RadzenRow>
+				<RadzenColumn>
+					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Full Chain Path</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealFullChainPath</b></RadzenText>
+				</RadzenColumn>
+			</RadzenRow>
+		}
 		<RadzenRow>
 			<RadzenColumn>
 				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
