@@ -19,7 +19,14 @@ namespace NginxPanel.Services
 
 			public bool Installed
 			{
-				get { return ConfigFile.HasConfValue(ConfigFile.enuConfKey.Le_RealKeyPath); }
+				get {
+					if (ConfigFile.HasConfValue(ConfigFile.enuConfKey.Le_RealKeyPath))
+					{
+						if (File.Exists(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealKeyPath)))
+							return true;
+					}
+					return false;
+				}
 			}
 
 			public DateTime? Created;
@@ -422,33 +429,20 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool InstallCertificate(List<string> domains, string KeyPath, string FullChainPath)
+		public bool InstallCertificate(string domainsCmd, string keyPath, string fullChainPath, string reloadCmd)
 		{
-			return false;
-
 			try
 			{
-				// Build list of domains portion of the command
-				string domainsCmd = "";
-				foreach (string domain in domains)
-				{
-					domainsCmd += $" -d {domain}";
-				}
-				domainsCmd = domainsCmd.Trim();
-
 				// Build location to save certificate files to (private/public keys)
 				string command = $"--installcert {domainsCmd}";
 
-				command += $" --key-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.key";
-				command += $" --fullchain-file /etc/acme.sh/{domains.First().ToLower()}/{domains.First().ToLower()}.cert";
+				command += $" --key-file {keyPath}";
+				command += $" --fullchain-file {fullChainPath}";
 
-				// Build reload command, include PFX export if included
-				command += " --reloadcmd \"service nginx force-reload";
-				//if (!String.IsNullOrWhiteSpace(PFXpassword))
-				//	command += $" && /root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {PFXpassword}";
+				// Build reload command
+				if (!String.IsNullOrWhiteSpace(reloadCmd))
+					command += $" --reloadcmd \"{reloadCmd}\"";
 				
-				command += "\"";
-
 				// Execute command to install certificate
 				_CLI.RunCommand($"{ACMEPath}/acme.sh {command}", sudo: false);
 

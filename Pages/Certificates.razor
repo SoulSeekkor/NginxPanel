@@ -68,7 +68,7 @@
 				<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 					<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
 					<RadzenStack Orientation="Orientation.Horizontal">
-						<RadzenButton Variant="Variant.Text" Text="Install" Click="() => InstallCertificate(cert)" Disabled="cert.Installed" class="rz-text-secondary-color" />
+						<RadzenButton Variant="Variant.Text" Text="Install" Click="() => InstallCertificate(cert)" class="rz-text-secondary-color" />
 						<RadzenButton Variant="Variant.Text" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" class="rz-text-secondary-color" />
 						<RadzenButton Variant="Variant.Text" Text="Details" Click="() => ViewCertificateDetails(cert)" ButtonStyle="ButtonStyle.Secondary" />
 					</RadzenStack>
@@ -124,6 +124,9 @@ else
 
 	private class InstallCertificateModel
 	{
+		public Services.ACME.Certificate? cert = null;
+
+		public string rootFolder = string.Empty;
 		public string keyPath = string.Empty;
 		public string fullChainPath = string.Empty;
 		public bool reloadNginx = true;
@@ -375,6 +378,27 @@ else
 		try
 		{
 			InstallCertificateModel installCert = new InstallCertificateModel();
+			installCert.cert = cert;
+
+			// Clean up domain name
+			string domain = cert.MainDomain.ToLower();
+
+			// Trim wildcard from start
+			if (domain.StartsWith("*."))
+				domain = domain.ReplaceFirst("*.", "");
+
+			string folderPath = $"/etc/acme.sh/{domain}";
+
+			// Append suffix if this is an ECC certificate
+			if (cert.KeyLength.Contains("ec"))
+				folderPath += "_ecc";
+
+			installCert.rootFolder = folderPath;
+
+			// Generate default values for paths
+			installCert.keyPath = $"{folderPath}/{domain}.key";
+			installCert.fullChainPath = $"{folderPath}/{domain}.fullchain.cert";
+
 			var result = await DialogService.OpenAsync("Install Certificate", ds =>
 	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@InstallCertSubmit>
 		<RadzenFieldset Text="Install Information">
@@ -418,19 +442,61 @@ else
 		}
 	}
 
-	void InstallCertSubmit(InstallCertificateModel cert)
+	void InstallCertSubmit(InstallCertificateModel installCert)
 	{
 		try
 		{
 			// Validate PFX password if export PFX was checked
-			if (cert.exportToPFX && String.IsNullOrWhiteSpace(cert.PFXpassword))
+			if (installCert.exportToPFX && String.IsNullOrWhiteSpace(installCert.PFXpassword))
 			{
 				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
 				return;
 			}
 
+			// Build list of domains portion of the command
+			string domainsCmd = $"-d {installCert.cert!.MainDomain}";
+			if (!(installCert.cert.SANDomains == "no"))
+			{
+				foreach (string domain in installCert.cert.SANDomains.Split(","))
+				{
+					domainsCmd += $" -d {domain}";
+				}
+			}
+			domainsCmd = domainsCmd.Trim();
+
+			// Generate reload command
+			string reloadCmd = string.Empty;
+
+			// PFX export first to make sure it succeeds
+			if (installCert.exportToPFX)
+				reloadCmd = $"/root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {installCert.PFXpassword}";
+
+			// Include user specified commands next
+			if (!String.IsNullOrWhiteSpace(installCert.reloadCmd))
+			{
+				if (!String.IsNullOrWhiteSpace(reloadCmd))
+					reloadCmd += " && ";
+
+				reloadCmd += installCert.reloadCmd;
+			}
+
+			// Include reload last in case it fails
+			if (installCert.reloadNginx)
+			{
+				if (!String.IsNullOrWhiteSpace(reloadCmd))
+					reloadCmd += " && ";
+
+				reloadCmd += "service nginx force-reload";
+			}
+
+			installCert.reloadCmd = reloadCmd;
+
+			// Make sure destination folder exists first before continuing
+			if (!Directory.Exists(installCert.rootFolder))
+				Directory.CreateDirectory(installCert.rootFolder);
+
 			// First, attempt to install the certificate
-			if (acme.InstallCertificate(new List<string>(), cert.keyPath, cert.fullChainPath))
+			if (acme.InstallCertificate(domainsCmd, installCert.keyPath, installCert.fullChainPath, installCert.reloadCmd))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);
