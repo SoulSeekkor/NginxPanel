@@ -46,6 +46,51 @@ namespace NginxPanel.Services
 			private string _config = string.Empty;
 			private Dictionary<string, string> _dicValues = new Dictionary<string, string>();
 
+			private const string _certBase64Prefix = "__ACME_BASE64__START_";
+			private const string _certBase64Suffix = "__ACME_BASE64__END_";
+
+			#region ConfKeyEnum
+
+			public enum enuConfKey
+			{
+				// Account conf
+				LOG_FILE,
+				AUTO_UPGRADE,
+				SAVED_CF_Token,
+				SAVED_CF_Account_ID,
+				SAVED_SMTP_BIN,
+				SAVED_SMTP_FROM,
+				SAVED_SMTP_TO,
+				SAVED_SMTP_HOST,
+				SAVED_SMTP_SECURE,
+				NOTIFY_HOOK,
+				DEFAULT_ACME_SERVER,
+				// Certificate conf
+				Le_Domain,
+				Le_Alt,
+				Le_Webroot,
+				Le_PreHook,
+				Le_PostHook,
+				Le_RenewHook,
+				Le_API,
+				Le_Keylength,
+				Le_OrderFinalize,
+				Le_LinkOrder,
+				Le_LinkCert,
+				Le_CertCreateTime,
+				Le_CertCreateTimeStr,
+				Le_NextRenewTimeStr,
+				Le_NextRenewTime,
+				Le_RealCertPath,
+				Le_RealCACertPath,
+				Le_RealKeyPath,
+				Le_ReloadCmd,
+				Le_RealFullChainPath,
+				Le_PFXPassword
+			}
+
+			#endregion
+
 			public string Config
 			{
 				get { return _config; }
@@ -165,48 +210,6 @@ namespace NginxPanel.Services
 
 		#endregion
 
-		#region Enums
-
-		public enum enuConfKey
-		{
-			// Account conf
-			LOG_FILE,
-			AUTO_UPGRADE,
-			SAVED_CF_Token,
-			SAVED_CF_Account_ID,
-			SAVED_SMTP_BIN,
-			SAVED_SMTP_FROM,
-			SAVED_SMTP_TO,
-			SAVED_SMTP_HOST,
-			SAVED_SMTP_SECURE,
-			NOTIFY_HOOK,
-			DEFAULT_ACME_SERVER,
-			// Certificate conf
-			Le_Domain,
-			Le_Alt,
-			Le_Webroot,
-			Le_PreHook,
-			Le_PostHook,
-			Le_RenewHook,
-			Le_API,
-			Le_Keylength,
-			Le_OrderFinalize,
-			Le_LinkOrder,
-			Le_LinkCert,
-			Le_CertCreateTime,
-			Le_CertCreateTimeStr,
-			Le_NextRenewTimeStr,
-			Le_NextRenewTime,
-			Le_RealCertPath,
-			Le_RealCACertPath,
-			Le_RealKeyPath,
-			Le_ReloadCmd,
-			Le_RealFullChainPath,
-			Le_PFXPassword
-		}
-
-		#endregion
-
 		#region Variables
 
 		private CLI _CLI;
@@ -216,9 +219,6 @@ namespace NginxPanel.Services
 		private ConfigFile _accountConf;
 		private List<Certificate> _certificates = new List<Certificate>();
 		private List<CertAuthority> _certAuthorities = new List<CertAuthority>();
-
-		private string _certBase64Prefix = "__ACME_BASE64__START_";
-		private string _certBase64Suffix = "__ACME_BASE64__END_";
 
 		#endregion
 
@@ -343,7 +343,7 @@ namespace NginxPanel.Services
 				string cmd = $"{ACMEPath}/acme.sh";
 
 				// Check if we are using a Cloudflare API token
-				if (_accountConf.GetConfValue(enuConfKey.SAVED_CF_Token) != string.Empty)
+				if (_accountConf.GetConfValue(ConfigFile.enuConfKey.SAVED_CF_Token) != string.Empty)
 				{
 					cmd += " --dns dns_cf";
 				}
