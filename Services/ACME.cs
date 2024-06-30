@@ -9,21 +9,19 @@ namespace NginxPanel.Services
 
 		public class Certificate
 		{
-			public string MainDomain = string.Empty;
-			public string SANDomains = string.Empty;
-			public string KeyLength = string.Empty;
-			public string CA = string.Empty;
-			public DateTime? Created;
-			public DateTime? Renew;
+			public string MainDomain { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Domain); } }
+			public string SANDomains { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Alt); } }
+			public string KeyLength { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Keylength); } }
+			public string CA { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API); } }
 
-			public Certificate(string mainDomain, string sanDomains, string keyLength, string ca, DateTime? created, DateTime? renew)
+			public DateTime? Created { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr)); } }
+			public DateTime? Renew { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_NextRenewTimeStr)); } }
+
+			public ConfigFile ConfigFile;
+
+			public Certificate(string configPath)
 			{
-				MainDomain = mainDomain;
-				SANDomains = (sanDomains == "no" ? "" : sanDomains.Replace(",", ", "));
-				KeyLength = keyLength.Trim('\"');
-				CA = ca;
-				Created = created;
-				Renew = renew;
+				ConfigFile= new ConfigFile(configPath);
 			}
 		}
 
@@ -95,6 +93,11 @@ namespace NginxPanel.Services
 			public string Config
 			{
 				get { return _config; }
+			}
+
+			public ConfigFile()
+			{
+				// Placeholder for deleted certificates that have no config file
 			}
 
 			public ConfigFile(string path)
@@ -487,55 +490,20 @@ namespace NginxPanel.Services
 		{
 			_certificates.Clear();
 
-			if (Installed)
+			if (Directory.Exists(ACMEPath))
 			{
-				// Refresh list of certificates
-				_CLI.RunCommand($"{ACMEPath}/acme.sh --list", sudo: false);
+				// Iterate through all ACME subdirectories looking for certificates
+				FileInfo[] confs;
+				FileInfo? conf;
+				foreach (string dir in Directory.GetDirectories(ACMEPath)){
+					// Retrieve config files and filter out the CSR conf
+					confs = new DirectoryInfo(dir).GetFiles("*.conf");
+					conf = confs.Where((x) => !x.Name.EndsWith("csr.conf")).FirstOrDefault();
 
-				string listing = _CLI.StandardOut;
-
-				if (listing.IndexOf(Environment.NewLine) == -1)
-				{
-					// No certificates currently
-					return;
-				}
-
-				string header = listing.Substring(0, listing.IndexOf(Environment.NewLine));
-
-				// Cleanup the header
-				while (header.Contains("  "))
-					header = header.Replace("  ", " ");
-
-				if (header != "Main_Domain KeyLength SAN_Domains CA Created Renew")
-				{
-					// Unable to parse, headers are not as expected!
-					return;
-				}
-
-				if (listing.Contains(Environment.NewLine))
-				{
-					// First line are headers, remove it
-					listing = listing.Substring(listing.IndexOf(Environment.NewLine)).Trim();
-
-					List<string> split;
-					DateTime? created = null;
-					DateTime? renew = null;
-					foreach (string line in listing.Split(Environment.NewLine))
+					if (!(conf is null))
 					{
-						split = line.Split(" ").ToList();
-						split.RemoveAll((x) => String.IsNullOrWhiteSpace(x));
-
-						if (split.Count == 4 || String.IsNullOrWhiteSpace(split[4]))
-							created = null;
-						else
-							created = DateTime.Parse(split[4]);
-
-						if (split.Count == 4 || String.IsNullOrWhiteSpace(split[5]))
-							renew = null;
-						else
-							renew = DateTime.Parse(split[5]);
-
-						_certificates.Add(new Certificate(split[0], split[2], split[1], split[3], created, renew));
+						// Certificate config found
+						_certificates.Add(new Certificate(conf.FullName));
 					}
 				}
 			}
