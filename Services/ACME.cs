@@ -12,7 +12,12 @@ namespace NginxPanel.Services
 			public string MainDomain { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Domain); } }
 			public string SANDomains { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Alt); } }
 			public string KeyLength { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Keylength); } }
-			public string CA { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API); } }
+			public string API { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API); } }
+
+			public bool Installed
+			{
+				get { return ConfigFile.HasConfValue(ConfigFile.enuConfKey.Le_RealKeyPath); }
+			}
 
 			public DateTime? Created { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr)); } }
 			public DateTime? Renew { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_NextRenewTimeStr)); } }

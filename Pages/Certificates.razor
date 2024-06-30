@@ -43,14 +43,14 @@
 					<RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>More Details</strong></RadzenText>
 					<RadzenRow RowGap="0">
 						<RadzenColumn SizeSM="8">
-							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">CA</RadzenText>
-							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.CA</b></RadzenText>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.API</b></RadzenText>
 							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
 							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
 						</RadzenColumn>
 						@if (cert.Created.HasValue)
 						{
-							<RadzenColumn SizeSM="8">
+							<RadzenColumn SizeSM="4">
 								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
 								<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
 								<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
@@ -60,8 +60,8 @@
 					</RadzenRow>
 				</RadzenCard>
 					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
-						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Install" Click="() => InstallCertificate(cert)" />
-						<RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" />
+						<RadzenButton Variant="Variant.Text" Text="Install" Click="() => InstallCertificate(cert)" Disabled="cert.Installed" class="rz-text-secondary-color" />
+						<RadzenButton Variant="Variant.Text" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" class="rz-text-secondary-color" />
 						<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
 					</RadzenStack>
 			</RadzenCard>
