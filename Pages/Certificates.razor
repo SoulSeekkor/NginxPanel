@@ -65,11 +65,14 @@
 						}
 					</RadzenRow>
 				</RadzenCard>
-					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+				<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+					<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
+					<RadzenStack Orientation="Orientation.Horizontal">
 						<RadzenButton Variant="Variant.Text" Text="Install" Click="() => InstallCertificate(cert)" Disabled="cert.Installed" class="rz-text-secondary-color" />
 						<RadzenButton Variant="Variant.Text" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" class="rz-text-secondary-color" />
-						<RadzenButton Variant="Variant.Text" Text="Delete" Click="() => DeleteCertificate(cert)" />
+						<RadzenButton Variant="Variant.Text" Text="Details" Click="() => ViewCertificateDetails(cert)" ButtonStyle="ButtonStyle.Secondary" />
 					</RadzenStack>
+				</RadzenStack>
 			</RadzenCard>
 		}
 	}
@@ -172,6 +175,56 @@ else
 		}
 	}
 
+
+	private async void ViewCertificateDetails(Services.ACME.Certificate cert)
+	{
+		await DialogService.OpenAsync("Certificate Details", ds =>
+	@<RadzenCard Class="rz-my-8" Style="max-width: 550px">
+		<RadzenRow>
+			<RadzenColumn>
+				<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Main Domain</RadzenText>
+				<RadzenText TextStyle="TextStyle.Body1"><b>@cert.MainDomain</b></RadzenText>
+			</RadzenColumn>
+		</RadzenRow>
+		<RadzenRow>
+		@if (!String.IsNullOrWhiteSpace(cert.SANDomains))
+		{
+			<RadzenColumn>
+				<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">SAN Domains</RadzenText>
+				<RadzenText TextStyle="TextStyle.Body1"><b>@cert.SANDomains</b></RadzenText>
+			</RadzenColumn>
+		}
+		</RadzenRow>
+		<RadzenRow>
+			<RadzenColumn>
+				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
+				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.API</b></RadzenText>
+			</RadzenColumn>
+		</RadzenRow>
+		<RadzenRow RowGap="0">
+			<RadzenColumn SizeSM="8">
+				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
+				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
+				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Webroot</RadzenText>
+				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Webroot</b></RadzenText>
+			</RadzenColumn>
+			@if (cert.Created.HasValue)
+			{
+				<RadzenColumn SizeSM="4">
+					<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
+					<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
+				</RadzenColumn>
+			}
+		</RadzenRow>
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
+			<RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+		</RadzenStack>
+	</RadzenCard>
+	);
+	}
+
 	private async void AddCertificate()
 	{
 		try
@@ -183,7 +236,7 @@ else
 			CAs.Insert(0, new Services.ACME.CertAuthority(cert.CA, cert.CA, false));
 
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit InvalidSubmit=@OnInvalidCertSubmit>
+	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
@@ -228,17 +281,6 @@ else
 	{
 		try
 		{
-			//console.Log($"Submit: {JsonSerializer.Serialize(model, new JsonSerializerOptions() { WriteIndented = true })}");
-
-			// Create new certificate
-
-			// Validate domain names
-			// if (System.Uri.CheckHostName(cert.primaryDomain) == UriHostNameType.Unknown)
-			// {
-			// 	layout?.DisplayToast(MainLayout.toastType.error, "Invalid primary domain was specified!");
-			// 	return;
-			// }
-
 			// Clear CA if it was the default
 			AddCertificateModel temp = new AddCertificateModel();
 			if (cert.CA == temp.CA)
@@ -261,12 +303,6 @@ else
 		{
 			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while adding certificate!");
 		}
-	}
-
-	void OnInvalidCertSubmit(FormInvalidSubmitEventArgs args)
-	{
-		layout?.DisplayToast(MainLayout.toastType.error, "Invalid add certificate submission!");
-		//console.Log($"InvalidSubmit: {JsonSerializer.Serialize(args, new JsonSerializerOptions() { WriteIndented = true })}");
 	}
 
 	private void AddSANDomain(AddCertificateModel cert)
