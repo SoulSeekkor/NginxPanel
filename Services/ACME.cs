@@ -40,6 +40,129 @@ namespace NginxPanel.Services
 			}
 		}
 
+		public class ConfigFile
+		{
+			private string _path = string.Empty;
+			private string _config = string.Empty;
+			private Dictionary<string, string> _dicValues = new Dictionary<string, string>();
+
+			public string Config
+			{
+				get { return _config; }
+			}
+
+			public ConfigFile(string path)
+			{
+				_path = path;
+				Refresh();
+			}
+
+			public void Refresh()
+			{
+				_config = string.Empty;
+				_dicValues.Clear();
+
+				// Check if file exists first
+				if (File.Exists(_path))
+				{
+					// Read in entire file
+					_config = File.ReadAllText(_path);
+
+					// Cleanup file a bit first
+					while (_config.Contains(Environment.NewLine + Environment.NewLine))
+					{
+						_config = _config.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+					}
+					_config = _config.Trim();
+
+					// Attempt to parse config file, split into lines and parse key/value pairs
+					string[] lines = _config.Split(Environment.NewLine);
+					string[] split;
+					string key;
+
+					foreach (string line in lines)
+					{
+						if (!String.IsNullOrWhiteSpace(line))
+						{
+							split = line.Split("=", 2);
+							key = split[0].Trim();
+
+							if (!_dicValues.ContainsKey(key))
+								_dicValues.Add(key, split[1].Trim().Trim('\''));
+						}
+					}
+				}
+			}
+
+			public string GetConfValue(enuAccountConfKey key)
+			{
+				if (_dicValues.ContainsKey(key.ToString()))
+					return _dicValues[key.ToString()];
+
+				return string.Empty;
+			}
+
+			public bool HasConfValue(enuAccountConfKey key)
+			{
+				return _dicValues.ContainsKey(key.ToString());
+			}
+
+			public bool SetConfValue(enuAccountConfKey key, string value)
+			{
+				try
+				{
+					// Update local tracking
+					if (!String.IsNullOrWhiteSpace(value))
+					{
+						// Add/Update the value
+						if (_dicValues.ContainsKey(key.ToString()))
+							_dicValues[key.ToString()] = value;
+						else
+							_dicValues.Add(key.ToString(), value);
+					}
+					else
+					{
+						// Remove the value
+						_dicValues.Remove(key.ToString());
+					}
+
+					// Update config file
+					Regex configKey = new Regex($"({key.ToString()}='[^']*')");
+
+					if (!String.IsNullOrWhiteSpace(value))
+					{
+						// Update config file
+						if (configKey.Match(_config).Success)
+						{
+							// Key exists in config, update it
+							_config = configKey.Replace(_config, $"{key.ToString()}='{value}'");
+						}
+						else
+						{
+							// Add new key to the config
+							_config += Environment.NewLine + $"{key.ToString()}='{value}'";
+						}
+					}
+					else
+					{
+						// Remove value from config file entirely
+						_config = configKey.Replace(_config, string.Empty);
+					}
+
+					// Output new config to file
+					File.WriteAllText(_path, _config);
+
+					return true;
+				}
+				catch
+				{
+					// Placeholder
+				}
+
+				return false;
+			}
+		}
+
 		#endregion
 
 		#region Enums
@@ -92,12 +215,9 @@ namespace NginxPanel.Services
 
 		private string _version = "";
 
+		private ConfigFile _accountConf;
 		private List<Certificate> _certificates = new List<Certificate>();
-
 		private List<CertAuthority> _certAuthorities = new List<CertAuthority>();
-
-		private string _accountConf = string.Empty;
-		private Dictionary<string, string> _accountConfDic = new Dictionary<string, string>();
 
 		private string _certBase64Prefix = "__ACME_BASE64__START_";
 		private string _certBase64Suffix = "__ACME_BASE64__END_";
@@ -114,6 +234,11 @@ namespace NginxPanel.Services
 		public string Version
 		{
 			get { return _version; }
+		}
+
+		public ConfigFile AccountConf
+		{
+			get { return _accountConf; }
 		}
 
 		public List<Certificate> Certificates
@@ -136,11 +261,6 @@ namespace NginxPanel.Services
 			get { return $"{ACMEPath}/account.conf"; }
 		}
 
-		public string AccountConf
-		{
-			get { return _accountConf; }
-		}
-
 		#endregion
 
 		#region Constructors
@@ -148,6 +268,7 @@ namespace NginxPanel.Services
 		public ACME(CLI CLI)
 		{
 			_CLI = CLI;
+			_accountConf = new ConfigFile(AccountConfPath);
 			BuildAvailableCAs();
 			Refresh();
 		}
@@ -170,13 +291,8 @@ namespace NginxPanel.Services
 		public void Refresh()
 		{
 			GetVersion();
-			RefreshAccountConf();
+			_accountConf.Refresh();
 			RefreshCertificates();
-		}
-
-		public void RefreshAccountConf()
-		{
-			ParseConfig(AccountConfPath, ref _accountConf, ref _accountConfDic);
 		}
 
 		public void GetVersion()
@@ -197,110 +313,7 @@ namespace NginxPanel.Services
 			}
 		}
 
-		private void ParseConfig(string pathToConf, ref string config, ref Dictionary<string, string> dicValues)
-		{
-			dicValues.Clear();
-
-			// Check if file exists first
-			if (File.Exists(pathToConf))
-			{
-				// Read in entire file
-				config = File.ReadAllText(pathToConf);
-
-				// Cleanup file a bit first
-				while (config.Contains(Environment.NewLine + Environment.NewLine))
-				{
-					config = config.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-				}
-				config = config.Trim();
-
-				// Attempt to parse config file, split into lines and parse key/value pairs
-				string[] lines = config.Split(Environment.NewLine);
-				string[] split;
-				string key;
-
-				foreach (string line in lines)
-				{
-					if (!String.IsNullOrWhiteSpace(line))
-					{
-						split = line.Split("=", 2);
-						key = split[0].Trim();
-
-						if (!dicValues.ContainsKey(key))
-							dicValues.Add(key, split[1].Trim().Trim('\''));
-					}
-				}
-			}
-		}
-
-		public string GetAccountConfValue(enuAccountConfKey key)
-		{
-			if (_accountConfDic.ContainsKey(key.ToString()))
-				return _accountConfDic[key.ToString()];
-
-			return string.Empty;
-		}
-
-		public bool HasAccountConfValue(enuAccountConfKey key)
-		{
-			return _accountConfDic.ContainsKey(key.ToString());
-		}
-
-		public bool SetAccountConfValue(enuAccountConfKey key, string value)
-		{
-			try
-			{
-				// Update local tracking
-				if (!String.IsNullOrWhiteSpace(value))
-				{
-					// Add/Update the value
-					if (_accountConfDic.ContainsKey(key.ToString()))
-						_accountConfDic[key.ToString()] = value;
-					else
-						_accountConfDic.Add(key.ToString(), value);
-				}
-				else
-				{
-					// Remove the value
-					_accountConfDic.Remove(key.ToString());
-				}
-
-				// Update config file
-				Regex configKey = new Regex($"({key.ToString()}='[^']*')");
-
-				if (!String.IsNullOrWhiteSpace(value))
-				{
-					// Update config file
-					if (configKey.Match(_accountConf).Success)
-					{
-						// Key exists in config, update it
-						_accountConf = configKey.Replace(_accountConf, $"{key.ToString()}='{value}'");
-					}
-					else
-					{
-						// Add new key to the config
-						_accountConf += Environment.NewLine + $"{key.ToString()}='{value}'";
-					}
-				}
-				else
-				{
-					// Remove value from config file entirely
-					_accountConf = configKey.Replace(_accountConf, string.Empty);
-				}
-
-				// Output new config to file
-				File.WriteAllText(AccountConfPath, _accountConf);
-
-				return true;
-			}
-			catch
-			{
-				// Placeholder
-			}
-
-			return false;
-		}
-
+		
 		public bool SetDefaultCA(string CA)
 		{
 			if (Installed)
@@ -311,7 +324,7 @@ namespace NginxPanel.Services
 
 					if (_CLI.StandardOut.Contains("Changed default CA"))
 					{
-						RefreshAccountConf();
+						_accountConf.Refresh();
 						return true;
 					}
 				}
@@ -332,7 +345,7 @@ namespace NginxPanel.Services
 				string cmd = $"{ACMEPath}/acme.sh";
 
 				// Check if we are using a Cloudflare API token
-				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
+				if (_accountConf.GetConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
 				{
 					cmd += " --dns dns_cf";
 				}

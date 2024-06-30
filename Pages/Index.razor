@@ -29,7 +29,7 @@ else
 	<h5>
 		Log File:&nbsp;
 		@{
-			string logFile = acme.GetAccountConfValue(enuAccountConfKey.LOG_FILE);
+			string logFile = acme.AccountConf.GetConfValue(enuAccountConfKey.LOG_FILE);
 
 			if (String.IsNullOrWhiteSpace(logFile))
 			{
@@ -44,7 +44,7 @@ else
 	<h5>
 		Auto-upgrade:&nbsp;
 		@{
-			string upgrade = acme.GetAccountConfValue(enuAccountConfKey.AUTO_UPGRADE);
+			string upgrade = acme.AccountConf.GetConfValue(enuAccountConfKey.AUTO_UPGRADE);
 
 			if (upgrade == "1")
 			{
@@ -57,7 +57,7 @@ else
 		}
 		<br />
 		<br />
-		<RadzenTextArea Value="@acme.AccountConf" Cols="85" Rows="15" />
+		<RadzenTextArea Value="@acme.AccountConf.Config" Cols="85" Rows="15" />
 	</h5>
 }
 else

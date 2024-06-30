@@ -47,7 +47,7 @@ else
 	<br />
 	<span>Set ACME Email Notifications:</span>
 	<br />
-	<RadzenCheckBox TValue="bool" Value="!(acme.GetAccountConfValue(enuAccountConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST) == string.Empty" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+	<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuAccountConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_HOST) == string.Empty" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 	<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
 	<br />
 	<br />
@@ -275,7 +275,7 @@ else
 	{
 		try
 		{
-			string token = acme.GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token);
+			string token = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_CF_Token);
 
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
 	@<RadzenStack>
@@ -308,7 +308,7 @@ else
 
 				await Task.Run(() =>
 				{
-					result = acme.SetAccountConfValue(enuAccountConfKey.SAVED_CF_Token, token);
+				result = acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_CF_Token, token);
 				});
 
 				if (result)
@@ -332,11 +332,11 @@ else
 	{
 		try
 		{
-			string bin = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_BIN);
-			string host = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST);
-			string secure = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_SECURE);
-			string from = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_FROM);
-			string to = acme.GetAccountConfValue(enuAccountConfKey.SAVED_SMTP_TO);
+			string bin = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_BIN);
+			string host = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_HOST);
+			string secure = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_SECURE);
+			string from = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_FROM);
+			string to = acme.AccountConf.GetConfValue(enuAccountConfKey.SAVED_SMTP_TO);
 
 			#if DEBUG
 			host = "10.12.1.16";
@@ -383,11 +383,11 @@ else
 
 				await Task.Run(() =>
 				{
-					result = acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_BIN, (String.IsNullOrWhiteSpace(bin) ? "python3" : bin)) &&
-						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_HOST, host) &&
-						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_SECURE, (String.IsNullOrWhiteSpace(secure) ? "none" : secure)) &&
-						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_FROM, from) &&
-						acme.SetAccountConfValue(enuAccountConfKey.SAVED_SMTP_TO, to);
+					result = acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_SMTP_BIN, (String.IsNullOrWhiteSpace(bin) ? "python3" : bin)) &&
+						acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_SMTP_HOST, host) &&
+						acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_SMTP_SECURE, (String.IsNullOrWhiteSpace(secure) ? "none" : secure)) &&
+						acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_SMTP_FROM, from) &&
+						acme.AccountConf.SetConfValue(enuAccountConfKey.SAVED_SMTP_TO, to);
 				});
 
 				if (result)
@@ -412,7 +412,7 @@ else
 		try
 		{
 			string CA = string.Empty;
-			string confVal = acme.GetAccountConfValue(enuAccountConfKey.DEFAULT_ACME_SERVER);
+			string confVal = acme.AccountConf.GetConfValue(enuAccountConfKey.DEFAULT_ACME_SERVER);
 
 			// Check current value
 			if (String.IsNullOrWhiteSpace(confVal) || confVal.Contains("zerossl"))
@@ -474,11 +474,11 @@ else
 			busyInstallReset = true;
 			StateHasChanged();
 
-			bool hookEnabled = acme.HasAccountConfValue(enuAccountConfKey.NOTIFY_HOOK);
+			bool hookEnabled = acme.AccountConf.HasConfValue(enuAccountConfKey.NOTIFY_HOOK);
 			bool result = false;
 			await Task.Run(() =>
 			{
-				result = acme.SetAccountConfValue(enuAccountConfKey.NOTIFY_HOOK, hookEnabled ? "" : "smtp");
+				result = acme.AccountConf.SetConfValue(enuAccountConfKey.NOTIFY_HOOK, hookEnabled ? "" : "smtp");
 			});
 
 			if (result)
