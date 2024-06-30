@@ -94,7 +94,7 @@ namespace NginxPanel.Services
 				}
 			}
 
-			public string GetConfValue(enuAccountConfKey key)
+			public string GetConfValue(enuConfKey key)
 			{
 				if (_dicValues.ContainsKey(key.ToString()))
 					return _dicValues[key.ToString()];
@@ -102,12 +102,12 @@ namespace NginxPanel.Services
 				return string.Empty;
 			}
 
-			public bool HasConfValue(enuAccountConfKey key)
+			public bool HasConfValue(enuConfKey key)
 			{
 				return _dicValues.ContainsKey(key.ToString());
 			}
 
-			public bool SetConfValue(enuAccountConfKey key, string value)
+			public bool SetConfValue(enuConfKey key, string value)
 			{
 				try
 				{
@@ -167,8 +167,9 @@ namespace NginxPanel.Services
 
 		#region Enums
 
-		public enum enuAccountConfKey
+		public enum enuConfKey
 		{
+			// Account conf
 			LOG_FILE,
 			AUTO_UPGRADE,
 			SAVED_CF_Token,
@@ -179,11 +180,8 @@ namespace NginxPanel.Services
 			SAVED_SMTP_HOST,
 			SAVED_SMTP_SECURE,
 			NOTIFY_HOOK,
-			DEFAULT_ACME_SERVER
-		}
-
-		public enum enuCertConfKey
-		{
+			DEFAULT_ACME_SERVER,
+			// Certificate conf
 			Le_Domain,
 			Le_Alt,
 			Le_Webroot,
@@ -345,7 +343,7 @@ namespace NginxPanel.Services
 				string cmd = $"{ACMEPath}/acme.sh";
 
 				// Check if we are using a Cloudflare API token
-				if (_accountConf.GetConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
+				if (_accountConf.GetConfValue(enuConfKey.SAVED_CF_Token) != string.Empty)
 				{
 					cmd += " --dns dns_cf";
 				}

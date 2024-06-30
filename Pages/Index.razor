@@ -29,7 +29,7 @@ else
 	<h5>
 		Log File:&nbsp;
 		@{
-			string logFile = acme.AccountConf.GetConfValue(enuAccountConfKey.LOG_FILE);
+			string logFile = acme.AccountConf.GetConfValue(enuConfKey.LOG_FILE);
 
 			if (String.IsNullOrWhiteSpace(logFile))
 			{
@@ -44,7 +44,7 @@ else
 	<h5>
 		Auto-upgrade:&nbsp;
 		@{
-			string upgrade = acme.AccountConf.GetConfValue(enuAccountConfKey.AUTO_UPGRADE);
+			string upgrade = acme.AccountConf.GetConfValue(enuConfKey.AUTO_UPGRADE);
 
 			if (upgrade == "1")
 			{
