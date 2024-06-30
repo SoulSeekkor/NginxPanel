@@ -20,14 +20,26 @@ namespace NginxPanel.Services
 				get { return ConfigFile.HasConfValue(ConfigFile.enuConfKey.Le_RealKeyPath); }
 			}
 
-			public DateTime? Created { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr)); } }
-			public DateTime? Renew { get { return DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_NextRenewTimeStr)); } }
+			public DateTime? Created;
+			public DateTime? Renew;
 
 			public ConfigFile ConfigFile;
 
 			public Certificate(string configPath)
 			{
 				ConfigFile= new ConfigFile(configPath);
+
+				// Set Created
+				if (DateTime.TryParse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr), out _))
+				{
+					Created = DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr));
+				}
+
+				// Set Renew
+				if (DateTime.TryParse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_NextRenewTimeStr), out _))
+				{
+					Renew = DateTime.Parse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_NextRenewTimeStr));
+				}
 			}
 		}
 
