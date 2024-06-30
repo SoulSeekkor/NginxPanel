@@ -469,7 +469,7 @@ else
 
 			// PFX export first to make sure it succeeds
 			if (installCert.exportToPFX)
-				reloadCmd = $"/root/.acme.sh/acme.sh --to-pkcs12 {domainsCmd} --password {installCert.PFXpassword}";
+				reloadCmd = $"openssl pkcs12 -export -in {installCert.fullChainPath} -inkey {installCert.keyPath} -out {installCert.rootFolder}/exported.pfx -passout pass:\"{installCert.PFXpassword}\"";
 
 			// Include user specified commands next
 			if (!String.IsNullOrWhiteSpace(installCert.reloadCmd))
