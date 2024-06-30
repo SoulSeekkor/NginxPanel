@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NginxPanel.Services
 {
@@ -142,7 +143,17 @@ namespace NginxPanel.Services
 			public string GetConfValue(enuConfKey key)
 			{
 				if (_dicValues.ContainsKey(key.ToString()))
-					return _dicValues[key.ToString()];
+				{
+					// Check if this is a Base64-encoded value
+					if (key == enuConfKey.Le_ReloadCmd)
+					{
+						return Encoding.UTF8.GetString(Convert.FromBase64String(_dicValues[key.ToString()].Replace(_certBase64Prefix, "").Replace(_certBase64Suffix, "")));
+					}
+					else
+					{
+						return _dicValues[key.ToString()];
+					}
+				}
 
 				return string.Empty;
 			}
@@ -156,14 +167,25 @@ namespace NginxPanel.Services
 			{
 				try
 				{
-					// Update local tracking
+					// Update local dictionary
 					if (!String.IsNullOrWhiteSpace(value))
 					{
-						// Add/Update the value
+						// Check if this is a Base64-encoded value
+						if (key == enuConfKey.Le_ReloadCmd)
+						{
+							value = _certBase64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(value)) + _certBase64Suffix;
+						}
+
 						if (_dicValues.ContainsKey(key.ToString()))
+						{
+							// Update the value
 							_dicValues[key.ToString()] = value;
+						}
 						else
+						{
+							// Add the value
 							_dicValues.Add(key.ToString(), value);
+						}
 					}
 					else
 					{
