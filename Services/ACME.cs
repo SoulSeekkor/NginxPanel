@@ -109,7 +109,7 @@ namespace NginxPanel.Services
 
 		public bool Installed
 		{
-			get { return !(_version == ""); }
+			get { return !(String.IsNullOrWhiteSpace(_version) && File.Exists($"{ACMEScriptPath}/acme.sh")); }
 		}
 
 		public string Version
@@ -127,6 +127,11 @@ namespace NginxPanel.Services
 			get { return _certAuthorities; }
 		}
 
+		public string ACMEScriptPath
+		{
+			get { return $"{_CLI.HomePath}/.acme.sh"; }
+		}
+
 		public string AccountConf
 		{
 			get { return _accountConf; }
@@ -140,6 +145,7 @@ namespace NginxPanel.Services
 		{
 			_CLI = CLI;
 			BuildAvailableCAs();
+
 			Refresh();
 			ParseAccountConf();
 		}
@@ -169,11 +175,11 @@ namespace NginxPanel.Services
 		{
 			_version = "";
 			
-			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
+			if (File.Exists($"{ACMEScriptPath}/acme.sh"))
 			{
 				try
 				{
-					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --version", sudo: false);
+					_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --version", sudo: false);
 					_version = _CLI.StandardOut.Split(Environment.NewLine)[1];
 				}
 				catch
@@ -189,7 +195,7 @@ namespace NginxPanel.Services
 
 			if (Installed)
 			{
-				_accountConfPath = $"{_CLI.HomePath}/.acme.sh/account.conf";
+				_accountConfPath = $"{ACMEScriptPath}/account.conf";
 
 				// Attempt to parse config files
 				if (File.Exists(_accountConfPath))
@@ -293,11 +299,11 @@ namespace NginxPanel.Services
 
 		public bool SetDefaultCA(string CA)
 		{
-			if (File.Exists($"{_CLI.HomePath}/.acme.sh/acme.sh"))
+			if (Installed)
 			{
 				try
 				{
-					_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --set-default-ca --server {CA}", sudo: false);
+					_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --set-default-ca --server {CA}", sudo: false);
 
 					if (_CLI.StandardOut.Contains("Changed default CA"))
 					{
@@ -316,12 +322,10 @@ namespace NginxPanel.Services
 
 		public bool IssueCertificate(List<string> domains, string CA)
 		{
-			return false;
-
 			try
 			{
 				// Build issue certificate command
-				string cmd = $"{_CLI.HomePath}/.acme.sh/acme.sh";
+				string cmd = $"{ACMEScriptPath}/acme.sh";
 
 				// Check if we are using a Cloudflare API token
 				if (GetAccountConfValue(enuAccountConfKey.SAVED_CF_Token) != string.Empty)
@@ -360,6 +364,8 @@ namespace NginxPanel.Services
 
 		public bool InstallCertificate(List<string> domains, string KeyPath, string FullChainPath)
 		{
+			return false;
+
 			try
 			{
 				// Build list of domains portion of the command
@@ -384,7 +390,7 @@ namespace NginxPanel.Services
 				command += "\"";
 
 				// Execute command to install certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh {command}", sudo: false);
+				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh {command}", sudo: false);
 
 				return true;
 			}
@@ -401,7 +407,7 @@ namespace NginxPanel.Services
 			try
 			{
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --remove --domain {cert.MainDomain}", sudo: false);
 
 				if (_CLI.StandardOut.Contains($"{cert.MainDomain} is removed"))
 					return true;
@@ -419,7 +425,7 @@ namespace NginxPanel.Services
 			try
 			{
 				// Execute command to delete certificate
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --renew --force --domain {cert.MainDomain}", sudo: false);
+				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --renew --force --domain {cert.MainDomain}", sudo: false);
 
 				// Check if the renewal was successful
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
@@ -447,7 +453,7 @@ namespace NginxPanel.Services
 			if (Installed)
 			{
 				// Refresh list of certificates
-				_CLI.RunCommand($"{_CLI.HomePath}/.acme.sh/acme.sh --list", sudo: false);
+				_CLI.RunCommand($"{ACMEScriptPath}/acme.sh --list", sudo: false);
 
 				string listing = _CLI.StandardOut;
 
