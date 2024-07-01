@@ -439,6 +439,8 @@ else
 				else
 					CA = "google";
 			}
+			else if (!String.IsNullOrWhiteSpace(confVal))
+				layout?.DisplayToast(MainLayout.toastType.warning, "Currently set certificate authority is unknown!  Be aware that changing this will overwrite the existing server value.");
 
 			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
 	@<RadzenStack>
