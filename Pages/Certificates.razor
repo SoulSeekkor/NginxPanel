@@ -317,14 +317,15 @@ else
 			domains.Insert(0, cert.primaryDomain);
 
 			// First, attempt to issue the certificate
-			if (acme.IssueCertificate(domains, cert.CA))
+			string result = string.Empty;
+			if (acme.IssueCertificate(domains, cert.CA, ref result))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
 				RefreshCertificates(false);
 				ds.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, "Failed to issue certificate!");
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to issue certificate: {result}");
 		}
 		catch
 		{
@@ -510,14 +511,15 @@ else
 				Directory.CreateDirectory(installCert.rootFolder);
 
 			// First, attempt to install the certificate
-			if (acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd))
+			string result = string.Empty;
+			if (acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd, ref result))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);
 				ds.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, "Failed to install certificate!");
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to install certificate: {result}");
 		}
 		catch
 		{

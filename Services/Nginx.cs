@@ -36,8 +36,11 @@ namespace NginxPanel.Services
 
 			public async Task Save()
 			{
-				await Task.Run(() => File.WriteAllText(ConfigPath, _fileContents));
-				ContentsDirty = false;
+				await Task.Run(() =>
+				{
+					File.WriteAllText(ConfigPath, _fileContents);
+					ContentsDirty = false;
+				} );
 			}
 		}
 

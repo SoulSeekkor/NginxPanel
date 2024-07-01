@@ -278,7 +278,7 @@ namespace NginxPanel.Services
 
 		public bool Installed
 		{
-			get { return !(String.IsNullOrWhiteSpace(_version) && File.Exists($"{ACMEPath}/acme.sh")); }
+			get { return !(String.IsNullOrWhiteSpace(_version)) && File.Exists($"{ACMEPath}/acme.sh"); }
 		}
 
 		public string Version
@@ -392,7 +392,7 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool IssueCertificate(List<string> domains, string CA)
+		public bool IssueCertificate(List<string> domains, string CA, ref string result)
 		{
 			try
 			{
@@ -425,6 +425,8 @@ namespace NginxPanel.Services
 					RefreshCertificates();
 					return true;
 				}
+				else
+					result = _CLI.StandardError;
 			}
 			catch
 			{
@@ -434,7 +436,7 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool InstallCertificate(string domainsCmd, string rootPath, string keyPath, string fullChainPath, string reloadCmd)
+		public bool InstallCertificate(string domainsCmd, string rootPath, string keyPath, string fullChainPath, string reloadCmd, ref string result)
 		{
 			try
 			{
@@ -453,6 +455,8 @@ namespace NginxPanel.Services
 
 				if (_CLI.StandardOut.Contains("Installing key") && _CLI.StandardOut.Contains("Installing full chain"))
 					return true;
+				else
+					result = _CLI.StandardError;
 			}
 			catch
 			{
