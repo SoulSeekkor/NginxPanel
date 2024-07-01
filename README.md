@@ -68,7 +68,7 @@ Run the following command and paste the systemd content to create a service for 
 1. Command to create service:
 
     ```bash
-    systemctl edit --full nginxpanel
+    systemctl edit --force --full nginxpanel
     ```
 
 2. Service file content:
