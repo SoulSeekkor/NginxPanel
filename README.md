@@ -43,7 +43,7 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
 3. Extract to folder:
 
     ```bash
-    tar -xvf publish.tar -C /opt/nginxpanel
+    mkdir -p /opt/nginxpanel && tar -xvf publish.tar -C /opt/nginxpanel
     ```
 
 4. Give execute rights:
