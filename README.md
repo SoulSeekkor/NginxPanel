@@ -16,7 +16,11 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
 
 * Ubuntu 22.04 (may work on other versions)
 * .NET 8
-* *Optionally LXD/Incus*
+
+*Optional:*
+
+* *OpenSSL for PFX Export*
+* *LXD/Incus for Deployment*
 
 ### Important
 
