@@ -127,8 +127,8 @@ else
 		public Services.ACME.Certificate? cert = null;
 
 		public string rootFolder = string.Empty;
-		public string keyPath = string.Empty;
-		public string fullChainPath = string.Empty;
+		public string keyFilename = string.Empty;
+		public string fullChainFilename = string.Empty;
 		public bool reloadNginx = true;
 		public string reloadCmd = string.Empty;
 
@@ -396,22 +396,27 @@ else
 			installCert.rootFolder = folderPath;
 
 			// Generate default values for paths
-			installCert.keyPath = $"{folderPath}/{domain}.key";
-			installCert.fullChainPath = $"{folderPath}/{domain}.fullchain.cert";
+			installCert.keyFilename = $"{domain}.key";
+			installCert.fullChainFilename = $"{domain}.fullchain.cert";
 
 			var result = await DialogService.OpenAsync("Install Certificate", ds =>
 	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@InstallCertSubmit>
 		<RadzenFieldset Text="Install Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
-					<RadzenLabel Text="Please enter the key path below:" />
-					<RadzenTextBox Name="KeyPath" @bind-Value=installCert.keyPath class="w-100" style="display: block" />
-					<RadzenRequiredValidator Component="KeyPath" Text="Key path is required" Popup=false Style="position: absolute" />
+					<RadzenLabel Text="Please enter the root path for the certificate below:" />
+					<RadzenTextBox Name="RootPath" @bind-Value=installCert.rootFolder class="w-100" style="display: block" />
+					<RadzenRequiredValidator Component="RootPath" Text="Root certificate path is required" Popup=false Style="position: absolute" />
 				</div>
 				<div>
-					<RadzenLabel Text="Please enter the full chain path below:" />
-					<RadzenTextBox Name="FullChainPath" @bind-Value=installCert.fullChainPath class="w-100" style="display: block" />
-					<RadzenRequiredValidator Component="FullChainPath" Text="Full chain path is required" Popup=false Style="position: absolute" />
+					<RadzenLabel Text="Please enter the certificate key filename below:" />
+					<RadzenTextBox Name="KeyFilename" @bind-Value=installCert.keyFilename class="w-100" style="display: block" />
+					<RadzenRequiredValidator Component="KeyFilename" Text="Certificate key filename is required" Popup=false Style="position: absolute" />
+				</div>
+				<div>
+					<RadzenLabel Text="Please enter the certificate full chain filename below:" />
+					<RadzenTextBox Name="FullChainFilename" @bind-Value=installCert.fullChainFilename class="w-100" style="display: block" />
+					<RadzenRequiredValidator Component="FullChainFilename" Text="Certificate full chain filename is required" Popup=false Style="position: absolute" />
 				</div>
 				<div>
 					<RadzenLabel Text="Please enter the reload command below (optional):" />
@@ -469,7 +474,7 @@ else
 
 			// PFX export first to make sure it succeeds
 			if (installCert.exportToPFX)
-				reloadCmd = $"openssl pkcs12 -export -in {installCert.fullChainPath} -inkey {installCert.keyPath} -out {installCert.rootFolder}/exported.pfx -passout pass:\"{installCert.PFXpassword}\"";
+				reloadCmd = $"openssl pkcs12 -export -in {installCert.rootFolder}/{installCert.fullChainFilename} -inkey {installCert.rootFolder}/{installCert.keyFilename} -out {installCert.rootFolder}/exported.pfx -passout pass:{installCert.PFXpassword}";
 
 			// Include user specified commands next
 			if (!String.IsNullOrWhiteSpace(installCert.reloadCmd))
@@ -484,19 +489,19 @@ else
 			if (installCert.reloadNginx)
 			{
 				if (!String.IsNullOrWhiteSpace(reloadCmd))
-					reloadCmd += " && ";
+					reloadCmd += " & ";
 
 				reloadCmd += "service nginx force-reload";
 			}
 
 			installCert.reloadCmd = reloadCmd;
 
-			// Make sure destination folder exists first before continuing
+			// Make sure destination root folder exists first before continuing
 			if (!Directory.Exists(installCert.rootFolder))
 				Directory.CreateDirectory(installCert.rootFolder);
 
 			// First, attempt to install the certificate
-			if (acme.InstallCertificate(domainsCmd, installCert.keyPath, installCert.fullChainPath, installCert.reloadCmd))
+			if (acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd))
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);

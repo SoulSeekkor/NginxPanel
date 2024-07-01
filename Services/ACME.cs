@@ -429,15 +429,15 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool InstallCertificate(string domainsCmd, string keyPath, string fullChainPath, string reloadCmd)
+		public bool InstallCertificate(string domainsCmd, string rootPath, string keyPath, string fullChainPath, string reloadCmd)
 		{
 			try
 			{
 				// Build location to save certificate files to (private/public keys)
 				string command = $"--installcert {domainsCmd}";
 
-				command += $" --key-file {keyPath}";
-				command += $" --fullchain-file {fullChainPath}";
+				command += $" --key-file {rootPath}/{keyPath}";
+				command += $" --fullchain-file {rootPath}/{fullChainPath}";
 
 				// Build reload command
 				if (!String.IsNullOrWhiteSpace(reloadCmd))
@@ -446,7 +446,8 @@ namespace NginxPanel.Services
 				// Execute command to install certificate
 				_CLI.RunCommand($"{ACMEPath}/acme.sh {command}", sudo: false);
 
-				return true;
+				if (_CLI.StandardOut.Contains("Installing key") && _CLI.StandardOut.Contains("Installing full chain"))
+					return true;
 			}
 			catch
 			{
