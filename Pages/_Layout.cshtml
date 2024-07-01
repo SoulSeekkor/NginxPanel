@@ -62,8 +62,27 @@
 
     <script src="_framework/blazor.server.js"></script>
 
+    <!-- Clipboard/Misc -->
     <script>
-        new ClipboardJS('.clip');
+        function clipboardCopy(text) {
+            try {
+                navigator.clipboard.writeText(text);
+                return "";
+            } catch (error) {
+                return error.toString();
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function setFocus(element) {
+            if (element) {
+                element.focus();
+            }
+        }
+    </script>
     </script>
     <!-- Butterup -->
     <!-- https://github.com/dgtlss/butterup -->

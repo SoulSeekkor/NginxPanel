@@ -3,6 +3,7 @@
 @using System.Text.RegularExpressions;
 
 @inject DialogService DialogService;
+@inject IJSRuntime JSRuntime
 @inject Services.ACME acme;
 
 <PageTitle>Certificates</PageTitle>
@@ -137,6 +138,12 @@ else
 		public string PFXpassword = string.Empty;
 	}
 
+	private async void CopyToClipboard(string name, string value)
+	{
+		await JSRuntime.InvokeAsync<string>("clipboardCopy", value);
+		layout?.DisplayToast(MainLayout.toastType.success, name + " copied to the clipboard successfully!");
+	}
+
 	private async void DeleteCertificate(Services.ACME.Certificate cert)
 	{
 		bool? confirm = await DialogService.Confirm($"Are you sure you want to delete certificate <span style='color: DeepSkyBlue; font-style: italic;'>{cert.MainDomain}</span>?", "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
@@ -203,13 +210,19 @@ else
 			<RadzenRow>
 				<RadzenColumn>
 					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Key Path</RadzenText>
-					<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealKeyPath</b></RadzenText>
+					<RadzenRow>
+						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealKeyPath</b></RadzenText>
+						<RadzenButton Click="@(() => CopyToClipboard("Real key path", cert.RealKeyPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+					</RadzenRow>
 				</RadzenColumn>
 			</RadzenRow>
 			<RadzenRow>
 				<RadzenColumn>
 					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Full Chain Path</RadzenText>
-					<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealFullChainPath</b></RadzenText>
+					<RadzenRow>
+						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealFullChainPath</b></RadzenText>
+						<RadzenButton Click="@(() => CopyToClipboard("Real full chain path", cert.RealFullChainPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+					</RadzenRow>
 				</RadzenColumn>
 			</RadzenRow>
 		}
