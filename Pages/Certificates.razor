@@ -262,7 +262,7 @@ else
 		{
 			AddCertificateModel cert = new AddCertificateModel();
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit>
+	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@(() => AddCertSubmit(cert, ref ds))>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
@@ -303,7 +303,7 @@ else
 		}
 	}
 
-	void AddCertSubmit(AddCertificateModel cert)
+	private void AddCertSubmit(AddCertificateModel cert, ref DialogService ds)
 	{
 		try
 		{
@@ -321,6 +321,7 @@ else
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
 				RefreshCertificates(false);
+				ds.Close(true);
 			}
 			else
 				layout?.DisplayToast(MainLayout.toastType.error, "Failed to issue certificate!");
@@ -408,7 +409,7 @@ else
 			installCert.fullChainFilename = $"{domain}.fullchain.cert";
 
 			var result = await DialogService.OpenAsync("Install Certificate", ds =>
-	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@InstallCertSubmit>
+	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@(() => InstallCertSubmit(installCert, ref ds))>
 		<RadzenFieldset Text="Install Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
@@ -455,7 +456,7 @@ else
 		}
 	}
 
-	void InstallCertSubmit(InstallCertificateModel installCert)
+	private void InstallCertSubmit(InstallCertificateModel installCert, ref DialogService ds)
 	{
 		try
 		{
@@ -513,6 +514,7 @@ else
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);
+				ds.Close(true);
 			}
 			else
 				layout?.DisplayToast(MainLayout.toastType.error, "Failed to install certificate!");
