@@ -112,7 +112,7 @@ else
 
 	private class AddCertificateModel
 	{
-		public string CA = "Default CA";
+		public string CA = string.Empty;
 		public string primaryDomain = string.Empty;
 
 		// SAN listbox related variables
@@ -248,18 +248,13 @@ else
 		try
 		{
 			AddCertificateModel cert = new AddCertificateModel();
-			List<Services.ACME.CertAuthority> CAs = acme.CertAuthorities.ToList();
-
-			// Add default CA
-			CAs.Insert(0, new Services.ACME.CertAuthority(cert.CA, cert.CA, false));
-
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
 	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@AddCertSubmit>
 		<RadzenFieldset Text="Certificate Information">
 			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 				<div>
 					<RadzenLabel Text="Certificate authority:" />
-					<RadzenDropDown Data=CAs @bind-Value=cert.CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" class="w-50" style="display: block" />
+					<RadzenDropDown Data=acme.CertAuthorities.ToList() @bind-Value=cert.CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" class="w-50" style="display: block" />
 				</div>
 				<div>
 					<RadzenLabel Text="Please enter the primary certificate domain:" />

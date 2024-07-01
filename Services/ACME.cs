@@ -328,6 +328,7 @@ namespace NginxPanel.Services
 		private void BuildAvailableCAs()
 		{
 			_certAuthorities.Clear();
+			_certAuthorities.Add(new CertAuthority("Default CA", "", false));
 			_certAuthorities.Add(new CertAuthority("ZeroSSL", "zerossl", false));
 			_certAuthorities.Add(new CertAuthority("LetsEncrypt", "letsencrypt", false));
 			_certAuthorities.Add(new CertAuthority("LetsEncrypt Test", "letsencrypt_test", false));
@@ -370,9 +371,13 @@ namespace NginxPanel.Services
 			{
 				try
 				{
-					_CLI.RunCommand($"{ACMEPath}/acme.sh --set-default-ca --server {CA}", sudo: false);
+					if (String.IsNullOrWhiteSpace(CA))
+						AccountConf.SetConfValue(ConfigFile.enuConfKey.DEFAULT_ACME_SERVER, string.Empty);
+					else
+						_CLI.RunCommand($"{ACMEPath}/acme.sh --set-default-ca --server {CA}", sudo: false);
 
-					if (_CLI.StandardOut.Contains("Changed default CA"))
+
+					if (String.IsNullOrWhiteSpace(CA) || _CLI.StandardOut.Contains("Changed default CA"))
 					{
 						_accountConf.Refresh();
 						return true;

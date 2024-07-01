@@ -414,7 +414,7 @@ else
 			string confVal = acme.AccountConf.GetConfValue(enuConfKey.DEFAULT_ACME_SERVER);
 
 			// Check current value
-			if (String.IsNullOrWhiteSpace(confVal) || confVal.Contains("zerossl"))
+			if (confVal.Contains("zerossl"))
 				CA = "zerossl";
 			else if (confVal.Contains("letsencrypt"))
 			{
@@ -422,6 +422,22 @@ else
 					CA = "letsencrypt_test";
 				else
 					CA = "letsencrypt";
+			}
+			else if (confVal.Contains("buypass"))
+			{
+				if (confVal.Contains("test"))
+					CA = "buypass_test";
+				else
+					CA = "buypass";
+			}
+			else if (confVal.Contains("sslcom"))
+				CA = "sslcom";
+			else if (confVal.Contains("goog"))
+			{
+				if (confVal.Contains("test"))
+					CA = "googletest";
+				else
+					CA = "google";
 			}
 
 			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
