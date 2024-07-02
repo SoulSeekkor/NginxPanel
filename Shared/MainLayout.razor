@@ -148,11 +148,10 @@
         await DialogService.OpenAsync("", ds =>
         {
             return 
-                @<RadzenRow>
-                    <RadzenColumn Size="12">
-                        @message
-                    </RadzenColumn>
-                </RadzenRow>;
-        }, new DialogOptions() { ShowTitle = false, Style = "min-height: 40px; min-width: auto; width: auto;", CloseDialogOnEsc = false });
+                @<RadzenStack AlignItems="AlignItems.Center" Class="rz-m-6" Gap="2rem">
+                    @message
+                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                </RadzenStack>;
+        }, new DialogOptions() { ShowTitle = false, Style = "min-height: auto; min-width: auto; width: auto;", CloseDialogOnEsc = false });
     }
 }
