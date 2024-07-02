@@ -44,15 +44,18 @@
                 {
                     // Display selected site config
                     <RadzenCard>
-                        <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="25">
+                            <RadzenButton Click=@(() => ReloadSite(selectedConf)) Disabled="busyRefreshing" Text="Reload" Icon="save" BusyText="Reloading..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+                            <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+                        </RadzenStack>
 
                         <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
                         <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="125" Rows="20" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" />
                         <br />
-                        <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" />
+                        <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
                     </RadzenCard>
                 }
             </div>
@@ -137,6 +140,25 @@ else
         finally
         {
             conf.busySaving = false;
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async void ReloadSite(Nginx.ConfigFile conf)
+    {
+        try
+        {
+            bool? confirm = await DialogService.Confirm($"Are you sure you want to reload site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  You will lose any changes you have made!", "Reload Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+            if (confirm.HasValue && confirm.Value)
+            {
+                await conf.Reload();
+
+                layout?.DisplayToast(MainLayout.toastType.info, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reloaded!");
+            }
+        }
+        finally
+        {
             await InvokeAsync(() => StateHasChanged());
         }
     }

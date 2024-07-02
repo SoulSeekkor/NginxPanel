@@ -43,6 +43,15 @@ namespace NginxPanel.Services
 					ContentsDirty = false;
 				} );
 			}
+
+			public async Task Reload()
+            {
+                await Task.Run(() =>
+                {
+                    _fileContents = File.ReadAllText(ConfigPath);
+                    ContentsDirty = false;
+                });
+            }
 		}
 
 		#endregion
