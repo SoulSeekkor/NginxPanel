@@ -95,18 +95,18 @@ else
 			StateHasChanged();
 
 			var result = await DialogService.OpenAsync("Nginx Package", ds =>
-	@<RadzenStack Gap="1.5rem">
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please select the Nginx package to use.</RadzenText>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="System Default" Click="@(() => ds.Close(""))" Style="width: 140px;" />
-				<RadzenButton Text="Stable" Click="@(() => ds.Close("stable"))" Style="width: 80px;" />
-				<RadzenButton Text="Mainline" Click="@(() => ds.Close("mainline"))" Style="width: 80px;" />
-			</RadzenStack>
-			<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
-		</RadzenStack>
-	</RadzenStack>
-	);
+				@<RadzenStack Gap="1.5rem">
+					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please select the Nginx package to use.</RadzenText>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="System Default" Click="@(() => ds.Close(""))" Style="width: 140px;" />
+							<RadzenButton Text="Stable" Click="@(() => ds.Close("stable"))" Style="width: 80px;" />
+							<RadzenButton Text="Mainline" Click="@(() => ds.Close("mainline"))" Style="width: 80px;" />
+						</RadzenStack>
+						<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
+					</RadzenStack>
+				</RadzenStack>
+			);
 
 			if (!(result is null))
 			{
@@ -186,9 +186,39 @@ else
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm("Are you sure you want to install the ACME script?", "Install ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			string email = string.Empty;
+			var result = await DialogService.OpenAsync("Install ACME", ds =>
+				@<RadzenStack Gap="1.5rem">
+					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the email to register with below:</RadzenText>
+					<RadzenTextBox @bind-Value=@email class="w-100" />
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+						</RadzenStack>
+					</RadzenStack>
+				</RadzenStack>
+	);
 
-			if (confirm.HasValue && confirm.Value)
+			bool emailValid = false;
+
+			try
+			{
+				var test = new System.Net.Mail.MailAddress(email);
+				emailValid = true;
+			}
+			catch
+			{
+				// Ignore
+			}
+
+			if (!emailValid)
+			{
+				layout?.DisplayToast(MainLayout.toastType.error, "Must enter a valid email for registration!");
+				return;
+			}
+
+			if (!(result is null) && result)
 			{
 				busyInstallReset = true;
 				StateHasChanged();
@@ -203,7 +233,15 @@ else
 
 				if (cli.StandardOut.Contains("Install success!"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME installed successfully!");
+					await Task.Run(() =>
+					{
+						cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --register-account -m {email}", sudo: false);
+					});
+
+					if (cli.StandardOut.Contains("Registered"))
+						layout?.DisplayToast(MainLayout.toastType.success, "ACME installed successfully!");
+					else
+						layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to register email!");
 				}
 				else
 				{
@@ -259,20 +297,20 @@ else
 		{
 			bool autoUpgrade = false;
 			var result = await DialogService.OpenAsync("Upgrade ACME", ds =>
-	@<RadzenStack>
-		<span>Are you sure you want to upgrade the ACME script?</span>
-		<span class="rz-text-align-left">
-			<RadzenCheckBox @bind-Value=autoUpgrade Name="chkAutoUpgrade" />
-			<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
-		</span>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Yes" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="No" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+				@<RadzenStack>
+					<span>Are you sure you want to upgrade the ACME script?</span>
+					<span class="rz-text-align-left">
+						<RadzenCheckBox @bind-Value=autoUpgrade Name="chkAutoUpgrade" />
+						<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
+					</span>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="Yes" Click="() => ds.Close(true)" Style="width: 80px;" />
+							<RadzenButton Text="No" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+						</RadzenStack>
+					</RadzenStack>
+				</RadzenStack>
+			);
 
 			if (!(result is null) && result)
 			{
@@ -309,20 +347,20 @@ else
 			string token = acme.AccountConf.GetConfValue(enuConfKey.SAVED_CF_Token);
 
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
-	@<RadzenStack>
-		<div>
-			<span>Please enter your Cloudflare API token below:</span>
-			<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
-			<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
-		</div>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+				@<RadzenStack>
+					<div>
+						<span>Please enter your Cloudflare API token below:</span>
+						<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+						<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
+					</div>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+						</RadzenStack>
+					</RadzenStack>
+				</RadzenStack>
+			);
 
 			if (!(result is null) && result)
 			{
@@ -376,30 +414,30 @@ else
 			#endif
 
 			var result = await DialogService.OpenAsync("Set ACME Email Notifications", ds =>
-	@<RadzenStack>
-		<div>
-			<span>Please enter your SMTP server below:</span>
-			<br />
-			<RadzenTextBox @bind-Value=@host Style="width: 310px; margin-right: 4px;" />
-		</div>
-		<div>
-			<span>Please enter the sender email address below:</span>
-			<br />
-			<RadzenTextBox @bind-Value=@from Style="width: 310px; margin-right: 4px;" />
-		</div>
-		<div>
-			<span>Please enter the email address to send notifications to below:</span>
-			<br />
-			<RadzenTextBox @bind-Value=@to Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
-		</div>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+				@<RadzenStack>
+					<div>
+						<span>Please enter your SMTP server below:</span>
+						<br />
+						<RadzenTextBox @bind-Value=@host Style="width: 310px; margin-right: 4px;" />
+					</div>
+					<div>
+						<span>Please enter the sender email address below:</span>
+						<br />
+						<RadzenTextBox @bind-Value=@from Style="width: 310px; margin-right: 4px;" />
+					</div>
+					<div>
+						<span>Please enter the email address to send notifications to below:</span>
+						<br />
+						<RadzenTextBox @bind-Value=@to Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+					</div>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+						</RadzenStack>
+					</RadzenStack>
+				</RadzenStack>
+			);
 
 			if (!(result is null) && result)
 			{
@@ -475,19 +513,19 @@ else
 				layout?.DisplayToast(MainLayout.toastType.warning, "Currently set certificate authority is unknown!  Be aware that changing this will overwrite the existing server value.");
 
 			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
-	@<RadzenStack>
-		<div>
-			<RadzenText Text="Select the CA you would like to use below:" />
-			<RadzenRadioButtonList Data="acme.CertAuthorities" @bind-Value=@CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" Orientation=Orientation.Vertical class="mb-5" />
-		</div>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+				@<RadzenStack>
+					<div>
+						<RadzenText Text="Select the CA you would like to use below:" />
+						<RadzenRadioButtonList Data="acme.CertAuthorities" @bind-Value=@CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" Orientation=Orientation.Vertical class="mb-5" />
+					</div>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+						</RadzenStack>
+					</RadzenStack>
+				</RadzenStack>
+			);
 
 			if (!(result is null) && result)
 			{

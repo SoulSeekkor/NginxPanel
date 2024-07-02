@@ -189,71 +189,71 @@ else
 	private async void ViewCertificateDetails(Services.ACME.Certificate cert)
 	{
 		await DialogService.OpenAsync("Certificate Details", ds =>
-	@<RadzenCard Class="rz-my-8" Style="max-width: 550px">
-		<RadzenRow>
-			<RadzenColumn>
-				<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Main Domain</RadzenText>
-				<RadzenText TextStyle="TextStyle.Body1"><b>@cert.MainDomain</b></RadzenText>
-			</RadzenColumn>
-		</RadzenRow>
-		<RadzenRow>
-		@if (!String.IsNullOrWhiteSpace(cert.SANDomains))
-		{
-			<RadzenColumn>
-				<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">SAN Domains</RadzenText>
-				<RadzenText TextStyle="TextStyle.Body1"><b>@cert.SANDomains</b></RadzenText>
-			</RadzenColumn>
-		}
-		</RadzenRow>
-		@if (cert.Installed)
-		{
-			<RadzenRow>
-				<RadzenColumn>
-					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Key Path</RadzenText>
+			@<RadzenCard Class="rz-my-8" Style="max-width: 550px">
+				<RadzenRow>
+					<RadzenColumn>
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Main Domain</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.MainDomain</b></RadzenText>
+					</RadzenColumn>
+				</RadzenRow>
+				<RadzenRow>
+				@if (!String.IsNullOrWhiteSpace(cert.SANDomains))
+				{
+					<RadzenColumn>
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">SAN Domains</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.SANDomains</b></RadzenText>
+					</RadzenColumn>
+				}
+				</RadzenRow>
+				@if (cert.Installed)
+				{
 					<RadzenRow>
-						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealKeyPath</b></RadzenText>
-						<RadzenButton Click="@(() => CopyToClipboard("Real key path", cert.RealKeyPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+						<RadzenColumn>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Key Path</RadzenText>
+							<RadzenRow>
+								<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealKeyPath</b></RadzenText>
+								<RadzenButton Click="@(() => CopyToClipboard("Real key path", cert.RealKeyPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+							</RadzenRow>
+						</RadzenColumn>
 					</RadzenRow>
-				</RadzenColumn>
-			</RadzenRow>
-			<RadzenRow>
-				<RadzenColumn>
-					<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Full Chain Path</RadzenText>
 					<RadzenRow>
-						<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealFullChainPath</b></RadzenText>
-						<RadzenButton Click="@(() => CopyToClipboard("Real full chain path", cert.RealFullChainPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+						<RadzenColumn>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Real Full Chain Path</RadzenText>
+							<RadzenRow>
+								<RadzenText TextStyle="TextStyle.Body1"><b>@cert.RealFullChainPath</b></RadzenText>
+								<RadzenButton Click="@(() => CopyToClipboard("Real full chain path", cert.RealFullChainPath))" Icon="content_copy" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Dark" Style="float: right;" />
+							</RadzenRow>
+						</RadzenColumn>
 					</RadzenRow>
-				</RadzenColumn>
-			</RadzenRow>
-		}
-		<RadzenRow>
-			<RadzenColumn>
-				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
-				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.API</b></RadzenText>
-			</RadzenColumn>
-		</RadzenRow>
-		<RadzenRow RowGap="0">
-			<RadzenColumn SizeSM="8">
-				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
-				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
-				<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Webroot</RadzenText>
-				<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Webroot</b></RadzenText>
-			</RadzenColumn>
-			@if (cert.Created.HasValue)
-			{
-				<RadzenColumn SizeSM="4">
-					<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
-					<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
-					<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
-					<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
-				</RadzenColumn>
-			}
-		</RadzenRow>
-		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
-			<RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-		</RadzenStack>
-	</RadzenCard>
-	);
+				}
+				<RadzenRow>
+					<RadzenColumn>
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">API</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.API</b></RadzenText>
+					</RadzenColumn>
+				</RadzenRow>
+				<RadzenRow RowGap="0">
+					<RadzenColumn SizeSM="8">
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Key Length</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.KeyLength</b></RadzenText>
+						<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Webroot</RadzenText>
+						<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Webroot</b></RadzenText>
+					</RadzenColumn>
+					@if (cert.Created.HasValue)
+					{
+						<RadzenColumn SizeSM="4">
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Created</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Created?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
+							<RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Renew</RadzenText>
+							<RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@cert.Renew?.ToString("M/d/yyyy h:mm tt")</b></RadzenText>
+						</RadzenColumn>
+					}
+				</RadzenRow>
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
+					<RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+				</RadzenStack>
+			</RadzenCard>
+		);
 	}
 
 	private async void AddCertificate()
@@ -262,40 +262,40 @@ else
 		{
 			AddCertificateModel cert = new AddCertificateModel();
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
-	@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@(() => AddCertSubmit(cert, ref ds))>
-		<RadzenFieldset Text="Certificate Information">
-			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
-				<div>
-					<RadzenLabel Text="Certificate authority:" />
-					<RadzenDropDown Data=acme.CertAuthorities.ToList() @bind-Value=cert.CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" class="w-50" style="display: block" />
-				</div>
-				<div>
-					<RadzenLabel Text="Please enter the primary certificate domain:" />
-					<RadzenTextBox Name="PrimaryDomain" @bind-Value=cert.primaryDomain class="w-50" style="display: block" />
-					<RadzenRequiredValidator Component="PrimaryDomain" Text="Primary domain is required" Popup=false Style="position: absolute" />
-					<RadzenRegexValidator Component="PrimaryDomain" Text="Must be a valid domain or wildcard FQDN" Pattern="^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$" Popup=false Style="position: absolute" />
-				</div>
-				<div>
-					<RadzenLabel Text="Please enter the subject alternative domains (SANs):" />
-					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
-							<RadzenTextBox @bind-Value=cert.newSANdomain Style="width: 300px;" />
-							<RadzenButton Click=@(() => AddSANDomain(cert)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+				@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@(() => AddCertSubmit(cert, ref ds))>
+					<RadzenFieldset Text="Certificate Information">
+						<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+							<div>
+								<RadzenLabel Text="Certificate authority:" />
+								<RadzenDropDown Data=acme.CertAuthorities.ToList() @bind-Value=cert.CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" class="w-50" style="display: block" />
+							</div>
+							<div>
+								<RadzenLabel Text="Please enter the primary certificate domain:" />
+								<RadzenTextBox Name="PrimaryDomain" @bind-Value=cert.primaryDomain class="w-50" style="display: block" />
+								<RadzenRequiredValidator Component="PrimaryDomain" Text="Primary domain is required" Popup=false Style="position: absolute" />
+								<RadzenRegexValidator Component="PrimaryDomain" Text="Must be a valid domain or wildcard FQDN" Pattern="^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$" Popup=false Style="position: absolute" />
+							</div>
+							<div>
+								<RadzenLabel Text="Please enter the subject alternative domains (SANs):" />
+								<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+									<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+										<RadzenTextBox @bind-Value=cert.newSANdomain Style="width: 300px;" />
+										<RadzenButton Click=@(() => AddSANDomain(cert)) Icon="add" ButtonStyle="ButtonStyle.Success" class="rz-mb-3" />
+									</RadzenStack>
+									<RadzenButton Click=@(() => DeleteSANDomain(cert)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
+								</RadzenStack>
+								<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+									<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
+								</RadzenStack>
+							</div>
+							<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+								<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
+								<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+							</RadzenStack>
 						</RadzenStack>
-						<RadzenButton Click=@(() => DeleteSANDomain(cert)) Icon="delete" ButtonStyle="ButtonStyle.Danger" class="rz-mb-3" Style="float: right;" />
-					</RadzenStack>
-					<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
-					</RadzenStack>
-				</div>
-				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
-					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
-					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-				</RadzenStack>
-			</RadzenStack>
-		</RadzenFieldset>
-	</RadzenTemplateForm>
-	);
+					</RadzenFieldset>
+				</RadzenTemplateForm>
+			);
 		}
 		catch
 		{
@@ -410,46 +410,46 @@ else
 			installCert.fullChainFilename = $"{domain}.fullchain.cert";
 
 			var result = await DialogService.OpenAsync("Install Certificate", ds =>
-	@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@(() => InstallCertSubmit(installCert, ref ds))>
-		<RadzenFieldset Text="Install Information">
-			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
-				<div>
-					<RadzenLabel Text="Please enter the root path for the certificate below:" />
-					<RadzenTextBox Name="RootPath" @bind-Value=installCert.rootFolder class="w-100" style="display: block" />
-					<RadzenRequiredValidator Component="RootPath" Text="Root certificate path is required" Popup=false Style="position: absolute" />
-				</div>
-				<div>
-					<RadzenLabel Text="Please enter the certificate key filename below:" />
-					<RadzenTextBox Name="KeyFilename" @bind-Value=installCert.keyFilename class="w-100" style="display: block" />
-					<RadzenRequiredValidator Component="KeyFilename" Text="Certificate key filename is required" Popup=false Style="position: absolute" />
-				</div>
-				<div>
-					<RadzenLabel Text="Please enter the certificate full chain filename below:" />
-					<RadzenTextBox Name="FullChainFilename" @bind-Value=installCert.fullChainFilename class="w-100" style="display: block" />
-					<RadzenRequiredValidator Component="FullChainFilename" Text="Certificate full chain filename is required" Popup=false Style="position: absolute" />
-				</div>
-				<div>
-					<RadzenLabel Text="Please enter the reload command below (optional):" />
-					<RadzenTextBox Name="ReloadCmd" @bind-Value=installCert.reloadCmd class="w-100" style="display: block" />
-				</div>
-				<div class="rz-text-align-left rz-mt-3">
-					<RadzenCheckBox @bind-Value=installCert.reloadNginx Name="chkReloadNginx" />
-					<RadzenLabel Text="Reload Nginx (On Renewals)" Component="chkReloadNginx" Style="margin-left: 8px; vertical-align: middle;" />
-				</div>
-				<div class="rz-text-align-left rz-mb-5">
-					<RadzenCheckBox @bind-Value=installCert.exportToPFX Name="chkExportPFX" />
-					<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
-					<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
-					<RadzenTextBox @bind-Value=installCert.PFXpassword class="w-20" />
-				</div>
-				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
-					<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
-					<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-				</RadzenStack>
-			</RadzenStack>
-		</RadzenFieldset>
-	</RadzenTemplateForm>
-	);
+				@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@(() => InstallCertSubmit(installCert, ref ds))>
+					<RadzenFieldset Text="Install Information">
+						<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
+							<div>
+								<RadzenLabel Text="Please enter the root path for the certificate below:" />
+								<RadzenTextBox Name="RootPath" @bind-Value=installCert.rootFolder class="w-100" style="display: block" />
+								<RadzenRequiredValidator Component="RootPath" Text="Root certificate path is required" Popup=false Style="position: absolute" />
+							</div>
+							<div>
+								<RadzenLabel Text="Please enter the certificate key filename below:" />
+								<RadzenTextBox Name="KeyFilename" @bind-Value=installCert.keyFilename class="w-100" style="display: block" />
+								<RadzenRequiredValidator Component="KeyFilename" Text="Certificate key filename is required" Popup=false Style="position: absolute" />
+							</div>
+							<div>
+								<RadzenLabel Text="Please enter the certificate full chain filename below:" />
+								<RadzenTextBox Name="FullChainFilename" @bind-Value=installCert.fullChainFilename class="w-100" style="display: block" />
+								<RadzenRequiredValidator Component="FullChainFilename" Text="Certificate full chain filename is required" Popup=false Style="position: absolute" />
+							</div>
+							<div>
+								<RadzenLabel Text="Please enter the reload command below (optional):" />
+								<RadzenTextBox Name="ReloadCmd" @bind-Value=installCert.reloadCmd class="w-100" style="display: block" />
+							</div>
+							<div class="rz-text-align-left rz-mt-3">
+								<RadzenCheckBox @bind-Value=installCert.reloadNginx Name="chkReloadNginx" />
+								<RadzenLabel Text="Reload Nginx (On Renewals)" Component="chkReloadNginx" Style="margin-left: 8px; vertical-align: middle;" />
+							</div>
+							<div class="rz-text-align-left rz-mb-5">
+								<RadzenCheckBox @bind-Value=installCert.exportToPFX Name="chkExportPFX" />
+								<RadzenLabel Text="Export to PFX" Component="chkExportPFX" Style="margin-left: 8px; vertical-align: middle;" />
+								<RadzenLabel Text="PFX password:" Style="margin-left: 50px; vertical-align: middle;" />
+								<RadzenTextBox @bind-Value=installCert.PFXpassword class="w-20" />
+							</div>
+							<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
+								<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
+								<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+							</RadzenStack>
+						</RadzenStack>
+					</RadzenFieldset>
+				</RadzenTemplateForm>
+			);
 		}
 		catch
 		{
