@@ -2,9 +2,10 @@
 
 @using System.Text.RegularExpressions;
 
-@inject DialogService DialogService;
-@inject IJSRuntime JSRuntime
 @inject Services.ACME acme;
+@inject DialogService DialogService;
+
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Certificates</PageTitle>
 <br />
@@ -262,7 +263,7 @@ else
 		{
 			AddCertificateModel cert = new AddCertificateModel();
 			var result = await DialogService.OpenAsync("Add Certificate", ds =>
-				@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@(() => AddCertSubmit(cert, ref ds))>
+				@<RadzenTemplateForm TItem="AddCertificateModel" Data=@cert Submit=@(() => AddCertSubmit(cert))>
 					<RadzenFieldset Text="Certificate Information">
 						<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 							<div>
@@ -296,7 +297,7 @@ else
 						</RadzenStack>
 					</RadzenFieldset>
 				</RadzenTemplateForm>
-			);
+	);
 		}
 		catch
 		{
@@ -304,7 +305,7 @@ else
 		}
 	}
 
-	private void AddCertSubmit(AddCertificateModel cert, ref DialogService ds)
+	private async Task AddCertSubmit(AddCertificateModel cert)
 	{
 		try
 		{
@@ -317,13 +318,24 @@ else
 			List<string> domains = cert.SANdomains.ToList();
 			domains.Insert(0, cert.primaryDomain);
 
-			// First, attempt to issue the certificate
 			string result = string.Empty;
-			if (acme.IssueCertificate(domains, cert.CA, ref result))
+			bool success = false;
+			await Task.Run(() =>
+			{
+				layout?.BusyDialog("Issuing (May Take Some Time) ...");
+
+				// First, attempt to issue the certificate
+				success = acme.IssueCertificate(domains, cert.CA, ref result);
+
+				// Close the dialog
+				DialogService.Close();
+			});
+
+			if (success)
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate issued successfully!");
 				RefreshCertificates(false);
-				ds.Close(true);
+				DialogService.Close(true);
 			}
 			else
 				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to issue certificate: {result}");

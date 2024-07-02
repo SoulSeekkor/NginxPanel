@@ -4,6 +4,7 @@
 
 @inject Services.CLI cli;
 @inject Services.Nginx nginx;
+@inject DialogService DialogService;
 @inject NotificationService NotificationService;
 @inject TooltipService TooltipService;
 
@@ -140,5 +141,25 @@
     public async Task InvokeStateHasChanged()
     {
         await InvokeAsync(() => StateHasChanged());
+    }
+
+    public async Task BusyDialog(string message)
+    {
+        await DialogService.OpenAsync("", ds =>
+        {
+            RenderFragment content = b =>
+            {
+                b.OpenElement(0, "RadzenRow");
+
+                b.OpenElement(1, "RadzenColumn");
+                b.AddAttribute(2, "Size", "12");
+
+                b.AddContent(3, message);
+
+                b.CloseElement();
+                b.CloseElement();
+            };
+            return content;
+        }, new DialogOptions() { ShowTitle = false, Style = "min-height: 40px; min-width: auto; width: auto;", CloseDialogOnEsc = false });
     }
 }
