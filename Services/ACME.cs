@@ -484,7 +484,7 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool ForceRenewCertificate(Certificate cert, ref string response)
+		public bool ForceRenewCertificate(Certificate cert, ref string result)
 		{
 			try
 			{
@@ -494,13 +494,13 @@ namespace NginxPanel.Services
 				// Check if the renewal was successful
 				if (_CLI.StandardOut.Contains("Cert success.") || _CLI.StandardOut.Contains("Skip, Next renewal time"))
 				{
-					response = "Renewal success.";
+					result = "Renewal success.";
 					return true;
 				}
 				else if (_CLI.StandardError.Contains("rateLimited"))
-				{
-					response = "Too many certificates issued for this exact set of domains.";
-				}
+					result = "Too many certificates issued for this exact set of domains.";
+				else
+					result = _CLI.StandardError;
 			}
 			catch
 			{

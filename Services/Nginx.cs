@@ -85,7 +85,7 @@ namespace NginxPanel.Services
 
 		public bool Installed
 		{
-			get { return !(_rootConfig == ""); }
+			get { return !(_rootConfig == "") && Directory.Exists(_rootPath); }
 		}
 
 		public string Version
@@ -160,53 +160,56 @@ namespace NginxPanel.Services
 
 		public void GetServiceStatus()
 		{
-			_CLI.RunCommand("systemctl status nginx");
-
-			if (!string.IsNullOrWhiteSpace(_CLI.StandardError))
+			if (Installed)
 			{
-				if (_CLI.StandardError == "Unit nginxd.service could not be found.")
-				{
-					_serviceStatus = enuServiceStatus.Unknown;
-				}
-			}
-			else if (!string.IsNullOrWhiteSpace(_CLI.StandardOut))
-			{
-				_serviceDetails = string.Empty;
+				_CLI.RunCommand("systemctl status nginx");
 
-				if (_CLI.StandardOut.Contains("Active: inactive"))
+				if (!string.IsNullOrWhiteSpace(_CLI.StandardError))
 				{
-					_serviceStatus = enuServiceStatus.Stopped;
-				}
-				else if (_CLI.StandardOut.Contains("Active: active"))
-				{
-					_serviceStatus = enuServiceStatus.Running;
-				}
-				else if (_CLI.StandardOut.Contains("Active: failed"))
-				{
-					_serviceStatus = enuServiceStatus.Failed;
-
-					// Parse failures from the output
-					Match match = new Regex(@"(?si)reverse proxy server\.\.\.(?<failures>.*?)\n[^\n]*nginx\.service").Match(_CLI.StandardOut);
-
-					if (match.Success)
+					if (_CLI.StandardError == "Unit nginxd.service could not be found.")
 					{
-						_serviceDetails = "The following errors were returned by the service when attempting to start:<br />";
+						_serviceStatus = enuServiceStatus.Unknown;
+					}
+				}
+				else if (!string.IsNullOrWhiteSpace(_CLI.StandardOut))
+				{
+					_serviceDetails = string.Empty;
 
-						string failures = match.Groups["failures"].Value.Trim();
+					if (_CLI.StandardOut.Contains("Active: inactive"))
+					{
+						_serviceStatus = enuServiceStatus.Stopped;
+					}
+					else if (_CLI.StandardOut.Contains("Active: active"))
+					{
+						_serviceStatus = enuServiceStatus.Running;
+					}
+					else if (_CLI.StandardOut.Contains("Active: failed"))
+					{
+						_serviceStatus = enuServiceStatus.Failed;
 
-						// Attempt to match individual failures
-						MatchCollection matches = new Regex(@"(?si)nginx:\s(?<failure>[^\n]*)").Matches(failures);
+						// Parse failures from the output
+						Match match = new Regex(@"(?si)reverse proxy server\.\.\.(?<failures>.*?)\n[^\n]*nginx\.service").Match(_CLI.StandardOut);
 
-						if (matches.Count > 0)
+						if (match.Success)
 						{
-							for (int i = 0; i < matches.Count; i++)
+							_serviceDetails = "The following errors were returned by the service when attempting to start:<br />";
+
+							string failures = match.Groups["failures"].Value.Trim();
+
+							// Attempt to match individual failures
+							MatchCollection matches = new Regex(@"(?si)nginx:\s(?<failure>[^\n]*)").Matches(failures);
+
+							if (matches.Count > 0)
 							{
-								_serviceDetails += "&emsp;" + (i+1).ToString() + ")&nbsp;" + matches[i].Groups["failure"].Value + "<br />";
+								for (int i = 0; i < matches.Count; i++)
+								{
+									_serviceDetails += "&emsp;" + (i + 1).ToString() + ")&nbsp;" + matches[i].Groups["failure"].Value + "<br />";
+								}
 							}
-						}
-						else
-						{
-							_serviceDetails += failures.Replace(Environment.NewLine, "<br />");
+							else
+							{
+								_serviceDetails += failures.Replace(Environment.NewLine, "<br />");
+							}
 						}
 					}
 				}
@@ -251,7 +254,7 @@ namespace NginxPanel.Services
 		{
 			_siteConfigs.Clear();
 
-			if (!string.IsNullOrWhiteSpace(_rootPath) && Directory.Exists(_rootPath))
+			if (Installed)
 			{
 				foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "sites-available")))
 				{
