@@ -52,9 +52,10 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
     chmod +x /opt/nginxpanel/NginxPanel
     ```
 
-5. Run binary:
+5. Run binary (must run from the same folder so the working directory is correct):
 
     ```bash
+    cd /opt/nginxpanel
     /opt/nginxpanel/NginxPanel
     ```
 
