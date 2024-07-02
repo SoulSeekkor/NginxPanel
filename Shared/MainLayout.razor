@@ -147,19 +147,12 @@
     {
         await DialogService.OpenAsync("", ds =>
         {
-            RenderFragment content = b =>
-            {
-                b.OpenElement(0, "RadzenRow");
-
-                b.OpenElement(1, "RadzenColumn");
-                b.AddAttribute(2, "Size", "12");
-
-                b.AddContent(3, message);
-
-                b.CloseElement();
-                b.CloseElement();
-            };
-            return content;
+            return 
+                @<RadzenRow>
+                    <RadzenColumn Size="12">
+                        @message
+                    </RadzenColumn>
+                </RadzenRow>;
         }, new DialogOptions() { ShowTitle = false, Style = "min-height: 40px; min-width: auto; width: auto;", CloseDialogOnEsc = false });
     }
 }
