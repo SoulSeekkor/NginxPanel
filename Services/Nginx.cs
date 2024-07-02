@@ -139,11 +139,20 @@ namespace NginxPanel.Services
 
 		private void _refreshService_Elapsed(object? sender, ElapsedEventArgs e)
 		{
-			enuServiceStatus oldStatus = _serviceStatus;
-			GetServiceStatus();
+			try
+			{
+				_refreshService.Stop();
 
-			if (!oldStatus.Equals(_serviceStatus) && !(ServiceStatusChanged is null))
-				ServiceStatusChanged();
+				enuServiceStatus oldStatus = _serviceStatus;
+				GetServiceStatus();
+
+				if (!oldStatus.Equals(_serviceStatus) && !(ServiceStatusChanged is null))
+					ServiceStatusChanged();
+			}
+			finally
+			{
+				_refreshService.Start();
+			}
 		}
 
 		#endregion
