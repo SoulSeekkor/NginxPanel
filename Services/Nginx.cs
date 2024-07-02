@@ -273,12 +273,12 @@ namespace NginxPanel.Services
 			if (config.Enabled)
 			{
 				// Remove from sites-enabled
-				_CLI.RunCommand("rm '" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "'");
+				_CLI.RunCommand("rm \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
 			}
 			else
 			{
 				// Add to sites-enabled
-				_CLI.RunCommand("ln -s '" + config.ConfigPath + "' '" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "'");
+				_CLI.RunCommand("ln -s \"" + config.ConfigPath + "\" \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
 			}
 
 			config.Enabled = !config.Enabled;
