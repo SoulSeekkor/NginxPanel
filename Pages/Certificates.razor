@@ -423,7 +423,7 @@ else
 			installCert.fullChainFilename = $"{domain}.fullchain.cert";
 
 			var result = await DialogService.OpenAsync("Install Certificate", ds =>
-				@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@(() => InstallCertSubmit(installCert, ref ds))>
+				@<RadzenTemplateForm TItem="InstallCertificateModel" Data=@installCert Submit=@(() => InstallCertSubmit(installCert))>
 					<RadzenFieldset Text="Install Information">
 						<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween">
 							<div>
@@ -470,7 +470,7 @@ else
 		}
 	}
 
-	private void InstallCertSubmit(InstallCertificateModel installCert, ref DialogService ds)
+	private async Task InstallCertSubmit(InstallCertificateModel installCert)
 	{
 		try
 		{
@@ -525,11 +525,23 @@ else
 
 			// First, attempt to install the certificate
 			string result = string.Empty;
-			if (acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd, ref result))
+			bool success = false;
+			await Task.Run(() =>
+			{
+				layout?.BusyDialog("Installing ...");
+
+				// First, attempt to issue the certificate
+				success = acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd, ref result);
+
+				// Close the dialog
+				DialogService.Close();
+			});
+
+			if (success)
 			{
 				layout?.DisplayToast(MainLayout.toastType.success, "Certificate installed successfully!");
 				RefreshCertificates(false);
-				ds.Close(true);
+				DialogService.Close(true);
 			}
 			else
 				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to install certificate: {result}");
