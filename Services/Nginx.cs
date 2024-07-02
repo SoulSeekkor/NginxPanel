@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using System.Timers;
 
 namespace NginxPanel.Services
 {
@@ -79,6 +80,11 @@ namespace NginxPanel.Services
 
 		private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
 
+		private System.Timers.Timer _refreshService = new System.Timers.Timer(1500);
+
+		public event ServiceStatusChangedHandler? ServiceStatusChanged;
+		public delegate void ServiceStatusChangedHandler();
+
 		#endregion
 
 		#region Properties
@@ -126,6 +132,18 @@ namespace NginxPanel.Services
 		{
 			_CLI = CLI;
 			Refresh();
+
+			_refreshService.Elapsed += _refreshService_Elapsed;
+			_refreshService.Start();
+		}
+
+		private void _refreshService_Elapsed(object? sender, ElapsedEventArgs e)
+		{
+			enuServiceStatus oldStatus = _serviceStatus;
+			GetServiceStatus();
+
+			if (!oldStatus.Equals(_serviceStatus) && !(ServiceStatusChanged is null))
+				ServiceStatusChanged();
 		}
 
 		#endregion

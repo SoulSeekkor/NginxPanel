@@ -62,6 +62,12 @@
         info
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            nginx.ServiceStatusChanged += RefreshServiceStatus;
+    }
+
     public async Task DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
     {
         await JSRuntime.InvokeVoidAsync("toast", type.ToString(), message, title, dismissable);
@@ -124,6 +130,11 @@
             busyTesting = false;
             await InvokeAsync(() => StateHasChanged());
         }
+    }
+
+    private async void RefreshServiceStatus()
+    {
+        await InvokeAsync(() => StateHasChanged());
     }
 
     public async Task InvokeStateHasChanged()
