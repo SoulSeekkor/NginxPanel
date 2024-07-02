@@ -517,8 +517,6 @@ else
 				reloadCmd += "service nginx force-reload";
 			}
 
-			installCert.reloadCmd = reloadCmd;
-
 			// Make sure destination root folder exists first before continuing
 			if (!Directory.Exists(installCert.rootFolder))
 				Directory.CreateDirectory(installCert.rootFolder);
@@ -531,7 +529,7 @@ else
 				layout?.BusyDialog("Installing ...");
 
 				// First, attempt to issue the certificate
-				success = acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, installCert.reloadCmd, ref result);
+				success = acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, reloadCmd, ref result);
 
 				// Close the dialog
 				DialogService.Close();
