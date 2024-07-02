@@ -12,9 +12,18 @@
 <br />
 <h3>Settings</h3>
 <br />
-Install or reinstall Nginx, leaves configs and gives the option of stable or mainline:
-<br />
-<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="@installText" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+@if (!nginx.Installed)
+{
+	<span>Install Nginx, gives the option of package manager (not recommended), stable or mainline:</span>
+	<br />
+	<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+}
+else
+{
+	<span>Uninstall Nginx, leaving configuration files behind:</span>
+	<br />
+	<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />	
+}
 <br />
 <br />
 Reset Nginx by reinstalling (includes configs):
@@ -63,17 +72,7 @@ else
 	[CascadingParameter]
 	private MainLayout? layout { get; set; }
 
-	string installText = "Install Nginx";
-
 	private bool busyInstallReset = false;
-
-	protected override void OnInitialized()
-	{
-		if (nginx.Installed)
-		{
-			installText = "Reinstall Nginx";
-		}
-	}
 
 	private void ResetNginx()
 	{
@@ -147,6 +146,39 @@ else
 			busyInstallReset = false;
 			nginx.Refresh();
 			StateHasChanged();
+			await layout!.InvokeStateHasChanged();
+		}
+	}
+
+	private async void UninstallNginx()
+	{
+		try
+		{
+			busyInstallReset = true;
+			StateHasChanged();
+
+			bool? confirm = await DialogService.Confirm("Are you sure you want to uninstall Nginx?", "Uninstall Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+			if (confirm.HasValue && confirm.Value)
+			{
+				await Task.Run(() =>
+				{
+					// Remove existing Nginx first
+					cli.RunCommand("apt remove nginx nginx-common nginx-full -y");
+					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
+					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+					//cli.RunCommand("apt update");
+				});
+
+				layout?.DisplayToast(MainLayout.toastType.success, "Nginx uninstalled successfully!");
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			nginx.Refresh();
+			StateHasChanged();
+			await layout!.InvokeStateHasChanged();
 		}
 	}
 
@@ -154,7 +186,7 @@ else
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm($"Are you sure you want to install the ACME script?", "Install ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool? confirm = await DialogService.Confirm("Are you sure you want to install the ACME script?", "Install ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 			if (confirm.HasValue && confirm.Value)
 			{

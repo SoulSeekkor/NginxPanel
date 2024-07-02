@@ -132,12 +132,17 @@ namespace NginxPanel.Services
 
 		public void Refresh()
 		{
+			_rootConfig = string.Empty;
+			_rootPath = string.Empty;
+
 			GetVersion();
+			GetServiceStatus();
+			RefreshFiles();
 		}
 
-		public void GetVersion()
+		private void GetVersion()
 		{
-			_version = "";
+			_version = string.Empty;
 
 			_CLI.RunCommand("nginx -V");
 
@@ -148,9 +153,6 @@ namespace NginxPanel.Services
 				_version = match.Groups["version"].Value;
 				_rootConfig = match.Groups["config"].Value;
 				_rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
-
-				GetServiceStatus();
-				RefreshFiles();
 			}
 			else
 			{
@@ -160,6 +162,8 @@ namespace NginxPanel.Services
 
 		public void GetServiceStatus()
 		{
+			_serviceStatus = enuServiceStatus.Unknown;
+
 			if (Installed)
 			{
 				_CLI.RunCommand("systemctl status nginx");

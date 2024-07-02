@@ -125,4 +125,9 @@
             await InvokeAsync(() => StateHasChanged());
         }
     }
+
+    public async Task InvokeStateHasChanged()
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
 }
