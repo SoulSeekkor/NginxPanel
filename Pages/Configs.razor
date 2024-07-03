@@ -71,7 +71,12 @@
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" Style="@configWrap" />
+                        <br />
+                        <RadzenStack Orientation="Orientation.Horizontal">
+                            <RadzenCheckBox TValue="bool" Value="@(configWrap != "white-space: nowrap;")" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configWrap = args == true ? "" : "white-space: nowrap;")" />
+                            <RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
+                        </RadzenStack>
                         <br />
                         <RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
                     </RadzenCard>
@@ -93,6 +98,8 @@ else
 
     private bool configsSidebarExpanded = true;
     private bool busyRefreshing = false;
+
+    private string configWrap = "white-space: nowrap;";
 
     protected override void OnInitialized()
     {
