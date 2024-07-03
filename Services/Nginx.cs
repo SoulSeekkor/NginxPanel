@@ -136,7 +136,7 @@ namespace NginxPanel.Services
 			get { return Path.Combine(_rootPath, "sites-available"); }
 		}
 
-		public List<ConfigFile> SiteConfigs
+		public List<ConfigFile> Configs
 		{
 			get { return _configs; }
 		}
@@ -324,20 +324,23 @@ namespace NginxPanel.Services
 			}
 		}
 
-		public void ToggleEnabled(ConfigFile config)
+		public void ToggleSiteEnabled(ConfigFile config)
 		{
-			if (config.Enabled)
+			if (config.ConfigType == ConfigFile.enuConfigType.Site)
 			{
-				// Remove from sites-enabled
-				_CLI.RunCommand("rm \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
-			}
-			else
-			{
-				// Add to sites-enabled
-				_CLI.RunCommand("ln -s \"" + config.ConfigPath + "\" \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
-			}
+				if (config.Enabled)
+				{
+					// Remove from sites-enabled
+					_CLI.RunCommand("rm \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
+				}
+				else
+				{
+					// Add to sites-enabled
+					_CLI.RunCommand("ln -s \"" + config.ConfigPath + "\" \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
+				}
 
-			config.Enabled = !config.Enabled;
+				config.Enabled = !config.Enabled;
+			}
 		}
 	}
 }

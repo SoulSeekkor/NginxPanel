@@ -17,16 +17,16 @@
     <RadzenLayout>
         <RadzenHeader>
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                <RadzenSidebarToggle Click="@(() => sitesSidebarExpanded = !sitesSidebarExpanded)" />
-                <RadzenButton Click=@(() => RefreshSites(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
-                <RadzenButton Click=@(() => AddSite()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+                <RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
+                <RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
+                <RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
             </RadzenStack>
         </RadzenHeader>
-        <RadzenSidebar @bind-Expanded="@sitesSidebarExpanded">
+        <RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
             <RadzenPanelMenu>
                 @if (!busyRefreshing)
                 {
-                    @foreach (Services.Nginx.ConfigFile conf in nginx.SiteConfigs)
+                    @foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
                     {
                         string style = "";
 
@@ -42,24 +42,24 @@
             <div class="rz-p-4">
                 @if (!(selectedConf is null) && !busyRefreshing)
                 {
-                    // Display selected site config
+                    // Display selected config
                     <RadzenCard>
                         <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenStack Orientation="Orientation.Horizontal">
-                                <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
+                                <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
                                 <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
                             </RadzenStack>
 
                             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                                <RadzenButton Click=@(() => RevertSite(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
-                                <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+                                <RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+                                <RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
                             </RadzenStack>
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
                         <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" />
                         <br />
-                        <RadzenButton Click=@(() => SaveSite(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
+                        <RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
                     </RadzenCard>
                 }
             </div>
@@ -77,15 +77,15 @@ else
 
     private Nginx.ConfigFile? selectedConf = null;
 
-    private bool sitesSidebarExpanded = true;
+    private bool configsSidebarExpanded = true;
     private bool busyRefreshing = false;
 
     protected override void OnInitialized()
     {
-        RefreshSites(false);
+        RefreshConfigs(false);
     }
 
-    private async void RefreshSites(bool notifyUser)
+    private async void RefreshConfigs(bool notifyUser)
     {
         try
         {
@@ -96,7 +96,7 @@ else
 
             if (notifyUser)
             {
-                layout?.DisplayToast(MainLayout.toastType.info, "Sites refreshed successfully!");
+                layout?.DisplayToast(MainLayout.toastType.info, "Configs refreshed successfully!");
             }
         }
         finally
@@ -106,28 +106,28 @@ else
         }
     }
 
-    private void ToggleSite(Services.Nginx.ConfigFile conf)
+    private void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
     {
         try
         {
-            nginx.ToggleEnabled(conf);
+            nginx.ToggleSiteEnabled(conf);
 
             if (conf.Enabled)
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> enabled successfully!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Site config <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> enabled successfully!");
             }
             else
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> disabled successfully!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Site config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> disabled successfully!");
             }
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while updating site '{conf.Name}'!");
+            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while updating site config '{conf.Name}'!");
         }
     }
 
-    private async void SaveSite(Nginx.ConfigFile conf)
+    private async void SaveConfig(Nginx.ConfigFile conf)
     {
         try
         {
@@ -135,11 +135,11 @@ else
 
             await conf.Save();
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Site <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> saved successfully!");
+            layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='color: DarkBlue; font-style: italic;'>{conf.Name}</span> saved successfully!");
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while saving site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span>!");
+            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while saving config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span>!");
         }
         finally
         {
@@ -148,17 +148,17 @@ else
         }
     }
 
-    private async void RevertSite(Nginx.ConfigFile conf)
+    private async void RevertConfig(Nginx.ConfigFile conf)
     {
         try
         {
-            bool? confirm = await DialogService.Confirm($"Are you sure you want to revert site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  You will lose any changes you have made!", "Revert Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+            bool? confirm = await DialogService.Confirm($"Are you sure you want to revert config <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  You will lose any changes you have made!", "Revert Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
             if (confirm.HasValue && confirm.Value)
             {
                 await conf.Revert();
 
-                layout?.DisplayToast(MainLayout.toastType.info, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reverted!");
+                layout?.DisplayToast(MainLayout.toastType.info, $"Config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reverted!");
             }
         }
         finally
@@ -167,13 +167,13 @@ else
         }
     }
 
-    private async void AddSite()
+    private async void AddConfig()
     {
-        string siteName = string.Empty;
-        var result = await DialogService.OpenAsync("Add Site", ds =>
+        string configName = string.Empty;
+        var result = await DialogService.OpenAsync("Add Config", ds =>
             @<RadzenStack Gap="1.5rem">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the site:</RadzenText>
-                <RadzenTextBox @bind-Value=@siteName class="w-100" />
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
+                <RadzenTextBox @bind-Value=@configName class="w-100" />
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                     <RadzenStack Orientation="Orientation.Horizontal">
                         <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
@@ -185,18 +185,18 @@ else
 
         if (!(result is null) && result)
         {
-            if (String.IsNullOrWhiteSpace(siteName))
+            if (String.IsNullOrWhiteSpace(configName))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, "Site name cannot be blank!");
+                layout?.DisplayToast(MainLayout.toastType.error, "Config name cannot be blank!");
                 return;
             }
 
-            siteName = siteName.Trim();
-            string configPath = Path.Combine(nginx.SitesAvailable, siteName);
+            configName = configName.Trim();
+            string configPath = Path.Combine(nginx.SitesAvailable, configName);
 
             if (File.Exists(configPath))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, $"Site with the name <span style='color: DarkRed; font-style: italic;'>{siteName}</span> already exists!");
+                layout?.DisplayToast(MainLayout.toastType.error, $"Config with the name <span style='color: DarkRed; font-style: italic;'>{configName}</span> already exists!");
                 return;
             }
 
@@ -205,38 +205,38 @@ else
                 await Task.Run(() =>
                 {
                     File.WriteAllText(configPath, "");
-                    RefreshSites(false);
+                    RefreshConfigs(false);
                 });
 
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site <span style='color: DarkRed; font-style: italic;'>{siteName}</span> has been added!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='color: DarkRed; font-style: italic;'>{configName}</span> has been added!");
             }
             catch (Exception ex)
             {
                 if (ex.GetType() == typeof(System.UnauthorizedAccessException))
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while adding site <span style='color: DarkRed; font-style: italic;'>{siteName}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while adding config <span style='color: DarkRed; font-style: italic;'>{configName}</span>!");
                 }
                 else
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while adding site <span style='color: DarkRed; font-style: italic;'>{siteName}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while adding config <span style='color: DarkRed; font-style: italic;'>{configName}</span>!");
                 }
             }
         }
     }
 
-    private async void DeleteSite(Nginx.ConfigFile conf)
+    private async void DeleteConfig(Nginx.ConfigFile conf)
     {
-        bool? confirm = await DialogService.Confirm($"Are you sure you want to delete site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?", "Delete Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+        bool? confirm = await DialogService.Confirm($"Are you sure you want to delete config <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?", "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
         if (confirm.HasValue && confirm.Value)
         {
             await Task.Run(() =>
             {
                 File.Delete(conf.ConfigPath);
-                RefreshSites(false);
+                RefreshConfigs(false);
             });
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been deleted!");
+            layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been deleted!");
         }
     }
 }
