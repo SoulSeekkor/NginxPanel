@@ -71,10 +71,10 @@
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" Style="@configWrap" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" Style="@configCurrentCSS" />
                         <br />
                         <RadzenStack Orientation="Orientation.Horizontal">
-                            <RadzenCheckBox TValue="bool" Value="@(configWrap != "white-space: nowrap;")" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configWrap = args == true ? "font-family: monospace;" : "white-space: nowrap; font-family: monospace;")" />
+                            <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigFontCSS + (args == true ? "" : configNoWrapCSS))" />
                             <RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
                         </RadzenStack>
                         <br />
@@ -99,10 +99,13 @@ else
     private bool configsSidebarExpanded = true;
     private bool busyRefreshing = false;
 
-    private string configWrap = "white-space: nowrap; font-family: monospace;";
+    private string configCurrentCSS = string.Empty;
+    private string defaultConfigFontCSS = "font-family: \"Lucida Console\", \"Courier New\", monospace;";
+    private string configNoWrapCSS = "white-space: nowrap;";
 
     protected override void OnInitialized()
     {
+        configCurrentCSS = configNoWrapCSS + defaultConfigFontCSS;
         RefreshConfigs(false);
     }
 
