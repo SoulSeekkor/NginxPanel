@@ -497,7 +497,7 @@ else
 
 			// PFX export first to make sure it succeeds
 			if (installCert.exportToPFX)
-				reloadCmd = $"openssl pkcs12 -export -in {installCert.rootFolder}/{installCert.fullChainFilename} -inkey {installCert.rootFolder}/{installCert.keyFilename} -out {installCert.rootFolder}/exported.pfx -passout pass:{installCert.PFXpassword}";
+				reloadCmd = $"openssl pkcs12 -export -in {installCert.rootFolder}/{installCert.fullChainFilename} -inkey {installCert.rootFolder}/{installCert.keyFilename} -certfile {Path.Combine(installCert.cert.RootPath, "ca.cer")} -out {installCert.rootFolder}/exported.pfx -passout pass:{installCert.PFXpassword}";
 
 			// Include user specified commands next
 			if (!String.IsNullOrWhiteSpace(installCert.reloadCmd))

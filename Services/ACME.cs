@@ -29,14 +29,27 @@ namespace NginxPanel.Services
 				}
 			}
 
+			public string RootPath
+			{
+				get { return _rootPath; }
+			}
+
 			public DateTime? Created;
 			public DateTime? Renew;
 
 			public ConfigFile ConfigFile;
 
+			private string _rootPath = string.Empty;
+			private string _configFilename = string.Empty;
+
 			public Certificate(string configPath)
 			{
-				ConfigFile= new ConfigFile(configPath);
+				FileInfo configFile = new FileInfo(configPath);
+				ConfigFile = new ConfigFile(configPath);
+
+				// Set path and filename
+				_rootPath = configFile.DirectoryName!;
+				_configFilename = configFile.Name;
 
 				// Set Created
 				if (DateTime.TryParse(ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_CertCreateTimeStr), out _))
@@ -69,8 +82,8 @@ namespace NginxPanel.Services
 		public class ConfigFile
 		{
 			private string _path = string.Empty;
-			private string _config = string.Empty;
-			private Dictionary<string, string> _dicValues = new Dictionary<string, string>();
+			private string _configContent = string.Empty;
+			private Dictionary<string, string> _dicConfigValues = new Dictionary<string, string>();
 
 			private const string _certBase64Prefix = "__ACME_BASE64__START_";
 			private const string _certBase64Suffix = "__ACME_BASE64__END_";
@@ -119,7 +132,7 @@ namespace NginxPanel.Services
 
 			public string Config
 			{
-				get { return _config; }
+				get { return _configContent; }
 			}
 
 			public ConfigFile()
@@ -135,24 +148,24 @@ namespace NginxPanel.Services
 
 			public void Refresh()
 			{
-				_config = string.Empty;
-				_dicValues.Clear();
+				_configContent = string.Empty;
+				_dicConfigValues.Clear();
 
 				// Check if file exists first
 				if (File.Exists(_path))
 				{
 					// Read in entire file
-					_config = File.ReadAllText(_path);
+					_configContent = File.ReadAllText(_path);
 
 					// Cleanup file a bit first
-					while (_config.Contains(Environment.NewLine + Environment.NewLine))
+					while (_configContent.Contains(Environment.NewLine + Environment.NewLine))
 					{
-						_config = _config.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+						_configContent = _configContent.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
 					}
-					_config = _config.Trim();
+					_configContent = _configContent.Trim();
 
 					// Attempt to parse config file, split into lines and parse key/value pairs
-					string[] lines = _config.Split(Environment.NewLine);
+					string[] lines = _configContent.Split(Environment.NewLine);
 					string[] split;
 					string key;
 
@@ -163,8 +176,8 @@ namespace NginxPanel.Services
 							split = line.Split("=", 2);
 							key = split[0].Trim();
 
-							if (!_dicValues.ContainsKey(key))
-								_dicValues.Add(key, split[1].Trim().Trim('\''));
+							if (!_dicConfigValues.ContainsKey(key))
+								_dicConfigValues.Add(key, split[1].Trim().Trim('\''));
 						}
 					}
 				}
@@ -172,16 +185,16 @@ namespace NginxPanel.Services
 
 			public string GetConfValue(enuConfKey key)
 			{
-				if (_dicValues.ContainsKey(key.ToString()))
+				if (_dicConfigValues.ContainsKey(key.ToString()))
 				{
 					// Check if this is a Base64-encoded value
 					if (key == enuConfKey.Le_ReloadCmd)
 					{
-						return Encoding.UTF8.GetString(Convert.FromBase64String(_dicValues[key.ToString()].Replace(_certBase64Prefix, "").Replace(_certBase64Suffix, "")));
+						return Encoding.UTF8.GetString(Convert.FromBase64String(_dicConfigValues[key.ToString()].Replace(_certBase64Prefix, "").Replace(_certBase64Suffix, "")));
 					}
 					else
 					{
-						return _dicValues[key.ToString()];
+						return _dicConfigValues[key.ToString()];
 					}
 				}
 
@@ -190,7 +203,7 @@ namespace NginxPanel.Services
 
 			public bool HasConfValue(enuConfKey key)
 			{
-				return _dicValues.ContainsKey(key.ToString());
+				return _dicConfigValues.ContainsKey(key.ToString());
 			}
 
 			public bool SetConfValue(enuConfKey key, string value)
@@ -206,21 +219,21 @@ namespace NginxPanel.Services
 							value = _certBase64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(value)) + _certBase64Suffix;
 						}
 
-						if (_dicValues.ContainsKey(key.ToString()))
+						if (_dicConfigValues.ContainsKey(key.ToString()))
 						{
 							// Update the value
-							_dicValues[key.ToString()] = value;
+							_dicConfigValues[key.ToString()] = value;
 						}
 						else
 						{
 							// Add the value
-							_dicValues.Add(key.ToString(), value);
+							_dicConfigValues.Add(key.ToString(), value);
 						}
 					}
 					else
 					{
 						// Remove the value
-						_dicValues.Remove(key.ToString());
+						_dicConfigValues.Remove(key.ToString());
 					}
 
 					// Update config file
@@ -229,25 +242,25 @@ namespace NginxPanel.Services
 					if (!String.IsNullOrWhiteSpace(value))
 					{
 						// Update config file
-						if (configKey.Match(_config).Success)
+						if (configKey.Match(_configContent).Success)
 						{
 							// Key exists in config, update it
-							_config = configKey.Replace(_config, $"{key.ToString()}='{value}'");
+							_configContent = configKey.Replace(_configContent, $"{key.ToString()}='{value}'");
 						}
 						else
 						{
 							// Add new key to the config
-							_config += Environment.NewLine + $"{key.ToString()}='{value}'";
+							_configContent += Environment.NewLine + $"{key.ToString()}='{value}'";
 						}
 					}
 					else
 					{
 						// Remove value from config file entirely
-						_config = configKey.Replace(_config, string.Empty);
+						_configContent = configKey.Replace(_configContent, string.Empty);
 					}
 
 					// Output new config to file
-					File.WriteAllText(_path, _config);
+					File.WriteAllText(_path, _configContent);
 
 					return true;
 				}
