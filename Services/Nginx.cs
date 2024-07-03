@@ -9,8 +9,15 @@ namespace NginxPanel.Services
 
 		public class ConfigFile
 		{
+			public enum enuConfigType
+			{
+				Site = 0,
+				Shared = 1
+			}
+
 			private string _fileContents = string.Empty;
 
+			public enuConfigType ConfigType { get; set; }
 			public string Name = string.Empty;
 			public string ConfigPath = string.Empty;
 
@@ -27,8 +34,9 @@ namespace NginxPanel.Services
 
 			public bool busySaving = false;
 
-			public ConfigFile(string rootPath, string configPath)
+			public ConfigFile(enuConfigType configType, string rootPath, string configPath)
 			{
+				ConfigType = configType;
 				ConfigPath = configPath;
 				Name = new FileInfo(configPath).Name;
 				Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
@@ -87,7 +95,7 @@ namespace NginxPanel.Services
 		private string _serviceDetails = "";
 		private string _lastTestResults = "";
 
-		private List<ConfigFile> _siteConfigs = new List<ConfigFile>();
+		private List<ConfigFile> _configs = new List<ConfigFile>();
 
 		private System.Timers.Timer _refreshService = new System.Timers.Timer(1500);
 
@@ -130,7 +138,7 @@ namespace NginxPanel.Services
 
 		public List<ConfigFile> SiteConfigs
 		{
-			get { return _siteConfigs; }
+			get { return _configs; }
 		}
 
 		#endregion
@@ -292,15 +300,27 @@ namespace NginxPanel.Services
 
 		public void RefreshFiles()
 		{
-			_siteConfigs.Clear();
+			_configs.Clear();
 
 			if (Installed)
 			{
+				// Load site configs first
 				foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "sites-available")))
 				{
-					_siteConfigs.Add(new ConfigFile(_rootPath, file));
+					_configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
 				}
-				_siteConfigs.Sort((a,b) => a.Name.CompareTo(b.Name));
+
+				// Load shared configs next, make sure the folder exists first
+				if (!Directory.Exists(Path.Combine(_rootPath, "shared-files")))
+					Directory.CreateDirectory(Path.Combine(_rootPath, "shared-files"));
+
+				foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "shared-files")))
+				{
+					_configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
+				}
+
+				// Sort the configs
+				_configs.OrderBy(x => x.ConfigType).ThenBy(x => x.Name);
 			}
 		}
 
