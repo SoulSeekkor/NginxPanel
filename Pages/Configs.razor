@@ -65,6 +65,7 @@
                             }
 
                             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                                <RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
                                 <RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
                                 <RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
                             </RadzenStack>
@@ -183,6 +184,24 @@ else
                 await conf.Revert();
 
                 layout?.DisplayToast(MainLayout.toastType.info, $"Config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reverted!");
+            }
+        }
+        finally
+        {
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async void AutoFormatConfig(Nginx.ConfigFile conf)
+    {
+        try
+        {
+            bool? confirm = await DialogService.Confirm($"Are you sure you want to auto format config <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  This will attempt to make the config nicer by replacing tabs with spaces, you may want to save before attempting this!", "Format Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+            if (confirm.HasValue && confirm.Value)
+            {
+                conf.FileContents = conf.FileContents.Replace("    ", "\t").Replace("  ", "    ").Replace("\t", "    ");
+                layout?.DisplayToast(MainLayout.toastType.info, $"Config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been auto formatted!");
             }
         }
         finally
