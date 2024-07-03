@@ -71,7 +71,7 @@
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" Style="@configCurrentCSS" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@configCurrentCSS" />
                         <br />
                         <RadzenStack Orientation="Orientation.Horizontal">
                             <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigFontCSS + (args == true ? "" : configNoWrapCSS))" />
@@ -100,7 +100,7 @@ else
     private bool busyRefreshing = false;
 
     private string configCurrentCSS = string.Empty;
-    private string defaultConfigFontCSS = "font-family: \"Lucida Console\", \"Courier New\", monospace;";
+    private string defaultConfigFontCSS = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px;";
     private string configNoWrapCSS = "white-space: nowrap;";
 
     protected override void OnInitialized()
