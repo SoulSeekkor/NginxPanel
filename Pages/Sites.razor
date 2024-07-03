@@ -44,13 +44,17 @@
                 {
                     // Display selected site config
                     <RadzenCard>
-                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="25">
-                            <RadzenButton Click=@(() => ReloadSite(selectedConf)) Disabled="busyRefreshing" Text="Reload" Icon="save" BusyText="Reloading..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
-                            <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
-                        </RadzenStack>
+                        <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Orientation="Orientation.Horizontal">
+                                <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
+                                <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+                            </RadzenStack>
 
-                        <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSite(selectedConf)" />
-                        <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+                            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                                <RadzenButton Click=@(() => ReloadSite(selectedConf)) Disabled="busyRefreshing" Text="Reload" Icon="save" BusyText="Reloading..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+                                <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+                            </RadzenStack>
+                        </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
                         <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="20" />
