@@ -51,7 +51,7 @@
                             </RadzenStack>
 
                             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                                <RadzenButton Click=@(() => ReloadSite(selectedConf)) Disabled="busyRefreshing" Text="Reload" Icon="save" BusyText="Reloading..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+                                <RadzenButton Click=@(() => RevertSite(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
                                 <RadzenButton Click=@(() => DeleteSite(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
                             </RadzenStack>
                         </RadzenRow>
@@ -148,17 +148,17 @@ else
         }
     }
 
-    private async void ReloadSite(Nginx.ConfigFile conf)
+    private async void RevertSite(Nginx.ConfigFile conf)
     {
         try
         {
-            bool? confirm = await DialogService.Confirm($"Are you sure you want to reload site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  You will lose any changes you have made!", "Reload Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+            bool? confirm = await DialogService.Confirm($"Are you sure you want to revert site <span style='color: DeepSkyBlue; font-style: italic;'>{conf.Name}</span>?  You will lose any changes you have made!", "Revert Site", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
             if (confirm.HasValue && confirm.Value)
             {
-                await conf.Reload();
+                await conf.Revert();
 
-                layout?.DisplayToast(MainLayout.toastType.info, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reloaded!");
+                layout?.DisplayToast(MainLayout.toastType.info, $"Site <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been reverted!");
             }
         }
         finally
