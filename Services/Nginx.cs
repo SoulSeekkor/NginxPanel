@@ -39,7 +39,10 @@ namespace NginxPanel.Services
 				ConfigType = configType;
 				ConfigPath = configPath;
 				Name = new FileInfo(configPath).Name;
-				Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
+
+				if (configType == enuConfigType.Site)
+					Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
+
 				_fileContents = File.ReadAllText(configPath);
 			}
 
@@ -134,6 +137,16 @@ namespace NginxPanel.Services
 		public string SitesAvailable
 		{
 			get { return Path.Combine(_rootPath, "sites-available"); }
+		}
+
+		public string SitesEnabled
+		{
+			get { return Path.Combine(_rootPath, "sites-enabled"); }
+		}
+
+		public string SharedFiles
+		{
+			get { return Path.Combine(_rootPath, "shared-files"); }
 		}
 
 		public List<ConfigFile> Configs
@@ -305,16 +318,16 @@ namespace NginxPanel.Services
 			if (Installed)
 			{
 				// Load site configs first
-				foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "sites-available")))
+				foreach (string file in Directory.GetFiles(SitesAvailable))
 				{
 					_configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
 				}
 
 				// Load shared configs next, make sure the folder exists first
-				if (!Directory.Exists(Path.Combine(_rootPath, "shared-files")))
-					Directory.CreateDirectory(Path.Combine(_rootPath, "shared-files"));
+				if (!Directory.Exists(SharedFiles))
+					Directory.CreateDirectory(SharedFiles);
 
-				foreach (string file in Directory.GetFiles(Path.Combine(_rootPath, "shared-files")))
+				foreach (string file in Directory.GetFiles(SharedFiles))
 				{
 					_configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
 				}
@@ -331,12 +344,12 @@ namespace NginxPanel.Services
 				if (config.Enabled)
 				{
 					// Remove from sites-enabled
-					_CLI.RunCommand("rm \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
+					_CLI.RunCommand("rm \"" + Path.Combine(SitesEnabled, config.Name) + "\"");
 				}
 				else
 				{
 					// Add to sites-enabled
-					_CLI.RunCommand("ln -s \"" + config.ConfigPath + "\" \"" + Path.Combine(_rootPath, "sites-enabled", config.Name) + "\"");
+					_CLI.RunCommand("ln -s \"" + config.ConfigPath + "\" \"" + Path.Combine(SitesEnabled, config.Name) + "\"");
 				}
 
 				config.Enabled = !config.Enabled;

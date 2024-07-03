@@ -28,12 +28,23 @@
                 {
                     @foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
                     {
+                        string icon = "";
                         string style = "";
+
+                        if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+                        {
+                            if (conf.Enabled)
+                                icon = "check";
+                            else
+                                icon = "description";
+                        }
+                        else
+                            icon = "share";
 
                         if (conf.ContentsDirty)
                             style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
 
-                        <RadzenPanelMenuItem Text="@conf.Name" Icon="@(conf.Enabled ? "check" : "description")" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
+                        <RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
                     }
                 }
             </RadzenPanelMenu>
@@ -45,10 +56,13 @@
                     // Display selected config
                     <RadzenCard>
                         <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                            <RadzenStack Orientation="Orientation.Horizontal">
-                                <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
-                                <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
-                            </RadzenStack>
+                            @if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+                            {
+                                <RadzenStack Orientation="Orientation.Horizontal">
+                                    <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
+                                    <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+                                </RadzenStack>
+                            }
 
                             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
                                 <RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
@@ -170,10 +184,17 @@ else
     private async void AddConfig()
     {
         string configName = string.Empty;
+        Services.Nginx.ConfigFile.enuConfigType configType = Nginx.ConfigFile.enuConfigType.Site;
         var result = await DialogService.OpenAsync("Add Config", ds =>
             @<RadzenStack Gap="1.5rem">
                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
                 <RadzenTextBox @bind-Value=@configName class="w-100" />
+                <RadzenRadioButtonList @bind-Value=@configType TValue="Services.Nginx.ConfigFile.enuConfigType" class="mb-2">
+                    <Items>
+                        <RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Site.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Site" />
+                        <RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Shared.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Shared" />
+                    </Items>
+                </RadzenRadioButtonList>
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                     <RadzenStack Orientation="Orientation.Horizontal">
                         <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
@@ -181,7 +202,7 @@ else
                     </RadzenStack>
                 </RadzenStack>
             </RadzenStack>
-        );
+    );
 
         if (!(result is null) && result)
         {
@@ -192,7 +213,12 @@ else
             }
 
             configName = configName.Trim();
-            string configPath = Path.Combine(nginx.SitesAvailable, configName);
+            string configPath = string.Empty;
+
+            if (configType == Nginx.ConfigFile.enuConfigType.Site)
+                configPath = Path.Combine(nginx.SitesAvailable, configName);
+            else
+                configPath = Path.Combine(nginx.SharedFiles, configName);
 
             if (File.Exists(configPath))
             {
