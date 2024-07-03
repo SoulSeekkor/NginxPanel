@@ -71,10 +71,10 @@
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@configCurrentCSS" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
                         <br />
                         <RadzenStack Orientation="Orientation.Horizontal">
-                            <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigFontCSS + (args == true ? "" : configNoWrapCSS))" />
+                            <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
                             <RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
                         </RadzenStack>
                         <br />
@@ -100,12 +100,12 @@ else
     private bool busyRefreshing = false;
 
     private string configCurrentCSS = string.Empty;
-    private string defaultConfigFontCSS = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px;";
+    private string defaultConfigCSS = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px; background: url(http://i.imgur.com/2cOaJ.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 10px; line-height:16px; border-color:#ccc;";
     private string configNoWrapCSS = "white-space: nowrap;";
 
     protected override void OnInitialized()
     {
-        configCurrentCSS = configNoWrapCSS + defaultConfigFontCSS;
+        configCurrentCSS = configNoWrapCSS + defaultConfigCSS;
         RefreshConfigs(false);
     }
 
