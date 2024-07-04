@@ -19,7 +19,7 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
 
 *Optional:*
 
-* *OpenSSL for PFX Export*
+* *OpenSSL for PFX Export (Only when installing certificates)*
 * *LXD/Incus for Deployment*
 
 ### Important
