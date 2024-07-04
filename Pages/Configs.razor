@@ -16,6 +16,7 @@
                 <RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
                 <RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
             </RadzenStack>
+            <span>Total Configs: @nginx.Configs.Count.ToString()</span>
         </RadzenHeader>
         <RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
             <RadzenPanelMenu>
