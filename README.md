@@ -59,8 +59,9 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
     /opt/nginxpanel/NginxPanel
     ```
 
-6. Nginx can be installed from the application itself, it will give you the option of using the package manager, stable, or mainline versions.
-7. ACME.sh can (and should) be installed from the application itself.
+6. On first launch the self-signed PFX and app.config files will be generated in /etc/nginxpanel, modify the config to customize port and PFX/password.
+7. Nginx can be installed from the application itself, it will give you the option of using the package manager, stable, or mainline versions.
+8. ACME.sh can (and should) be installed from the application itself.
 
 ## Running as a service
 
@@ -86,7 +87,6 @@ Run the following command and paste the systemd content to create a service for 
     Restart=always
     RestartSec=10
     User=root
-    Environment=ASPNETCORE_ENVIRONMENT=Production
 
     [Install]
     WantedBy=multi-user.target
