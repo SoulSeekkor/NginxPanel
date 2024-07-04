@@ -11,18 +11,13 @@
 @inject IJSRuntime JSRuntime
 
 <PageTitle>Nginx Panel - Certificates</PageTitle>
-<br />
-<br />
-<h3>Certificates@(acme.Installed ? $" ({acme.Certificates.Count})" : "")</h3>
 
 @if (acme.Installed)
 {
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0" Style="margin-top: 50px; margin-bottom: 20px;">
 		<RadzenButton Click=@(() => RefreshCertificates(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
 		<RadzenButton Click=@(() => AddCertificate()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
 	</RadzenStack>
-	<br />
-	<br />
 
 	if (acme.Certificates.Count == 0)
 	{

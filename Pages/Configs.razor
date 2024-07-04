@@ -6,15 +6,10 @@
 @inject Services.Nginx nginx;
 
 <PageTitle>Nginx Panel - Configs</PageTitle>
-<br />
-<br />
-<h3>Configs</h3>
-<br />
-<br />
 
 @if (nginx.Installed)
 {
-    <RadzenLayout>
+    <RadzenLayout Style="margin-top: 10px;">
         <RadzenHeader>
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                 <RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
