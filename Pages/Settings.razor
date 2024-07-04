@@ -22,7 +22,12 @@ else
 {
 	<span>Uninstall Nginx, leaving configuration files behind:</span>
 	<br />
-	<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />	
+	<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+	<br />
+	<br />
+	<span>Upgrade Nginx:</span>
+	<br />
+	<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
 }
 <br />
 <br />
@@ -46,7 +51,7 @@ else
 	<br />
 	<span>Upgrade ACME:</span>
 	<br />
-	<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+	<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
 	<br />
 	<br />
 	<span>Set ACME Cloudflare Token:</span>
@@ -56,7 +61,7 @@ else
 	<br />
 	<span>Set ACME Email Notifications:</span>
 	<br />
-	<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+	<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 	<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
 	<br />
 	<br />
@@ -171,6 +176,46 @@ else
 				});
 
 				layout?.DisplayToast(MainLayout.toastType.success, "Nginx uninstalled successfully!");
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			nginx.Refresh();
+			StateHasChanged();
+			await layout!.InvokeStateHasChanged();
+		}
+	}
+
+	private async void UpgradeNginx()
+	{
+		try
+		{
+			bool? confirm = await DialogService.Confirm($"Are you sure you want to upgrade Nginx?", "Upgrade Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+
+			if (confirm.HasValue && confirm.Value)
+			{
+				busyInstallReset = true;
+				StateHasChanged();
+
+				await Task.Run(() =>
+				{
+					cli.RunCommand("apt update");
+					cli.RunCommand("apt install --only-upgrade nginx-full -y");
+				});
+
+				if (cli.StandardOut.Contains("Setting up nginx"))
+				{
+					layout?.DisplayToast(MainLayout.toastType.success, "Nginx upgraded successfully!");
+				}
+				else if (cli.StandardOut.Contains("is already the newest version"))
+				{
+					layout?.DisplayToast(MainLayout.toastType.info, "Nginx already at the latest version!");
+				}
+				else
+				{
+					layout?.DisplayToast(MainLayout.toastType.error, "Nginx failed to upgrade!");
+				}
 			}
 		}
 		finally
