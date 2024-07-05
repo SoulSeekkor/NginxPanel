@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Reflection;
+
+@inherits LayoutComponentBase
 
 @inject IJSRuntime JSRuntime;
 
@@ -40,6 +42,7 @@
             </RadzenStack>
         </RadzenHeader>
         <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+            <RadzenText Text="@Assembly.GetEntryAssembly()!.GetName().Name" TextStyle="TextStyle.DisplayH5" Style="padding: 10px;" />
             <RadzenPanelMenu>
                 <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
                 <RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
