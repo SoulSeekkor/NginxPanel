@@ -9,13 +9,10 @@
 @inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
-    <div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
-
-        <main>
-            <div class="top-row px-4" style="width: 100%;">
+    <RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
+        <RadzenHeader>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
                 <span style="padding-right: 50px;">
                     User: @cli.RunningAsUser
                     <br />
@@ -40,18 +37,28 @@
                 <span style="margin-left: 100px;">
                     Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
                 </span>
-            </div>
-
-            <article class="content px-4">
+            </RadzenStack>
+        </RadzenHeader>
+        <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+            <RadzenPanelMenu>
+                <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
+                <RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
+                <RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
+                <RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
+            </RadzenPanelMenu>
+        </RadzenSidebar>
+        <RadzenBody>
+            <div class="rz-p-4">
                 @Body
-            </article>
-        </main>
-    </div>
+            </div>
+        </RadzenBody>
+    </RadzenLayout>
 
     <RadzenComponents />
 </CascadingValue>
 
 @code {
+    private bool sidebarExpanded = true;
     private bool disableAllButtons = false;
     private bool busyTesting = false;
 

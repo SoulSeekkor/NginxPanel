@@ -1,6 +1,9 @@
 ﻿@page "/"
+@page "/dashboard"
 
 @using static Services.ACME.ConfigFile;
+
+@inject NavigationManager NavigationManager
 
 @inject Services.ACME acme;
 @inject Services.Nginx nginx;
@@ -68,4 +71,10 @@ else
 }
 
 @code {
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender && !NavigationManager.Uri.EndsWith("dashboard"))
+			NavigationManager.NavigateTo("dashboard");
+	}
+
 }
