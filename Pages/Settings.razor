@@ -10,7 +10,7 @@
 <PageTitle>Nginx Panel - Settings</PageTitle>
 
 <RadzenStack Orientation="Orientation.Vertical">
-	<RadzenCard Style="width: 400px;">
+	<RadzenCard Style="width: 500px;">
 		<RadzenText Text="Nginx Settings" TextStyle="TextStyle.DisplayH6" />
 		<hr style="margin-bottom: 25px;" />
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
@@ -20,18 +20,26 @@
 				<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 			}
 			else
-			{
-				<span>Uninstall Nginx, leaving configuration files behind:</span>
-				<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-				<span>Upgrade Nginx:</span>
-				<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+			{	
+				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
+					<RadzenColumn SizeSM="6">
+						<span>Uninstall Nginx:</span>
+						<br />
+						<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					</RadzenColumn>
+					<RadzenColumn>
+						<span>Upgrade Nginx:</span>
+						<br />
+						<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+					</RadzenColumn>
+				</RadzenRow>
 				<span>Reset Nginx by reinstalling (includes configs):</span>
 				<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 			}
 		</RadzenStack>
 	</RadzenCard>
 
-	<RadzenCard Style="width: 400px;">
+	<RadzenCard Style="width: 500px;">
 		<RadzenText Text="ACME Settings" TextStyle="TextStyle.DisplayH6" />
 		<hr style="margin-bottom: 25px;" />
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
@@ -42,18 +50,27 @@
 			}
 			else
 			{
-				<span>Uninstall ACME:</span>
-				<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-				<span>Upgrade ACME:</span>
-				<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
+					<RadzenColumn SizeSM="6">
+						<span>Uninstall ACME:</span>
+						<br />
+						<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					</RadzenColumn>
+					<RadzenColumn>
+						<span>Upgrade ACME:</span>
+						<br />
+						<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+					</RadzenColumn>
+				</RadzenRow>
 				<span>Set ACME Cloudflare Token:</span>
-				<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+				<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />				
+				<span>Set ACME CA:</span>
+				<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+
 				<span>Set ACME Email Notifications:</span>
 				<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 				<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
 				<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
-				<span>Set ACME CA:</span>
-				<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 			}
 		</RadzenStack>
 	</RadzenCard>
@@ -148,7 +165,7 @@
 			busyInstallReset = true;
 			StateHasChanged();
 
-			bool? confirm = await DialogService.Confirm("Are you sure you want to uninstall Nginx?", "Uninstall Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool? confirm = await DialogService.Confirm("Are you sure you want to uninstall Nginx? This will leave the configuration files behind.", "Uninstall Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 			if (confirm.HasValue && confirm.Value)
 			{
