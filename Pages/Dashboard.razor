@@ -11,13 +11,14 @@
 <PageTitle>Nginx Panel - Dashboard</PageTitle>
 
 <RadzenStack Orientation="Orientation.Vertical">
-	<RadzenCard>
+	<RadzenCard Style="width: 700px;">
+		<RadzenText Text="Nginx" TextStyle="TextStyle.DisplayH6" />
+		<hr style="margin-bottom: 25px;" />
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 			@if (nginx.Installed)
 			{
-
-				<h3>Nginx Version: @nginx.Version</h3>
-				<h5>Last config test results:</h5>
+				<h6>Version: @nginx.Version</h6>
+				<h6>Last config test results:</h6>
 				@((MarkupString)nginx.LastTestResults)
 			}
 			else
@@ -29,12 +30,14 @@
 		</RadzenStack>
 	</RadzenCard>
 
-	<RadzenCard Style="rz-mt-10">
+	<RadzenCard Style="width: 700px;">
+		<RadzenText Text="ACME" TextStyle="TextStyle.DisplayH6" />
+		<hr style="margin-bottom: 25px;" />
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 			@if (acme.Installed)
 			{
-				<h3>ACME Version: @acme.Version</h3>
-				<h5>
+				<h6>Version: @acme.Version</h6>
+				<h6>
 					Log File:&nbsp;
 					@{
 						string logFile = acme.AccountConf.GetConfValue(enuConfKey.LOG_FILE);
@@ -48,8 +51,8 @@
 							<span>@logFile</span>
 						}
 					}
-				</h5>
-				<h5>
+				</h6>
+				<h6>
 					Auto-upgrade:&nbsp;
 					@{
 						string upgrade = acme.AccountConf.GetConfValue(enuConfKey.AUTO_UPGRADE);
@@ -65,14 +68,14 @@
 					}
 					<br />
 					<br />
-					<RadzenTextArea Value="@acme.AccountConf.Config" Cols="85" Rows="18" Style="white-space: nowrap;" />
-				</h5>
+					<RadzenTextArea Value="@acme.AccountConf.Config" Cols="85" Rows="18" Style="white-space: nowrap; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;" />
+				</h6>
 			}
 			else
 			{
-				<h5>
+				<h6>
 					ACME is not installed, see <RadzenLink Icon="settings" Path="Settings" Text="Settings" /> screen for more information.
-				</h5>
+				</h6>
 			}
 		</RadzenStack>
 	</RadzenCard>

@@ -9,66 +9,55 @@
 
 <PageTitle>Nginx Panel - Settings</PageTitle>
 
-@if (!nginx.Installed)
-{
-	<span>Install Nginx, gives the option of package manager (not recommended), stable or mainline:</span>
-	<br />
-	<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-}
-else
-{
-	<span>Uninstall Nginx, leaving configuration files behind:</span>
-	<br />
-	<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-	<br />
-	<br />
-	<span>Upgrade Nginx:</span>
-	<br />
-	<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
-}
-<br />
-<br />
-Reset Nginx by reinstalling (includes configs):
-<br />
-<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-<br />
-<br />
-@if (!acme.Installed)
-{
-	<span>Install ACME:</span>
-	<br />
-	<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-}
-else
-{
-	<span>Uninstall ACME:</span>
-	<br />
-	<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
-	<br />
-	<br />
-	<span>Upgrade ACME:</span>
-	<br />
-	<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
-	<br />
-	<br />
-	<span>Set ACME Cloudflare Token:</span>
-	<br />
-	<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
-	<br />
-	<br />
-	<span>Set ACME Email Notifications:</span>
-	<br />
-	<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
-	<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
-	<br />
-	<br />
-	<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
-	<br />
-	<br />
-	<span>Set ACME CA:</span>
-	<br />
-	<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
-}
+<RadzenStack Orientation="Orientation.Vertical">
+	<RadzenCard Style="width: 400px;">
+		<RadzenText Text="Nginx Settings" TextStyle="TextStyle.DisplayH6" />
+		<hr style="margin-bottom: 25px;" />
+		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+			@if (!nginx.Installed)
+			{
+				<span>Install Nginx, gives the option of package manager (not recommended), stable or mainline:</span>
+				<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+			}
+			else
+			{
+				<span>Uninstall Nginx, leaving configuration files behind:</span>
+				<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+				<span>Upgrade Nginx:</span>
+				<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+				<span>Reset Nginx by reinstalling (includes configs):</span>
+				<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+			}
+		</RadzenStack>
+	</RadzenCard>
+
+	<RadzenCard Style="width: 400px;">
+		<RadzenText Text="ACME Settings" TextStyle="TextStyle.DisplayH6" />
+		<hr style="margin-bottom: 25px;" />
+		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+			@if (!acme.Installed)
+			{
+				<span>Install ACME:</span>
+				<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+			}
+			else
+			{
+				<span>Uninstall ACME:</span>
+				<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+				<span>Upgrade ACME:</span>
+				<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+				<span>Set ACME Cloudflare Token:</span>
+				<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+				<span>Set ACME Email Notifications:</span>
+				<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+				<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
+				<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+				<span>Set ACME CA:</span>
+				<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+			}
+		</RadzenStack>
+	</RadzenCard>
+</RadzenStack>
 
 @code {
 	[CascadingParameter]
