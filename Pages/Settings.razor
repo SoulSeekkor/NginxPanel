@@ -33,6 +33,7 @@
 						<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
 					</RadzenColumn>
 				</RadzenRow>
+
 				<span>Reset Nginx by reinstalling (includes configs):</span>
 				<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 			}
@@ -62,15 +63,18 @@
 						<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
 					</RadzenColumn>
 				</RadzenRow>
+
 				<span>Set ACME Cloudflare Token:</span>
 				<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />				
 				<span>Set ACME CA:</span>
 				<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 
-				<span>Set ACME Email Notifications:</span>
-				<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
-				<RadzenLabel Text="Enable SMTP Notify" Component="NotifyHookSMTP" />
-				<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="Set SMTP" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+				<span>ACME Notifications:</span>
+				<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
+					<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+					<RadzenLabel Text="SMTP Notify (SMTP Settings Must Be Set First)" Component="NotifyHookSMTP" />
+				</RadzenRow>
 			}
 		</RadzenStack>
 	</RadzenCard>
