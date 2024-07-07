@@ -61,6 +61,7 @@
                             }
 
                             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                                <RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
                                 <RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
                                 <RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
                                 <RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
@@ -68,7 +69,7 @@
                         </RadzenRow>
 
                         <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@((value) => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
+                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
                         <br />
                         <RadzenStack Orientation="Orientation.Horizontal">
                             <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
@@ -185,6 +186,90 @@ else
         finally
         {
             await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async void RenameConfig(Nginx.ConfigFile conf)
+    {
+        string configName = conf.Name;
+        var result = await DialogService.OpenAsync("Rename Config", ds =>
+            @<RadzenStack Gap="1.5rem">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the new name for this config below:</RadzenText>
+                <RadzenTextBox @bind-Value=@configName class="w-100" />
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+                        <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenStack>
+    );
+
+        if (!(result is null) && result && !(configName == conf.Name))
+        {
+            if (String.IsNullOrWhiteSpace(configName))
+            {
+                layout?.DisplayToast(MainLayout.toastType.error, "Config name cannot be blank!");
+                return;
+            }
+
+            configName = configName.Trim();
+            string configPath = string.Empty;
+
+            if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+                configPath = Path.Combine(nginx.SitesAvailable, configName);
+            else
+                configPath = Path.Combine(nginx.SharedFiles, configName);
+
+            if (File.Exists(configPath))
+            {
+                layout?.DisplayToast(MainLayout.toastType.error, $"Config with the name <span style='color: DarkRed; font-style: italic;'>{configName}</span> already exists!");
+                return;
+            }
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    // Output new file
+                    File.WriteAllText(configPath, conf.FileContents);
+
+                    // Check enabled status
+                    if (conf.Enabled)
+                    {
+                        string oldName = conf.Name;
+                        string oldPath = conf.ConfigPath;
+
+                        // Disable current file
+                        nginx.ToggleSiteEnabled(conf);
+
+                        // Enable new file
+                        conf.Name = configName;
+                        conf.ConfigPath = configPath;
+                        nginx.ToggleSiteEnabled(conf);
+
+                        // Reset values (so messages below are accurate)
+                        conf.Name = oldName;
+                        conf.ConfigPath = oldPath;
+                    }
+
+                    File.Delete(conf.ConfigPath);
+                    RefreshConfigs(false);
+                });
+
+                layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span> has been renamed to <span style='color: DarkRed; font-style: italic;'>{configName}</span>!");
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(System.UnauthorizedAccessException))
+                {
+                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while renaming config <span style='color: DarkRed; font-style: italic;'>{conf.Name}</span>!");
+                }
+                else
+                {
+                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while renaming config to <span style='color: DarkRed; font-style: italic;'>{configName}</span>!");
+                }
+            }
         }
     }
 
