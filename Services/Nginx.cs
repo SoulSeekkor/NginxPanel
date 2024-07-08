@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 namespace NginxPanel.Services
@@ -71,9 +72,17 @@ namespace NginxPanel.Services
 
 		public enum enuServiceStatus
 		{
+			Checking,
 			Unknown,
+			[Description("Not Found")]
+			NotFound,
+			[Description("Not Installed")]
+			NotInstalled,
 			Running,
+			Starting,
+			Restarting,
 			Stopped,
+			Stopping,
 			Failed
 		}
 
@@ -94,7 +103,7 @@ namespace NginxPanel.Services
 		private string _rootConfig = "";
 		private string _rootPath = "";
 
-		private enuServiceStatus _serviceStatus = enuServiceStatus.Unknown;
+		private enuServiceStatus _serviceStatus = enuServiceStatus.Checking;
 		private string _serviceDetails = "";
 		private string _lastTestResults = "";
 
@@ -172,15 +181,11 @@ namespace NginxPanel.Services
 			try
 			{
 				_refreshService.Stop();
-
-				enuServiceStatus oldStatus = _serviceStatus;
 				GetServiceStatus();
-
-				if (!oldStatus.Equals(_serviceStatus) && !(ServiceStatusChanged is null))
-					ServiceStatusChanged();
 			}
 			finally
 			{
+				// Make sure our timer is started again no matter what
 				_refreshService.Start();
 			}
 		}
@@ -219,7 +224,7 @@ namespace NginxPanel.Services
 
 		public void GetServiceStatus()
 		{
-			_serviceStatus = enuServiceStatus.Unknown;
+			enuServiceStatus oldStatus = _serviceStatus;
 
 			if (Installed)
 			{
@@ -227,9 +232,12 @@ namespace NginxPanel.Services
 
 				if (!string.IsNullOrWhiteSpace(_CLI.StandardError))
 				{
+					// Default to unknown for existence of errors
+					_serviceStatus = enuServiceStatus.Unknown;
+
 					if (_CLI.StandardError == "Unit nginxd.service could not be found.")
 					{
-						_serviceStatus = enuServiceStatus.Unknown;
+						_serviceStatus = enuServiceStatus.NotFound;
 					}
 				}
 				else if (!string.IsNullOrWhiteSpace(_CLI.StandardOut))
@@ -275,22 +283,32 @@ namespace NginxPanel.Services
 					}
 				}
 			}
+			else
+				_serviceStatus = enuServiceStatus.NotInstalled;
+
+			if (!(oldStatus == _serviceStatus) && !(ServiceStatusChanged is null))
+				ServiceStatusChanged();
 		}
 
 		public void PerformServiceAction(enuServiceAction serviceAction)
 		{
+
 			if (serviceAction == enuServiceAction.Start)
-			{
-				_CLI.RunCommand("systemctl start nginx");
-			}
+				_serviceStatus = enuServiceStatus.Starting;
 			else if (serviceAction == enuServiceAction.Stop)
-			{
-				_CLI.RunCommand("systemctl stop nginx");
-			}
+				_serviceStatus = enuServiceStatus.Stopping;
 			else if (serviceAction == enuServiceAction.Restart)
-			{
+				_serviceStatus = enuServiceStatus.Restarting;
+
+			if (!(ServiceStatusChanged is null))
+				ServiceStatusChanged();
+
+			if (serviceAction == enuServiceAction.Start)
+				_CLI.RunCommand("systemctl start nginx");
+			else if (serviceAction == enuServiceAction.Stop)
+				_CLI.RunCommand("systemctl stop nginx");
+			else if (serviceAction == enuServiceAction.Restart)
 				_CLI.RunCommand("systemctl restart nginx");
-			}
 
 			GetServiceStatus();
 		}

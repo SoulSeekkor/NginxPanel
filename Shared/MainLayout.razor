@@ -18,22 +18,23 @@
                 <span style="padding-right: 50px;">
                     User: @cli.RunningAsUser
                     <br />
-                    Nginx Service: @nginx.ServiceStatus.ToString()
+                    Nginx Service: @nginx.ServiceStatus.GetEnumDescription()
                 </span>
 
                 <span>
-                    @if (nginx.ServiceStatus != Services.Nginx.enuServiceStatus.Unknown)
+                    @switch (nginx.ServiceStatus)
                     {
-                        @if (nginx.ServiceStatus == Services.Nginx.enuServiceStatus.Running)
-                        {
+                        case Services.Nginx.enuServiceStatus.Running:
                             <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
                             <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
-                        }
-                        else
-                        {
+                            <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+                            break;
+                        case Services.Nginx.enuServiceStatus.Stopped:
+                        case Services.Nginx.enuServiceStatus.Failed:
                             <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
-                        }
-                        <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+                            <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+                            break;
+
                     }
                 </span>
                 <span style="margin-left: 100px;">
