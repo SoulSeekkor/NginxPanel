@@ -136,16 +136,16 @@ else
 
             if (conf.Enabled)
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> enabled successfully!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% enabled successfully!");
             }
             else
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> disabled successfully!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% disabled successfully!");
             }
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while updating site config <span style='font-weight: bold; color: Crimson;'>{conf.Name}</span>!");
+            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while updating site config %ss%{conf.Name}%se%!");
         }
     }
 
@@ -157,11 +157,11 @@ else
 
             await conf.Save();
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> saved successfully!");
+            layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while saving config <span style='font-weight: bold; color: Crimson;'>{conf.Name}</span>!");
+            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while saving config %ss%{conf.Name}%se%!");
         }
         finally
         {
@@ -174,13 +174,14 @@ else
     {
         try
         {
-            bool? confirm = await DialogService.Confirm($"Are you sure you want to revert config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span>?  You will lose any changes you have made!", "Revert Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+            string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to revert config %ss%{conf.Name}%se%?  You will lose any changes you have made!");
+            bool? confirm = await DialogService.Confirm(message, "Revert Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
             if (confirm.HasValue && confirm.Value)
             {
                 await conf.Revert();
 
-                layout?.DisplayToast(MainLayout.toastType.info, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> has been reverted!");
+                layout?.DisplayToast(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been reverted!");
             }
         }
         finally
@@ -223,7 +224,7 @@ else
 
             if (File.Exists(configPath))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, $"Config with new name of <span style='font-weight: bold; color: Crimson;'>{configName}</span> already exists!");
+                layout?.DisplayToast(MainLayout.toastType.error, $"Config with new name of %ss%{configName}%se% already exists!");
                 return;
             }
 
@@ -257,17 +258,17 @@ else
                     RefreshConfigs(false);
                 });
 
-                layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> has been renamed to <span style='font-weight: bold; color: DeepSkyBlue;'>{configName}</span>!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
             }
             catch (Exception ex)
             {
                 if (ex.GetType() == typeof(System.UnauthorizedAccessException))
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while renaming config <span style='font-weight: bold; color: Crimson;'>{conf.Name}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while renaming config %ss%{conf.Name}%se%!");
                 }
                 else
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while renaming config to <span style='font-weight: bold; color: Crimson;'>{configName}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while renaming config to %ss%{configName}%se%!");
                 }
             }
         }
@@ -277,12 +278,13 @@ else
     {
         try
         {
-            bool? confirm = await DialogService.Confirm($"Are you sure you want to auto format config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span>?  This will attempt to make the config nicer by replacing tabs with spaces, you may want to save before attempting this!", "Format Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+            string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to auto format config %ss%{conf.Name}%se%?  This will attempt to make the config nicer by replacing tabs with spaces, you may want to save before attempting this!");
+            bool? confirm = await DialogService.Confirm(message, "Format Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
             if (confirm.HasValue && confirm.Value)
             {
                 conf.FileContents = conf.FileContents.Replace("    ", "\t").Replace("  ", "    ").Replace("\t", "    ");
-                layout?.DisplayToast(MainLayout.toastType.info, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> has been auto formatted!");
+                layout?.DisplayToast(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been auto formatted!");
             }
         }
         finally
@@ -332,7 +334,7 @@ else
 
             if (File.Exists(configPath))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, $"Config with the name <span style='font-weight: bold; color: Crimson;'>{configName}</span> already exists!");
+                layout?.DisplayToast(MainLayout.toastType.error, $"Config with the name %ss%{configName}%se% already exists!");
                 return;
             }
 
@@ -344,17 +346,17 @@ else
                     RefreshConfigs(false);
                 });
 
-                layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{configName}</span> has been added!");
+                layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
             }
             catch (Exception ex)
             {
                 if (ex.GetType() == typeof(System.UnauthorizedAccessException))
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while adding config <span style='font-weight: bold; color: Crimson;'>{configName}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while adding config %ss%{configName}%se%!");
                 }
                 else
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while adding config <span style='font-weight: bold; color: Crimson;'>{configName}</span>!");
+                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
                 }
             }
         }
@@ -362,7 +364,8 @@ else
 
     private async void DeleteConfig(Nginx.ConfigFile conf)
     {
-        bool? confirm = await DialogService.Confirm($"Are you sure you want to delete config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span>?", "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+        string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete config %ss%{conf.Name}%se%?");
+        bool? confirm = await DialogService.Confirm(message, "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
         if (confirm.HasValue && confirm.Value)
         {
@@ -372,7 +375,7 @@ else
                 RefreshConfigs(false);
             });
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Config <span style='font-weight: bold; color: DeepSkyBlue;'>{conf.Name}</span> has been deleted!");
+            layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
         }
     }
 }

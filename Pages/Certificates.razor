@@ -146,7 +146,8 @@ else
 
 	private async void DeleteCertificate(Services.ACME.Certificate cert)
 	{
-		bool? confirm = await DialogService.Confirm($"Are you sure you want to delete certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.MainDomain}</span>?", "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete certificate %ss%{cert.MainDomain}%se%?");
+		bool? confirm = await DialogService.Confirm(message, "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
@@ -154,18 +155,19 @@ else
 			{
 				if (acme.DeleteCertificate(cert))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.MainDomain}</span> has been deleted!");
+					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been deleted!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to delete certificate <span style='font-weight: bold; color: Crimson;'>{cert.MainDomain}</span>!");
+					layout?.DisplayToast(MainLayout.toastType.error, "Failed to delete certificate %ss%{cert.MainDomain}%se%!");
 			});
 		}
 	}
 
 	private async void ForceRenewCertificate(Services.ACME.Certificate cert)
 	{
-		bool? confirm = await DialogService.Confirm($"Are you sure you want to force renewal for certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.MainDomain}</span>?", "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to force renewal for certificate %ss%{cert.MainDomain}%se%?");
+		bool? confirm = await DialogService.Confirm(message, "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
@@ -175,11 +177,11 @@ else
 
 				if (acme.ForceRenewCertificate(cert, ref response))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.MainDomain}</span> has been renewed!");
+					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been renewed!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to force certificate renewal for <span style='font-weight: bold; color: Crimson;'>{cert.MainDomain}</span>: {response}");
+					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to force certificate renewal for %ss%{cert.MainDomain}%se%: {response}");
 			});
 
 		}
@@ -229,11 +231,11 @@ else
 
 				File.WriteAllBytes(pfxFile.FullName, pfxCert.Export(X509ContentType.Pfx, pfxPass));
 
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.MainDomain}</span> successfully exported!");
+				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% successfully exported!");
 			}
 			catch
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to export certificate <span style='font-weight: bold; color: Crimson;'>{cert.MainDomain}</span>!");
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to export certificate %ss%{cert.MainDomain}%se%!");
 			}
 		}
 	}
@@ -384,16 +386,16 @@ else
 
 			if (success)
 			{
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{cert.primaryDomain}</span> issued successfully!");
+				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.primaryDomain}%se% issued successfully!");
 				RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to issue certificate <span style='font-weight: bold; color: Crimson;'>{cert.primaryDomain}</span>: {result}");
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to issue certificate %ss%{cert.primaryDomain}%se%: {result}");
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding certificate <span style='font-weight: bold; color: Crimson;'>{cert.primaryDomain}</span>!");
+			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding certificate %ss%{cert.primaryDomain}%se%!");
 		}
 	}
 
@@ -418,12 +420,12 @@ else
 						layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, $"SAN domain <span style='font-weight: bold; color: Crimson;'>{cert.newSANdomain}</span> must be a valid FQDN or wildcard!");
+					layout?.DisplayToast(MainLayout.toastType.error, $"SAN domain %ss%{cert.newSANdomain}%se% must be a valid FQDN or wildcard!");
 			}
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding SAN domain <span style='font-weight: bold; color: Crimson;'>{cert.newSANdomain}</span>!");
+			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding SAN domain %ss%{cert.newSANdomain}%se%!");
 		}
 	}
 
@@ -443,7 +445,7 @@ else
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while deleting SAN domain <span style='font-weight: bold; color: Crimson;'>{cert.selectedSAN}</span>!");
+			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while deleting SAN domain %ss%{cert.selectedSAN}%se%!");
 		}
 	}
 
@@ -517,7 +519,7 @@ else
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while displaying install certificate screen for <span style='font-weight: bold; color: Crimson;'>{cert.MainDomain}</span>!");
+			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while displaying install certificate screen for %ss%{cert.MainDomain}%se%!");
 		}
 	}
 
@@ -588,16 +590,16 @@ else
 
 			if (success)
 			{
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate <span style='font-weight: bold; color: DeepSkyBlue;'>{installCert.cert!.MainDomain}</span> installed successfully!");
+				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{installCert.cert!.MainDomain}%se% installed successfully!");
 				RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to install certificate <span style='font-weight: bold; color: Crimson;'>{installCert.cert!.MainDomain}</span>: {result}");
+				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to install certificate %ss%{installCert.cert!.MainDomain}%se%: {result}");
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate <span style='font-weight: bold; color: Crimson;'>{installCert.cert!.MainDomain}</span>!");
+			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate %ss%{installCert.cert!.MainDomain}%se%!");
 		}
 	}
 }

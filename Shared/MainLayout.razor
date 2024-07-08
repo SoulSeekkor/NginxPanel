@@ -81,7 +81,22 @@
 
     public async Task DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
     {
-        await JSRuntime.InvokeVoidAsync("toast", type.ToString(), message, title, dismissable);
+        await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+    }
+
+    public string StyleMessage(toastType type, string message)
+    {
+        // Determine color by toastType
+        string color = "DeepSkyBlue";
+
+        if (type == toastType.error)
+            color = "Crimson";
+
+        // Replace "span start/end" with styling
+        message = message.Replace("%ss%", "<span style='color: %color%; font-weight: bold;'>".Replace("%color%", color));
+        message = message.Replace("%se%", "</span>");
+
+        return message;
     }
 
     public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);

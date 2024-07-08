@@ -198,7 +198,7 @@
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm($"Are you sure you want to upgrade Nginx?", "Upgrade Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool? confirm = await DialogService.Confirm("Are you sure you want to upgrade Nginx?", "Upgrade Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 			if (confirm.HasValue && confirm.Value)
 			{
@@ -313,7 +313,7 @@
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm($"Are you sure you want to uninstall the ACME script?", "Uninstall ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool? confirm = await DialogService.Confirm("Are you sure you want to uninstall the ACME script?", "Uninstall ACME", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 			if (confirm.HasValue && confirm.Value)
 			{
