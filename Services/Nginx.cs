@@ -72,6 +72,7 @@ namespace NginxPanel.Services
 
 		public enum enuServiceStatus
 		{
+			[Description("Checking...")]
 			Checking,
 			Unknown,
 			[Description("Not Found")]
@@ -79,9 +80,12 @@ namespace NginxPanel.Services
 			[Description("Not Installed")]
 			NotInstalled,
 			Running,
+			[Description("Starting...")]
 			Starting,
+			[Description("Restarting...")]
 			Restarting,
 			Stopped,
+			[Description("Stopping...")]
 			Stopping,
 			Failed
 		}
