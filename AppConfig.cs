@@ -18,6 +18,12 @@ namespace NginxPanel
         public static string PFXPath { get; set; } = Path.Combine(_basePath, "self-signed.pfx");
         public static string PFXPassword { get; set; } = GeneratePassword();
 
+        // DUO related settings
+        public static bool DUOEnabled { get; set; } = false;
+        public static string DUOIntegrationKey { get; set; } = string.Empty;
+        public static string DUOSecretKey { get; set; } = string.Empty;
+        public static string DUOAPIHostname { get; set; } = string.Empty;
+
         public static void Init()
         {
             // Check if config already exists
@@ -43,6 +49,12 @@ namespace NginxPanel
             config.AppendLine($"Port='{Port}'");
             config.AppendLine($"PFXPath='{PFXPath}'");
             config.AppendLine($"PFXPassword='{PFXPassword}'");
+
+            // DUO related settings
+            config.AppendLine($"DUOEnabled='{DUOEnabled}'");
+            config.AppendLine($"DUOIntegrationKey='{DUOIntegrationKey}'");
+            config.AppendLine($"DUOSecretKey='{DUOSecretKey}'");
+            config.AppendLine($"DUOAPIHostname='{DUOAPIHostname}'");
 
             // Output config file (overwrites)
             File.WriteAllText(AppConfigPath, config.ToString());
@@ -70,6 +82,14 @@ namespace NginxPanel
                         PFXPath = split[1]; break;
                     case "pfxpassword":
                         PFXPassword = split[1]; break;
+                    case "duoenabled":
+                        DUOEnabled = (split[1] == "1" || split[1] == "true"); break;
+                    case "duointegrationkey":
+                        DUOIntegrationKey = split[1]; break;
+                    case "duosecretkey":
+                        DUOSecretKey = split[1]; break;
+                    case "duoapihostname":
+                        DUOAPIHostname = split[1]; break;
                 }
             }
 
