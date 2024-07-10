@@ -39,6 +39,8 @@ builder.Services.AddSingleton<CLI>();
 builder.Services.AddSingleton<Nginx>();
 builder.Services.AddSingleton<ACME>();
 
+builder.Services.AddScoped<AuthState>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

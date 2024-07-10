@@ -4,6 +4,7 @@
 
 @inject IJSRuntime JSRuntime;
 
+@inject Services.AuthState auth;
 @inject Services.CLI cli;
 @inject Services.Nginx nginx;
 @inject DialogService DialogService;
@@ -11,52 +12,60 @@
 @inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
-    <RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
-        <RadzenHeader>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
-                <span style="padding-right: 50px;">
-                    User: @cli.RunningAsUser
-                    <br />
-                    Nginx Service: @nginx.ServiceStatus.GetEnumDescription()
-                </span>
+    @if (auth.Authenticated)
+    {
+        <RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
+            <RadzenHeader>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                    <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+                    <span style="padding-right: 50px;">
+                        User: @cli.RunningAsUser
+                        <br />
+                        Nginx Service: @nginx.ServiceStatus.GetEnumDescription()
+                    </span>
 
-                <span>
-                    @switch (nginx.ServiceStatus)
-                    {
-                        case Services.Nginx.enuServiceStatus.Running:
-                            <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
-                            <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
-                            <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
-                            break;
-                        case Services.Nginx.enuServiceStatus.Stopped:
-                        case Services.Nginx.enuServiceStatus.Failed:
-                            <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
-                            <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
-                            break;
+                    <span>
+                        @switch (nginx.ServiceStatus)
+                        {
+                            case Services.Nginx.enuServiceStatus.Running:
+                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
+                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
+                                <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+                                break;
+                            case Services.Nginx.enuServiceStatus.Stopped:
+                            case Services.Nginx.enuServiceStatus.Failed:
+                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
+                                <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+                                break;
 
-                    }
-                </span>
-                <span style="margin-left: 100px;">
-                    Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
-                </span>
-            </RadzenStack>
-        </RadzenHeader>
-        <RadzenSidebar @bind-Expanded="@sidebarExpanded">
-            <RadzenText Text="@Assembly.GetEntryAssembly()!.GetName().Name" TextStyle="TextStyle.DisplayH5" Style="padding: 10px;" />
-            <RadzenPanelMenu>
-                <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
-                <RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
-                <RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
-                <RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
-            </RadzenPanelMenu>
-        </RadzenSidebar>
-        <RadzenBody>
-            <div class="rz-p-4">
-                @Body
-            </div>
-        </RadzenBody>
-    </RadzenLayout>
+                        }
+                    </span>
+                    <span style="margin-left: 100px;">
+                        Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
+                    </span>
+                </RadzenStack>
+            </RadzenHeader>
+            <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+                <RadzenText Text="@Assembly.GetEntryAssembly()!.GetName().Name" TextStyle="TextStyle.DisplayH5" Style="padding: 10px;" />
+                <RadzenPanelMenu>
+                    <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
+                    <RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
+                    <RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
+                    <RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
+                </RadzenPanelMenu>
+            </RadzenSidebar>
+            <RadzenBody>
+                <div class="rz-p-4">
+                    @Body
+                </div>
+            </RadzenBody>
+        </RadzenLayout>
+    }
+    else
+    {
+        <!-- Temporary display -->
+        <RadzenText Text="You must authenticate before using this application." TextStyle="TextStyle.DisplayH4" TextAlign="TextAlign.Center" />
+    }
 
     <RadzenComponents />
 </CascadingValue>
