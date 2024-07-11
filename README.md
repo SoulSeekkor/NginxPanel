@@ -4,7 +4,10 @@
 
 * [Introduction](#introduction)
 * [Requirements](#requirements)
+* [Important](#important)
 * [Install](#install)
+* [Running as a service](#running-as-a-service)
+* [Configuration settings](#configuration-settings)
 * [Reporting issues](#reporting-issues)
 * [Submitting fixes or additions](#submitting-fixes-or-additions)
 
@@ -91,6 +94,30 @@ Run the following command and paste the systemd content to create a service for 
     [Install]
     WantedBy=multi-user.target
     ```
+
+## Configuration settings
+
+You can find the generated config file after first run at /etc/nginxpanel/app.conf.
+> NOTE: This file is currently loaded AND resaved upon each run, so unmatched settings/comments will be removed! (This behavior will change at a later date.)
+
+* Port: Port that the application will listen on.
+
+* PFXPath: Full path to where the **self-signed PFX** or **preferred PFX** certificate lives. Auto-generated on first start if none exists.
+
+* PFXPassword: Password for the specificed PFX certificate. Randomly generated on first start for new self-signed certificates.
+
+* DisableAuthWarningOnStart: Used for disabling the toast on startup about not having any authentication settings specified yet (if you wish to run this with no auth).
+
+* Username: Username to use for login (login is not case sensitive).
+
+* Password: Password for your application, 15 characters or more is best (do not reuse your passwords).
+
+* DUOEnabled: Used for turning on DUO push 2FA, must also specify other DUO settings.
+
+* DUOIntegrationKey/DUOSecretKey/DUOAPIHostname: Values from the DUO admin portal when you create a new web SDK application.
+
+> [!IMPORTANT]
+> DUO is not yet implemented!
 
 ## Reporting issues
 
