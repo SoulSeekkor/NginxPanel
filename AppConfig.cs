@@ -16,7 +16,11 @@ namespace NginxPanel
 
         public static int Port { get; set; } = 5000;
         public static string PFXPath { get; set; } = Path.Combine(_basePath, "self-signed.pfx");
-        public static string PFXPassword { get; set; } = GeneratePassword();
+        public static string PFXPassword { get; set; } = GeneratePFXPassword();
+
+        // Basic auth related settings
+        public static string Username { get; set; } = string.Empty;
+        public static string Password { get; set; } = string.Empty;
 
         // DUO related settings
         public static bool DUOEnabled { get; set; } = false;
@@ -50,6 +54,10 @@ namespace NginxPanel
             config.AppendLine($"PFXPath='{PFXPath}'");
             config.AppendLine($"PFXPassword='{PFXPassword}'");
 
+            // Basic auth related settings
+            config.AppendLine($"Username='{Username}'");
+            config.AppendLine($"Password='{Password}'");
+
             // DUO related settings
             config.AppendLine($"DUOEnabled='{DUOEnabled}'");
             config.AppendLine($"DUOIntegrationKey='{DUOIntegrationKey}'");
@@ -82,6 +90,10 @@ namespace NginxPanel
                         PFXPath = split[1]; break;
                     case "pfxpassword":
                         PFXPassword = split[1]; break;
+                    case "username":
+                        Username = split[1]; break;
+                    case "password":
+                        Password = split[1]; break;
                     case "duoenabled":
                         DUOEnabled = (split[1] == "1" || split[1] == "true"); break;
                     case "duointegrationkey":
@@ -102,7 +114,7 @@ namespace NginxPanel
             }
         }
 
-        private static string GeneratePassword()
+        private static string GeneratePFXPassword()
         {
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             StringBuilder pass = new StringBuilder();

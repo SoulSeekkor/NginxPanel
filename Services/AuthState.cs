@@ -2,14 +2,13 @@
 {
     public class AuthState
     {
-        public bool Authenticated {  get { return _authenticated; }
-    }
+        public bool Authenticated { get { return _authenticated; } }
 
         private bool _authenticated = false;
 
         public AuthState()
         {
-            if (!AppConfig.DUOEnabled)
+            if (!AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
             {
                 _authenticated = true;
             }
