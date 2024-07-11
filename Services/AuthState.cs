@@ -13,5 +13,10 @@
                 _authenticated = true;
             }
         }
+
+        public void SetAuthenticated()
+        {
+            _authenticated = true;
+        }
     }
 }

@@ -18,6 +18,8 @@ namespace NginxPanel
         public static string PFXPath { get; set; } = Path.Combine(_basePath, "self-signed.pfx");
         public static string PFXPassword { get; set; } = GeneratePFXPassword();
 
+        public static bool DisableAuthWarningOnStart { get; set; } = false;
+
         // Basic auth related settings
         public static string Username { get; set; } = string.Empty;
         public static string Password { get; set; } = string.Empty;
@@ -33,8 +35,9 @@ namespace NginxPanel
             // Check if config already exists
             if (File.Exists(AppConfigPath))
             {
-                // Load config
+                // Load config, then save to make sure config settings are current
                 ReadConfig();
+                SaveConfig();
             }
             else
             {
@@ -53,6 +56,8 @@ namespace NginxPanel
             config.AppendLine($"Port='{Port}'");
             config.AppendLine($"PFXPath='{PFXPath}'");
             config.AppendLine($"PFXPassword='{PFXPassword}'");
+
+            config.AppendLine($"DisableAuthWarningOnStart='{DisableAuthWarningOnStart}'");
 
             // Basic auth related settings
             config.AppendLine($"Username='{Username}'");
@@ -90,12 +95,14 @@ namespace NginxPanel
                         PFXPath = split[1]; break;
                     case "pfxpassword":
                         PFXPassword = split[1]; break;
+                    case "disableauthwarningonstart":
+                        DisableAuthWarningOnStart = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
                     case "username":
                         Username = split[1]; break;
                     case "password":
                         Password = split[1]; break;
                     case "duoenabled":
-                        DUOEnabled = (split[1] == "1" || split[1] == "true"); break;
+                        DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
                     case "duointegrationkey":
                         DUOIntegrationKey = split[1]; break;
                     case "duosecretkey":
