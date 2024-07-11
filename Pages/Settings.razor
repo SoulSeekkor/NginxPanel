@@ -150,7 +150,7 @@
 					}
 				});
 
-				layout?.DisplayToast(MainLayout.toastType.success, "Nginx installed successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx installed successfully!");
 			}
 		}
 		finally
@@ -182,7 +182,7 @@
 					//cli.RunCommand("apt update");
 				});
 
-				layout?.DisplayToast(MainLayout.toastType.success, "Nginx uninstalled successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx uninstalled successfully!");
 			}
 		}
 		finally
@@ -213,15 +213,15 @@
 
 				if (cli.StandardOut.Contains("Setting up nginx"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "Nginx upgraded successfully!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx upgraded successfully!");
 				}
 				else if (cli.StandardOut.Contains("is already the newest version"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.info, "Nginx already at the latest version!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.info, "Nginx already at the latest version!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "Nginx failed to upgrade!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Nginx failed to upgrade!");
 				}
 			}
 		}
@@ -266,7 +266,7 @@
 
 			if (!emailValid)
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, "Must enter a valid email for registration!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "Must enter a valid email for registration!");
 				return;
 			}
 
@@ -291,13 +291,13 @@
 					});
 
 					if (cli.StandardOut.Contains("Registered"))
-						layout?.DisplayToast(MainLayout.toastType.success, "ACME installed successfully!");
+						await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME installed successfully!");
 					else
-						layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to register email!");
+						await layout!.DisplayToastAsync(MainLayout.toastType.error, "ACME failed to register email!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to install!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "ACME failed to install!");
 				}
 			}
 		}
@@ -327,11 +327,11 @@
 
 				if (cli.StandardOut.Contains("Uninstalling alias"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME uninstalled successfully!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME uninstalled successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to uninstall!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "ACME failed to uninstall!");
 				}
 			}
 		}
@@ -376,11 +376,11 @@
 
 				if (cli.StandardOut.Contains("Upgrade success!"))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME upgraded successfully! Auto upgrade was " + (autoUpgrade ? "enabled" : "disabled") + ".");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME upgraded successfully! Auto upgrade was " + (autoUpgrade ? "enabled" : "disabled") + ".");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "ACME failed to upgrade!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "ACME failed to upgrade!");
 				}
 			}
 		}
@@ -434,11 +434,11 @@
 
 				if (result)
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, $"ACME Cloudflare API token {(String.IsNullOrWhiteSpace(token) ? "cleared" : "set")} successfully!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, $"ACME Cloudflare API token {(String.IsNullOrWhiteSpace(token) ? "cleared" : "set")} successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to {(String.IsNullOrWhiteSpace(token) ? "clear" : "set")} ACME Cloudflare API token!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to {(String.IsNullOrWhiteSpace(token) ? "clear" : "set")} ACME Cloudflare API token!");
 				}
 			}
 		}
@@ -498,7 +498,7 @@
 
 				if (String.IsNullOrWhiteSpace(host) || String.IsNullOrWhiteSpace(from) || String.IsNullOrWhiteSpace(to))
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "All email settings must be entered!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "All email settings must be entered!");
 					return;
 				}
 
@@ -513,11 +513,11 @@
 
 				if (result)
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME email notifications set successfully!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME email notifications set successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME email notifications!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Failed to set ACME email notifications!");
 				}
 			}
 		}
@@ -562,7 +562,7 @@
 					CA = "google";
 			}
 			else if (!String.IsNullOrWhiteSpace(confVal))
-				layout?.DisplayToast(MainLayout.toastType.warning, "Currently set certificate authority is unknown!  Be aware that changing this will overwrite the existing server value.");
+				await layout!.DisplayToastAsync(MainLayout.toastType.warning, "Currently set certificate authority is unknown!  Be aware that changing this will overwrite the existing server value.");
 
 			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
 				@<RadzenStack>
@@ -591,11 +591,11 @@
 
 				if (result)
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, "ACME default certificate authority set successfully!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME default certificate authority set successfully!");
 				}
 				else
 				{
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to set ACME default certificate authority!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Failed to set ACME default certificate authority!");
 				}
 			}
 		}
@@ -622,11 +622,11 @@
 
 			if (result)
 			{
-				layout?.DisplayToast(MainLayout.toastType.success, $"ACME SMTP notify hook {(hookEnabled ? "cleared" : "set")} successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"ACME SMTP notify hook {(hookEnabled ? "cleared" : "set")} successfully!");
 			}
 			else
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to {(hookEnabled ? "clear" : "set")} ACME SMTP notify hook!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to {(hookEnabled ? "clear" : "set")} ACME SMTP notify hook!");
 			}
 		}
 		finally

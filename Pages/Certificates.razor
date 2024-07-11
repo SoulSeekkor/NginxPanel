@@ -101,7 +101,7 @@ else
 
 			if (notifyUser)
 			{
-				layout?.DisplayToast(MainLayout.toastType.info, "Certificates refreshed successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.info, "Certificates refreshed successfully!");
 			}
 		}
 		finally
@@ -140,8 +140,15 @@ else
 
 	private async void CopyToClipboard(string name, string value)
 	{
-		await JSRuntime.InvokeAsync<string>("clipboardCopy", value);
-		layout?.DisplayToast(MainLayout.toastType.success, name + " copied to the clipboard successfully!");
+		try
+		{
+			await JSRuntime.InvokeAsync<string>("clipboardCopy", value);
+			await layout!.DisplayToastAsync(MainLayout.toastType.success, name + " copied to the clipboard successfully!");
+		}
+		catch
+		{
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to copy {name} to the clipboard!");
+		}
 	}
 
 	private async void DeleteCertificate(Services.ACME.Certificate cert)
@@ -155,11 +162,11 @@ else
 			{
 				if (acme.DeleteCertificate(cert))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been deleted!");
+					layout?.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been deleted!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, "Failed to delete certificate %ss%{cert.MainDomain}%se%!");
+					layout?.DisplayToastAsync(MainLayout.toastType.error, "Failed to delete certificate %ss%{cert.MainDomain}%se%!");
 			});
 		}
 	}
@@ -177,11 +184,11 @@ else
 
 				if (acme.ForceRenewCertificate(cert, ref response))
 				{
-					layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been renewed!");
+					layout?.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been renewed!");
 					RefreshCertificates(false);
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, $"Failed to force certificate renewal for %ss%{cert.MainDomain}%se%: {response}");
+					layout?.DisplayToastAsync(MainLayout.toastType.error, $"Failed to force certificate renewal for %ss%{cert.MainDomain}%se%: {response}");
 			});
 
 		}
@@ -210,13 +217,13 @@ else
 		{
 			if (String.IsNullOrWhiteSpace(pfxPath))
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, "Export path cannot be blank!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "Export path cannot be blank!");
 				return;
 			}
 
 			if (String.IsNullOrWhiteSpace(pfxPass))
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, "PFX password cannot be blank!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "PFX password cannot be blank!");
 				return;
 			}
 
@@ -231,11 +238,11 @@ else
 
 				File.WriteAllBytes(pfxFile.FullName, pfxCert.Export(X509ContentType.Pfx, pfxPass));
 
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% successfully exported!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% successfully exported!");
 			}
 			catch
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to export certificate %ss%{cert.MainDomain}%se%!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to export certificate %ss%{cert.MainDomain}%se%!");
 			}
 		}
 	}
@@ -354,7 +361,7 @@ else
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while displaying add certificate screen!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, "Exception occurred while displaying add certificate screen!");
 		}
 	}
 
@@ -386,20 +393,20 @@ else
 
 			if (success)
 			{
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{cert.primaryDomain}%se% issued successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.primaryDomain}%se% issued successfully!");
 				RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to issue certificate %ss%{cert.primaryDomain}%se%: {result}");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to issue certificate %ss%{cert.primaryDomain}%se%: {result}");
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding certificate %ss%{cert.primaryDomain}%se%!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Exception occurred while adding certificate %ss%{cert.primaryDomain}%se%!");
 		}
 	}
 
-	private void AddSANDomain(AddCertificateModel cert)
+	private async void AddSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
@@ -417,19 +424,19 @@ else
 						cert.SANs?.Reset();
 					}
 					else
-						layout?.DisplayToast(MainLayout.toastType.info, "SAN already exists!");
+						await layout!.DisplayToastAsync(MainLayout.toastType.info, "SAN already exists!");
 				}
 				else
-					layout?.DisplayToast(MainLayout.toastType.error, $"SAN domain %ss%{cert.newSANdomain}%se% must be a valid FQDN or wildcard!");
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"SAN domain %ss%{cert.newSANdomain}%se% must be a valid FQDN or wildcard!");
 			}
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while adding SAN domain %ss%{cert.newSANdomain}%se%!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Exception occurred while adding SAN domain %ss%{cert.newSANdomain}%se%!");
 		}
 	}
 
-	private void DeleteSANDomain(AddCertificateModel cert)
+	private async void DeleteSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
@@ -445,7 +452,7 @@ else
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while deleting SAN domain %ss%{cert.selectedSAN}%se%!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Exception occurred while deleting SAN domain %ss%{cert.selectedSAN}%se%!");
 		}
 	}
 
@@ -519,7 +526,7 @@ else
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, $"Exception occurred while displaying install certificate screen for %ss%{cert.MainDomain}%se%!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Exception occurred while displaying install certificate screen for %ss%{cert.MainDomain}%se%!");
 		}
 	}
 
@@ -530,7 +537,7 @@ else
 			// Validate PFX password if export PFX was checked
 			if (installCert.exportToPFX && String.IsNullOrWhiteSpace(installCert.PFXpassword))
 			{
-				layout?.DisplayToast(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "PFX export was selected, password must be specified!");
 				return;
 			}
 
@@ -590,16 +597,16 @@ else
 
 			if (success)
 			{
-				layout?.DisplayToast(MainLayout.toastType.success, $"Certificate %ss%{installCert.cert!.MainDomain}%se% installed successfully!");
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{installCert.cert!.MainDomain}%se% installed successfully!");
 				RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else
-				layout?.DisplayToast(MainLayout.toastType.error, $"Failed to install certificate %ss%{installCert.cert!.MainDomain}%se%: {result}");
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to install certificate %ss%{installCert.cert!.MainDomain}%se%: {result}");
 		}
 		catch
 		{
-			layout?.DisplayToast(MainLayout.toastType.error, "Exception occurred while installing certificate %ss%{installCert.cert!.MainDomain}%se%!");
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, "Exception occurred while installing certificate %ss%{installCert.cert!.MainDomain}%se%!");
 		}
 	}
 }

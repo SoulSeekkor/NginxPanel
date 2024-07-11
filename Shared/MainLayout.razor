@@ -71,9 +71,17 @@
 </CascadingValue>
 
 @code {
+    #region Variables
+
     private bool sidebarExpanded = true;
     private bool disableAllButtons = false;
     private bool busyTesting = false;
+
+    // Basic auth variables
+    private string username = string.Empty;
+    private string password = string.Empty;
+
+    #endregion
 
     public enum toastType
     {
@@ -86,12 +94,22 @@
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
+        {
             nginx.ServiceStatusChanged += RefreshServiceStatus;
+
+            if (!AppConfig.DisableAuthWarningOnStart && !AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
+                DisplayToast(toastType.warning, $"No authentication mechanism has been set, see {AppConfig.AppConfigPath} for settings!");
+        }
     }
 
-    public async Task DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
+    public async Task DisplayToastAsync(toastType type, string message, string title = "", bool dismissable = false)
     {
         await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+    }
+
+    public void DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
+    {
+        JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
     }
 
     public string StyleMessage(toastType type, string message)
@@ -123,15 +141,15 @@
             switch (action)
             {
                 case Services.Nginx.enuServiceAction.Start:
-                    await DisplayToast(toastType.info, "Nginx service started!");
+                    await DisplayToastAsync(toastType.info, "Nginx service started!");
                     break;
 
                 case Services.Nginx.enuServiceAction.Stop:
-                    await DisplayToast(toastType.info, "Nginx service stopped!");
+                    await DisplayToastAsync(toastType.info, "Nginx service stopped!");
                     break;
 
                 case Services.Nginx.enuServiceAction.Restart:
-                    await DisplayToast(toastType.info, "Nginx service restarted!");
+                    await DisplayToastAsync(toastType.info, "Nginx service restarted!");
                     break;
             }
         }
@@ -154,11 +172,11 @@
 
             if (results.Contains("Successful"))
             {
-                await DisplayToast(toastType.success, "Nginx configuration test was successful!");
+                await DisplayToastAsync(toastType.success, "Nginx configuration test was successful!");
             }
             else
             {
-                await DisplayToast(toastType.error, $"Nginx configuration test failed! View dashboard for more information.");
+                await DisplayToastAsync(toastType.error, $"Nginx configuration test failed! View dashboard for more information.");
             }
         }
         finally

@@ -118,7 +118,7 @@ else
 
             if (notifyUser)
             {
-                layout?.DisplayToast(MainLayout.toastType.info, "Configs refreshed successfully!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.info, "Configs refreshed successfully!");
             }
         }
         finally
@@ -128,7 +128,7 @@ else
         }
     }
 
-    private void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
+    private async void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
     {
         try
         {
@@ -136,16 +136,16 @@ else
 
             if (conf.Enabled)
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% enabled successfully!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% enabled successfully!");
             }
             else
             {
-                layout?.DisplayToast(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% disabled successfully!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% disabled successfully!");
             }
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while updating site config %ss%{conf.Name}%se%!");
+            await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while updating site config %ss%{conf.Name}%se%!");
         }
     }
 
@@ -157,11 +157,11 @@ else
 
             await conf.Save();
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
+            await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
         }
         catch
         {
-            layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while saving config %ss%{conf.Name}%se%!");
+            await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while saving config %ss%{conf.Name}%se%!");
         }
         finally
         {
@@ -181,7 +181,7 @@ else
             {
                 await conf.Revert();
 
-                layout?.DisplayToast(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been reverted!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been reverted!");
             }
         }
         finally
@@ -210,7 +210,7 @@ else
         {
             if (String.IsNullOrWhiteSpace(configName))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, "New config name cannot be blank!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.error, "New config name cannot be blank!");
                 return;
             }
 
@@ -224,7 +224,7 @@ else
 
             if (File.Exists(configPath))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, $"Config with new name of %ss%{configName}%se% already exists!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with new name of %ss%{configName}%se% already exists!");
                 return;
             }
 
@@ -258,17 +258,17 @@ else
                     RefreshConfigs(false);
                 });
 
-                layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
             }
             catch (Exception ex)
             {
                 if (ex.GetType() == typeof(System.UnauthorizedAccessException))
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while renaming config %ss%{conf.Name}%se%!");
+                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while renaming config %ss%{conf.Name}%se%!");
                 }
                 else
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while renaming config to %ss%{configName}%se%!");
+                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while renaming config to %ss%{configName}%se%!");
                 }
             }
         }
@@ -284,7 +284,7 @@ else
             if (confirm.HasValue && confirm.Value)
             {
                 conf.FileContents = conf.FileContents.Replace("    ", "\t").Replace("  ", "    ").Replace("\t", "    ");
-                layout?.DisplayToast(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been auto formatted!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been auto formatted!");
             }
         }
         finally
@@ -320,7 +320,7 @@ else
         {
             if (String.IsNullOrWhiteSpace(configName))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, "Config name cannot be blank!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.error, "Config name cannot be blank!");
                 return;
             }
 
@@ -334,7 +334,7 @@ else
 
             if (File.Exists(configPath))
             {
-                layout?.DisplayToast(MainLayout.toastType.error, $"Config with the name %ss%{configName}%se% already exists!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with the name %ss%{configName}%se% already exists!");
                 return;
             }
 
@@ -346,17 +346,17 @@ else
                     RefreshConfigs(false);
                 });
 
-                layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
+                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
             }
             catch (Exception ex)
             {
                 if (ex.GetType() == typeof(System.UnauthorizedAccessException))
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"File permission error occurred while adding config %ss%{configName}%se%!");
+                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while adding config %ss%{configName}%se%!");
                 }
                 else
                 {
-                    layout?.DisplayToast(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
+                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
                 }
             }
         }
@@ -375,7 +375,7 @@ else
                 RefreshConfigs(false);
             });
 
-            layout?.DisplayToast(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
+            await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
         }
     }
 }
