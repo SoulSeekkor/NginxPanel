@@ -84,31 +84,35 @@ namespace NginxPanel
 
             foreach (string line in lines)
             {
-                split = line.Split('=');
-                split[1] = split[1].Trim('\'');
-
-                switch (split[0].ToLower())
+                // TODO Add collection on unrecognized lines
+                if (line.Contains("="))
                 {
-                    case "port":
-                        Port = int.Parse(split[1]); break;
-                    case "pfxpath":
-                        PFXPath = split[1]; break;
-                    case "pfxpassword":
-                        PFXPassword = split[1]; break;
-                    case "disableauthwarningonstart":
-                        DisableAuthWarningOnStart = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
-                    case "username":
-                        Username = split[1]; break;
-                    case "password":
-                        Password = split[1]; break;
-                    case "duoenabled":
-                        DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
-                    case "duointegrationkey":
-                        DUOIntegrationKey = split[1]; break;
-                    case "duosecretkey":
-                        DUOSecretKey = split[1]; break;
-                    case "duoapihostname":
-                        DUOAPIHostname = split[1]; break;
+                    split = line.Split('=', 2);
+                    split[1] = split[1].Trim('\'');
+
+                    switch (split[0].ToLower())
+                    {
+                        case "port":
+                            Port = int.Parse(split[1]); break;
+                        case "pfxpath":
+                            PFXPath = split[1]; break;
+                        case "pfxpassword":
+                            PFXPassword = split[1]; break;
+                        case "disableauthwarningonstart":
+                            DisableAuthWarningOnStart = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
+                        case "username":
+                            Username = split[1]; break;
+                        case "password":
+                            Password = split[1]; break;
+                        case "duoenabled":
+                            DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
+                        case "duointegrationkey":
+                            DUOIntegrationKey = split[1]; break;
+                        case "duosecretkey":
+                            DUOSecretKey = split[1]; break;
+                        case "duoapihostname":
+                            DUOAPIHostname = split[1]; break;
+                    }
                 }
             }
 
