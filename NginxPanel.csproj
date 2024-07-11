@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Radzen.Blazor" Version="4.33.3" />
+    <PackageReference Include="Radzen.Blazor" Version="4.34.0" />
   </ItemGroup>
 
 </Project>
