@@ -97,6 +97,7 @@
 
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="PFX Certificate" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
+			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
 		</RadzenCard>
 	</RadzenStack>
 </RadzenStack>
@@ -720,6 +721,48 @@
 	});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Username/password set successfully!");
+			}
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
+
+	private async void SetPFXDetails()
+	{
+		try
+		{
+			string PFXpath = AppConfig.PFXPath;
+			string PFXpassword = AppConfig.PFXPassword;
+
+			var result = await DialogService.OpenAsync("Set PFX Details", ds =>
+	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
+		<span>Enter PFX path below:</span>
+		<RadzenTextBox @bind-Value=@PFXpath Style="width:550px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter PFX password below:</span>
+		<RadzenPassword @bind-Value=@PFXpassword Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				StateHasChanged();
+
+				await Task.Run(() =>
+	{
+		AppConfig.PFXPath = PFXpath;
+		AppConfig.PFXPassword = PFXpassword;
+		AppConfig.SaveConfig();
+	});
+
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "PFX details set successfully!");
 			}
 		}
 		finally
