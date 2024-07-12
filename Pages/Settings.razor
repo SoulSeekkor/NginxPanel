@@ -92,7 +92,7 @@
 					<RadzenLabel Text="Disable Auth Settings Warning On Start" Component="DisableAuthWarning" />
 				</RadzenRow>
 
-				<RadzenButton Click=@(() => SetACMECloudflareToken()) Text="Set Username/Password" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+				<RadzenButton Click=@(() => SetUsernamePassword()) Text="Set Username/Password" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
 			</RadzenStack>
 
 			<hr style="margin-bottom: 25px;" />
@@ -681,7 +681,49 @@
 		}
 		finally
 		{
-			busyInstallReset = false;
+			StateHasChanged();
+		}
+	}
+
+	private async void SetUsernamePassword()
+	{
+		try
+		{
+			string username = AppConfig.Username;
+			string password = AppConfig.Password;
+
+			var result = await DialogService.OpenAsync("Set Username/Password", ds =>
+	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
+		<span>Enter username below:</span>
+		<RadzenTextBox @bind-Value=@username Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter password below:</span>
+		<RadzenPassword @bind-Value=@password Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<RadzenText Text="NOTE: Leave blank to not require a username or password." Style="margin-bottom: 40px; font-style: italic;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				StateHasChanged();
+
+				await Task.Run(() =>
+	{
+		AppConfig.Username = username;
+		AppConfig.Password = password;
+		AppConfig.SaveConfig();
+	});
+
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Username/password set successfully!");
+			}
+		}
+		finally
+		{
 			StateHasChanged();
 		}
 	}
