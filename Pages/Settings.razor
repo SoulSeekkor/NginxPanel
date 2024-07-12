@@ -83,13 +83,20 @@
 	<RadzenStack Orientation="Orientation.Vertical">
 		<RadzenCard Style="width: 500px;">
 			<RadzenText Text="Application Settings" TextStyle="TextStyle.DisplayH6" />
+
 			<hr style="margin-bottom: 25px;" />
+			<RadzenText Text="Authentication" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
 			<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 					<RadzenCheckBox TValue="bool" Value="AppConfig.DisableAuthWarningOnStart" Name="DisableAuthWarning" Change="() => ToggleAuthSettingsWarning()" />
 					<RadzenLabel Text="Disable Auth Settings Warning On Start" Component="DisableAuthWarning" />
 				</RadzenRow>
+
+				<RadzenButton Click=@(() => SetACMECloudflareToken()) Text="Set Username/Password" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
 			</RadzenStack>
+
+			<hr style="margin-bottom: 25px;" />
+			<RadzenText Text="PFX Certificate" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
 		</RadzenCard>
 	</RadzenStack>
 </RadzenStack>
@@ -99,6 +106,8 @@
 	private MainLayout? layout { get; set; }
 
 	private bool busyInstallReset = false;
+
+	#region Nginx
 
 	private void ResetNginx()
 	{
@@ -121,48 +130,48 @@
 			StateHasChanged();
 
 			var result = await DialogService.OpenAsync("Nginx Package", ds =>
-				@<RadzenStack Gap="1.5rem">
-					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please select the Nginx package to use.</RadzenText>
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="System Default" Click="@(() => ds.Close(""))" Style="width: 140px;" />
-							<RadzenButton Text="Stable" Click="@(() => ds.Close("stable"))" Style="width: 80px;" />
-							<RadzenButton Text="Mainline" Click="@(() => ds.Close("mainline"))" Style="width: 80px;" />
-						</RadzenStack>
-						<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
-					</RadzenStack>
-				</RadzenStack>
-			);
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please select the Nginx package to use.</RadzenText>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="System Default" Click="@(() => ds.Close(""))" Style="width: 140px;" />
+				<RadzenButton Text="Stable" Click="@(() => ds.Close("stable"))" Style="width: 80px;" />
+				<RadzenButton Text="Mainline" Click="@(() => ds.Close("mainline"))" Style="width: 80px;" />
+			</RadzenStack>
+			<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
+		</RadzenStack>
+	</RadzenStack>
+		);
 
 			if (!(result is null))
 			{
 				await Task.Run(() =>
-				{
-					// Remove existing Nginx first
-					cli.RunCommand("apt remove nginx nginx-common nginx-full -y");
+	{
+		// Remove existing Nginx first
+		cli.RunCommand("apt remove nginx nginx-common nginx-full -y");
 
-					if (!String.IsNullOrWhiteSpace(result))
-					{
-						// Install dependencies
-						cli.RunCommand("apt install software-properties-common -y");
+		if (!String.IsNullOrWhiteSpace(result))
+		{
+			// Install dependencies
+			cli.RunCommand("apt install software-properties-common -y");
 
-						if (result == "stable")
-							cli.RunCommand("add-apt-repository ppa:ondrej/nginx -y");  // Stable
-						else if (result == "mainline")
-							cli.RunCommand("add-apt-repository ppa:ondrej/nginx-mainline -y");  // Mainline
+			if (result == "stable")
+				cli.RunCommand("add-apt-repository ppa:ondrej/nginx -y");  // Stable
+			else if (result == "mainline")
+				cli.RunCommand("add-apt-repository ppa:ondrej/nginx-mainline -y");  // Mainline
 
-						cli.RunCommand("apt update");
-						cli.RunCommand("apt install nginx-full -y");
-					}
-					else
-					{
-						// Remove custom repositories if they exist first
-						cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
-						cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
-						cli.RunCommand("apt update");
-						cli.RunCommand("apt install nginx -y");  // Default system package
-					}
-				});
+			cli.RunCommand("apt update");
+			cli.RunCommand("apt install nginx-full -y");
+		}
+		else
+		{
+			// Remove custom repositories if they exist first
+			cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
+			cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+			cli.RunCommand("apt update");
+			cli.RunCommand("apt install nginx -y");  // Default system package
+		}
+	});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx installed successfully!");
 			}
@@ -188,13 +197,13 @@
 			if (confirm.HasValue && confirm.Value)
 			{
 				await Task.Run(() =>
-				{
-					// Remove existing Nginx first
-					cli.RunCommand("apt remove nginx nginx-common nginx-full -y");
-					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
-					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
-					//cli.RunCommand("apt update");
-				});
+	{
+		// Remove existing Nginx first
+		cli.RunCommand("apt remove nginx nginx-common nginx-full -y");
+		cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
+		cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+		//cli.RunCommand("apt update");
+	});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx uninstalled successfully!");
 			}
@@ -220,10 +229,10 @@
 				StateHasChanged();
 
 				await Task.Run(() =>
-				{
-					cli.RunCommand("apt update");
-					cli.RunCommand("apt install --only-upgrade nginx-full -y");
-				});
+	{
+		cli.RunCommand("apt update");
+		cli.RunCommand("apt install --only-upgrade nginx-full -y");
+	});
 
 				if (cli.StandardOut.Contains("Setting up nginx"))
 				{
@@ -248,23 +257,27 @@
 		}
 	}
 
+	#endregion
+
+	#region ACME
+
 	private async void InstallACME()
 	{
 		try
 		{
 			string email = string.Empty;
 			var result = await DialogService.OpenAsync("Install ACME", ds =>
-				@<RadzenStack Gap="1.5rem">
-					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the email to register with below:</RadzenText>
-					<RadzenTextBox @bind-Value=@email class="w-100" />
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-						</RadzenStack>
-					</RadzenStack>
-				</RadzenStack>
-	);
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the email to register with below:</RadzenText>
+		<RadzenTextBox @bind-Value=@email class="w-100" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+		);
 
 			bool emailValid = false;
 
@@ -290,19 +303,19 @@
 				StateHasChanged();
 
 				await Task.Run(() =>
-				{
-					//cli.RunCommand("apt install openssl cron socat curl");  // Potential prerequisite packages
-					cli.RunCommand("wget -O acme.sh https://get.acme.sh");
-					cli.RunCommand("chmod +x acme.sh");
-					cli.RunCommand("bash acme.sh");
-				});
+	{
+		//cli.RunCommand("apt install openssl cron socat curl");  // Potential prerequisite packages
+		cli.RunCommand("wget -O acme.sh https://get.acme.sh");
+		cli.RunCommand("chmod +x acme.sh");
+		cli.RunCommand("bash acme.sh");
+	});
 
 				if (cli.StandardOut.Contains("Install success!"))
 				{
 					await Task.Run(() =>
-					{
-						cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --register-account -m {email}", sudo: false);
-					});
+		{
+			cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --register-account -m {email}", sudo: false);
+		});
 
 					if (cli.StandardOut.Contains("Registered"))
 						await layout!.DisplayToastAsync(MainLayout.toastType.success, "ACME installed successfully!");
@@ -335,9 +348,9 @@
 				StateHasChanged();
 
 				await Task.Run(() =>
-				{
-					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --uninstall", sudo: false);
-				});
+	{
+		cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --uninstall", sudo: false);
+	});
 
 				if (cli.StandardOut.Contains("Uninstalling alias"))
 				{
@@ -363,20 +376,20 @@
 		{
 			bool autoUpgrade = false;
 			var result = await DialogService.OpenAsync("Upgrade ACME", ds =>
-				@<RadzenStack>
-					<span>Are you sure you want to upgrade the ACME script?</span>
-					<span class="rz-text-align-left">
-						<RadzenCheckBox @bind-Value=autoUpgrade Name="chkAutoUpgrade" />
-						<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
-					</span>
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="Yes" Click="() => ds.Close(true)" Style="width: 80px;" />
-							<RadzenButton Text="No" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-						</RadzenStack>
-					</RadzenStack>
-				</RadzenStack>
-			);
+	@<RadzenStack>
+		<span>Are you sure you want to upgrade the ACME script?</span>
+		<span class="rz-text-align-left">
+			<RadzenCheckBox @bind-Value=autoUpgrade Name="chkAutoUpgrade" />
+			<RadzenLabel Text="Auto Upgrade" Component="chkAutoUpgrade" MouseEnter="@(args => layout?.ShowTooltip(args, "Set to auto upgrade going forward.", new TooltipOptions(){ Position = TooltipPosition.Right }) )" Style="margin-left: 8px; vertical-align: middle;" />
+		</span>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Yes" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="No" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+		);
 
 			if (!(result is null) && result)
 			{
@@ -384,9 +397,9 @@
 				StateHasChanged();
 
 				await Task.Run(() =>
-				{
-					cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --upgrade --auto-upgrade " + (autoUpgrade ? "1" : "0"), sudo: false);
-				});
+	{
+		cli.RunCommand($"{cli.HomePath}/.acme.sh/acme.sh --upgrade --auto-upgrade " + (autoUpgrade ? "1" : "0"), sudo: false);
+	});
 
 				if (cli.StandardOut.Contains("Upgrade success!"))
 				{
@@ -413,20 +426,20 @@
 			string token = acme.AccountConf.GetConfValue(enuConfKey.SAVED_CF_Token);
 
 			var result = await DialogService.OpenAsync("Set ACME Cloudflare Token", ds =>
-				@<RadzenStack>
-					<div>
-						<span>Please enter your Cloudflare API token below:</span>
-						<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
-						<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
-					</div>
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-						</RadzenStack>
-					</RadzenStack>
-				</RadzenStack>
-			);
+	@<RadzenStack>
+		<div>
+			<span>Please enter your Cloudflare API token below:</span>
+			<RadzenTextBox @bind-Value=@token Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+			<!--<RadzenButton Text="Clear" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" />-->
+		</div>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 
 			if (!(result is null) && result)
 			{
@@ -442,9 +455,9 @@
 				}
 
 				await Task.Run(() =>
-				{
-					result = acme.AccountConf.SetConfValue(enuConfKey.SAVED_CF_Token, token);
-				});
+	{
+		result = acme.AccountConf.SetConfValue(enuConfKey.SAVED_CF_Token, token);
+	});
 
 				if (result)
 				{
@@ -473,37 +486,37 @@
 			string from = acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_FROM);
 			string to = acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_TO);
 
-			#if DEBUG
-			host = "10.12.1.16";
-			from = "ajenti@soulseekkor.net";
-			to = "mewert@soulseekkor.net";
-			#endif
+#if DEBUG
+	host = "10.12.1.16";
+	from = "ajenti@soulseekkor.net";
+	to = "mewert@soulseekkor.net";
+#endif
 
 			var result = await DialogService.OpenAsync("Set ACME Email Notifications", ds =>
-				@<RadzenStack>
-					<div>
-						<span>Please enter your SMTP server below:</span>
-						<br />
-						<RadzenTextBox @bind-Value=@host Style="width: 310px; margin-right: 4px;" />
-					</div>
-					<div>
-						<span>Please enter the sender email address below:</span>
-						<br />
-						<RadzenTextBox @bind-Value=@from Style="width: 310px; margin-right: 4px;" />
-					</div>
-					<div>
-						<span>Please enter the email address to send notifications to below:</span>
-						<br />
-						<RadzenTextBox @bind-Value=@to Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
-					</div>
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-						</RadzenStack>
-					</RadzenStack>
-				</RadzenStack>
-			);
+	@<RadzenStack>
+		<div>
+			<span>Please enter your SMTP server below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@host Style="width: 310px; margin-right: 4px;" />
+		</div>
+		<div>
+			<span>Please enter the sender email address below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@from Style="width: 310px; margin-right: 4px;" />
+		</div>
+		<div>
+			<span>Please enter the email address to send notifications to below:</span>
+			<br />
+			<RadzenTextBox @bind-Value=@to Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		</div>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 
 			if (!(result is null) && result)
 			{
@@ -517,13 +530,13 @@
 				}
 
 				await Task.Run(() =>
-				{
-					result = acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_BIN, (String.IsNullOrWhiteSpace(bin) ? "python3" : bin)) &&
-						acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_HOST, host) &&
-						acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_SECURE, (String.IsNullOrWhiteSpace(secure) ? "none" : secure)) &&
-						acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_FROM, from) &&
-						acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_TO, to);
-				});
+	{
+		result = acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_BIN, (String.IsNullOrWhiteSpace(bin) ? "python3" : bin)) &&
+			acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_HOST, host) &&
+			acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_SECURE, (String.IsNullOrWhiteSpace(secure) ? "none" : secure)) &&
+			acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_FROM, from) &&
+			acme.AccountConf.SetConfValue(enuConfKey.SAVED_SMTP_TO, to);
+	});
 
 				if (result)
 				{
@@ -579,19 +592,19 @@
 				await layout!.DisplayToastAsync(MainLayout.toastType.warning, "Currently set certificate authority is unknown!  Be aware that changing this will overwrite the existing server value.");
 
 			var result = await DialogService.OpenAsync("Set ACME Default Certificate Authority", ds =>
-				@<RadzenStack>
-					<div>
-						<RadzenText Text="Select the CA you would like to use below:" />
-						<RadzenRadioButtonList Data="acme.CertAuthorities" @bind-Value=@CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" Orientation=Orientation.Vertical class="mb-5" />
-					</div>
-					<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-							<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
-						</RadzenStack>
-					</RadzenStack>
-				</RadzenStack>
-			);
+	@<RadzenStack>
+		<div>
+			<RadzenText Text="Select the CA you would like to use below:" />
+			<RadzenRadioButtonList Data="acme.CertAuthorities" @bind-Value=@CA TValue="string" TextProperty="DisplayName" ValueProperty="CmdValue" DisabledProperty="Disabled" Orientation=Orientation.Vertical class="mb-5" />
+		</div>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 
 			if (!(result is null) && result)
 			{
@@ -650,6 +663,10 @@
 		}
 	}
 
+	#endregion
+
+	#region Application Settings
+
 	private async void ToggleAuthSettingsWarning()
 	{
 		try
@@ -668,4 +685,6 @@
 			StateHasChanged();
 		}
 	}
+
+	#endregion
 }

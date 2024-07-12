@@ -9,373 +9,373 @@
 
 @if (nginx.Installed)
 {
-    <RadzenLayout Style="margin-top: 10px;">
-        <RadzenHeader>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                <RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
-                <RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
-                <RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
-            </RadzenStack>
-            <span>Total Configs: @nginx.Configs.Count.ToString()</span>
-        </RadzenHeader>
-        <RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
-            <RadzenPanelMenu>
-                @if (!busyRefreshing)
-                {
-                    @foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
-                    {
-                        string icon = "";
-                        string style = "";
+	<RadzenLayout Style="margin-top: 10px;">
+		<RadzenHeader>
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+				<RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
+				<RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
+				<RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+			</RadzenStack>
+			<span>Total Configs: @nginx.Configs.Count.ToString()</span>
+		</RadzenHeader>
+		<RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
+			<RadzenPanelMenu>
+				@if (!busyRefreshing)
+				{
+					@foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
+					{
+						string icon = "";
+						string style = "";
 
-                        if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-                        {
-                            if (conf.Enabled)
-                                icon = "check";
-                            else
-                                icon = "description";
-                        }
-                        else
-                            icon = "share";
+						if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+						{
+							if (conf.Enabled)
+								icon = "check";
+							else
+								icon = "description";
+						}
+						else
+							icon = "share";
 
-                        if (conf.ContentsDirty)
-                            style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
+						if (conf.ContentsDirty)
+							style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
 
-                        <RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
-                    }
-                }
-            </RadzenPanelMenu>
-        </RadzenSidebar>
-        <RadzenBody>
-            <div class="rz-p-4">
-                @if (!(selectedConf is null) && !busyRefreshing)
-                {
-                    // Display selected config
-                    <RadzenCard>
-                        <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                            @if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-                            {
-                                <RadzenStack Orientation="Orientation.Horizontal">
-                                    <RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
-                                    <RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
-                                </RadzenStack>
-                            }
+						<RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
+					}
+				}
+			</RadzenPanelMenu>
+		</RadzenSidebar>
+		<RadzenBody>
+			<div class="rz-p-4">
+				@if (!(selectedConf is null) && !busyRefreshing)
+				{
+					// Display selected config
+					<RadzenCard>
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+							@if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+							{
+								<RadzenStack Orientation="Orientation.Horizontal">
+									<RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
+									<RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+								</RadzenStack>
+							}
 
-                            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                                <RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
-                                <RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
-                                <RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
-                                <RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
-                            </RadzenStack>
-                        </RadzenRow>
+							<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+								<RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+								<RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+								<RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Secondary" Style="float: right;" />
+								<RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Danger" Style="float: right;" />
+							</RadzenStack>
+						</RadzenRow>
 
-                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-                        <RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
-                        <br />
-                        <RadzenStack Orientation="Orientation.Horizontal">
-                            <RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
-                            <RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
-                        </RadzenStack>
-                        <br />
-                        <RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
-                    </RadzenCard>
-                }
-            </div>
-        </RadzenBody>
-    </RadzenLayout>
+						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
+						<br />
+						<RadzenStack Orientation="Orientation.Horizontal">
+							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
+							<RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
+						</RadzenStack>
+						<br />
+						<RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" ButtonStyle="ButtonStyle.Success" />
+					</RadzenCard>
+				}
+			</div>
+		</RadzenBody>
+	</RadzenLayout>
 }
 else
 {
-    <RadzenText TextStyle="TextStyle.DisplayH5" class="rz-mt-5" TagName="TagName.H5">Nginx service was not found, you must install Nginx before using this page.</RadzenText>
+	<RadzenText TextStyle="TextStyle.DisplayH5" class="rz-mt-5" TagName="TagName.H5">Nginx service was not found, you must install Nginx before using this page.</RadzenText>
 }
 
 @code {
-    [CascadingParameter]
-    private MainLayout? layout { get; set; }
+	[CascadingParameter]
+	private MainLayout? layout { get; set; }
 
-    private Nginx.ConfigFile? selectedConf = null;
+	private Nginx.ConfigFile? selectedConf = null;
 
-    private bool configsSidebarExpanded = true;
-    private bool busyRefreshing = false;
+	private bool configsSidebarExpanded = true;
+	private bool busyRefreshing = false;
 
-    private string configCurrentCSS = string.Empty;
-    private string defaultConfigCSS = "background-color: #5F737E !important; cursor: default; font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;";
-    private string configNoWrapCSS = "white-space: nowrap;";
+	private string configCurrentCSS = string.Empty;
+	private string defaultConfigCSS = "background-color: #5F737E !important; cursor: default; font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;";
+	private string configNoWrapCSS = "white-space: nowrap;";
 
-    protected override void OnInitialized()
-    {
-        configCurrentCSS = configNoWrapCSS + defaultConfigCSS;
-        RefreshConfigs(false);
-    }
+	protected override void OnInitialized()
+	{
+		configCurrentCSS = configNoWrapCSS + defaultConfigCSS;
+		RefreshConfigs(false);
+	}
 
-    private async void RefreshConfigs(bool notifyUser)
-    {
-        try
-        {
-            busyRefreshing = true;
-            selectedConf = null;
+	private async void RefreshConfigs(bool notifyUser)
+	{
+		try
+		{
+			busyRefreshing = true;
+			selectedConf = null;
 
-            await Task.Run(() => nginx.RefreshFiles());
+			await Task.Run(() => nginx.RefreshFiles());
 
-            if (notifyUser)
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.info, "Configs refreshed successfully!");
-            }
-        }
-        finally
-        {
-            busyRefreshing = false;
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+			if (notifyUser)
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.info, "Configs refreshed successfully!");
+			}
+		}
+		finally
+		{
+			busyRefreshing = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
-    {
-        try
-        {
-            nginx.ToggleSiteEnabled(conf);
+	private async void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
+	{
+		try
+		{
+			nginx.ToggleSiteEnabled(conf);
 
-            if (conf.Enabled)
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% enabled successfully!");
-            }
-            else
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% disabled successfully!");
-            }
-        }
-        catch
-        {
-            await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while updating site config %ss%{conf.Name}%se%!");
-        }
-    }
+			if (conf.Enabled)
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% enabled successfully!");
+			}
+			else
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Site config %ss%{conf.Name}%se% disabled successfully!");
+			}
+		}
+		catch
+		{
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while updating site config %ss%{conf.Name}%se%!");
+		}
+	}
 
-    private async void SaveConfig(Nginx.ConfigFile conf)
-    {
-        try
-        {
-            conf.busySaving = true;
+	private async void SaveConfig(Nginx.ConfigFile conf)
+	{
+		try
+		{
+			conf.busySaving = true;
 
-            await conf.Save();
+			await conf.Save();
 
-            await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
-        }
-        catch
-        {
-            await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while saving config %ss%{conf.Name}%se%!");
-        }
-        finally
-        {
-            conf.busySaving = false;
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+			await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
+		}
+		catch
+		{
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while saving config %ss%{conf.Name}%se%!");
+		}
+		finally
+		{
+			conf.busySaving = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void RevertConfig(Nginx.ConfigFile conf)
-    {
-        try
-        {
-            string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to revert config %ss%{conf.Name}%se%?  You will lose any changes you have made!");
-            bool? confirm = await DialogService.Confirm(message, "Revert Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+	private async void RevertConfig(Nginx.ConfigFile conf)
+	{
+		try
+		{
+			string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to revert config %ss%{conf.Name}%se%?  You will lose any changes you have made!");
+			bool? confirm = await DialogService.Confirm(message, "Revert Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
-            if (confirm.HasValue && confirm.Value)
-            {
-                await conf.Revert();
+			if (confirm.HasValue && confirm.Value)
+			{
+				await conf.Revert();
 
-                await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been reverted!");
-            }
-        }
-        finally
-        {
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+				await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been reverted!");
+			}
+		}
+		finally
+		{
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void RenameConfig(Nginx.ConfigFile conf)
-    {
-        string configName = conf.Name;
-        var result = await DialogService.OpenAsync("Rename Config", ds =>
-            @<RadzenStack Gap="1.5rem">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the new name for this config below:</RadzenText>
-                <RadzenTextBox @bind-Value=@configName class="w-100" />
-                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <RadzenStack Orientation="Orientation.Horizontal">
-                        <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-                        <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-                    </RadzenStack>
-                </RadzenStack>
-            </RadzenStack>
-    );
+	private async void RenameConfig(Nginx.ConfigFile conf)
+	{
+		string configName = conf.Name;
+		var result = await DialogService.OpenAsync("Rename Config", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the new name for this config below:</RadzenText>
+		<RadzenTextBox @bind-Value=@configName class="w-100" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+		);
 
-        if (!(result is null) && result && !(configName == conf.Name))
-        {
-            if (String.IsNullOrWhiteSpace(configName))
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.error, "New config name cannot be blank!");
-                return;
-            }
+		if (!(result is null) && result && !(configName == conf.Name))
+		{
+			if (String.IsNullOrWhiteSpace(configName))
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "New config name cannot be blank!");
+				return;
+			}
 
-            configName = configName.Trim();
-            string configPath = string.Empty;
+			configName = configName.Trim();
+			string configPath = string.Empty;
 
-            if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-                configPath = Path.Combine(nginx.SitesAvailable, configName);
-            else
-                configPath = Path.Combine(nginx.SharedFiles, configName);
+			if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+				configPath = Path.Combine(nginx.SitesAvailable, configName);
+			else
+				configPath = Path.Combine(nginx.SharedFiles, configName);
 
-            if (File.Exists(configPath))
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with new name of %ss%{configName}%se% already exists!");
-                return;
-            }
+			if (File.Exists(configPath))
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with new name of %ss%{configName}%se% already exists!");
+				return;
+			}
 
-            try
-            {
-                await Task.Run(() =>
-                {
-                    // Output new file
-                    File.WriteAllText(configPath, conf.FileContents);
+			try
+			{
+				await Task.Run(() =>
+			{
+				// Output new file
+				File.WriteAllText(configPath, conf.FileContents);
 
-                    // Check enabled status
-                    if (conf.Enabled)
-                    {
-                        string oldName = conf.Name;
-                        string oldPath = conf.ConfigPath;
+				// Check enabled status
+				if (conf.Enabled)
+				{
+					string oldName = conf.Name;
+					string oldPath = conf.ConfigPath;
 
-                        // Disable current file
-                        nginx.ToggleSiteEnabled(conf);
+					// Disable current file
+					nginx.ToggleSiteEnabled(conf);
 
-                        // Enable new file
-                        conf.Name = configName;
-                        conf.ConfigPath = configPath;
-                        nginx.ToggleSiteEnabled(conf);
+					// Enable new file
+					conf.Name = configName;
+					conf.ConfigPath = configPath;
+					nginx.ToggleSiteEnabled(conf);
 
-                        // Reset values (so messages below are accurate)
-                        conf.Name = oldName;
-                        conf.ConfigPath = oldPath;
-                    }
+					// Reset values (so messages below are accurate)
+					conf.Name = oldName;
+					conf.ConfigPath = oldPath;
+				}
 
-                    File.Delete(conf.ConfigPath);
-                    RefreshConfigs(false);
-                });
+				File.Delete(conf.ConfigPath);
+				RefreshConfigs(false);
+			});
 
-                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType() == typeof(System.UnauthorizedAccessException))
-                {
-                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while renaming config %ss%{conf.Name}%se%!");
-                }
-                else
-                {
-                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while renaming config to %ss%{configName}%se%!");
-                }
-            }
-        }
-    }
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
+			}
+			catch (Exception ex)
+			{
+				if (ex.GetType() == typeof(System.UnauthorizedAccessException))
+				{
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while renaming config %ss%{conf.Name}%se%!");
+				}
+				else
+				{
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while renaming config to %ss%{configName}%se%!");
+				}
+			}
+		}
+	}
 
-    private async void AutoFormatConfig(Nginx.ConfigFile conf)
-    {
-        try
-        {
-            string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to auto format config %ss%{conf.Name}%se%?  This will attempt to make the config nicer by replacing tabs with spaces, you may want to save before attempting this!");
-            bool? confirm = await DialogService.Confirm(message, "Format Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+	private async void AutoFormatConfig(Nginx.ConfigFile conf)
+	{
+		try
+		{
+			string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to auto format config %ss%{conf.Name}%se%?  This will attempt to make the config nicer by replacing tabs with spaces, you may want to save before attempting this!");
+			bool? confirm = await DialogService.Confirm(message, "Format Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
-            if (confirm.HasValue && confirm.Value)
-            {
-                conf.FileContents = conf.FileContents.Replace("    ", "\t").Replace("  ", "    ").Replace("\t", "    ");
-                await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been auto formatted!");
-            }
-        }
-        finally
-        {
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+			if (confirm.HasValue && confirm.Value)
+			{
+				conf.FileContents = conf.FileContents.Replace("    ", "\t").Replace("  ", "    ").Replace("\t", "    ");
+				await layout!.DisplayToastAsync(MainLayout.toastType.info, $"Config %ss%{conf.Name}%se% has been auto formatted!");
+			}
+		}
+		finally
+		{
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void AddConfig()
-    {
-        string configName = string.Empty;
-        Services.Nginx.ConfigFile.enuConfigType configType = Nginx.ConfigFile.enuConfigType.Site;
-        var result = await DialogService.OpenAsync("Add Config", ds =>
-            @<RadzenStack Gap="1.5rem">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
-                <RadzenTextBox @bind-Value=@configName class="w-100" />
-                <RadzenRadioButtonList @bind-Value=@configType TValue="Services.Nginx.ConfigFile.enuConfigType" class="mb-2">
-                    <Items>
-                        <RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Site.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Site" />
-                        <RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Shared.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Shared" />
-                    </Items>
-                </RadzenRadioButtonList>
-                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <RadzenStack Orientation="Orientation.Horizontal">
-                        <RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-                        <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-                    </RadzenStack>
-                </RadzenStack>
-            </RadzenStack>
-    );
+	private async void AddConfig()
+	{
+		string configName = string.Empty;
+		Services.Nginx.ConfigFile.enuConfigType configType = Nginx.ConfigFile.enuConfigType.Site;
+		var result = await DialogService.OpenAsync("Add Config", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
+		<RadzenTextBox @bind-Value=@configName class="w-100" />
+		<RadzenRadioButtonList @bind-Value=@configType TValue="Services.Nginx.ConfigFile.enuConfigType" class="mb-2">
+			<Items>
+				<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Site.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Site" />
+				<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Shared.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Shared" />
+			</Items>
+		</RadzenRadioButtonList>
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
 
-        if (!(result is null) && result)
-        {
-            if (String.IsNullOrWhiteSpace(configName))
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.error, "Config name cannot be blank!");
-                return;
-            }
+		if (!(result is null) && result)
+		{
+			if (String.IsNullOrWhiteSpace(configName))
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, "Config name cannot be blank!");
+				return;
+			}
 
-            configName = configName.Trim();
-            string configPath = string.Empty;
+			configName = configName.Trim();
+			string configPath = string.Empty;
 
-            if (configType == Nginx.ConfigFile.enuConfigType.Site)
-                configPath = Path.Combine(nginx.SitesAvailable, configName);
-            else
-                configPath = Path.Combine(nginx.SharedFiles, configName);
+			if (configType == Nginx.ConfigFile.enuConfigType.Site)
+				configPath = Path.Combine(nginx.SitesAvailable, configName);
+			else
+				configPath = Path.Combine(nginx.SharedFiles, configName);
 
-            if (File.Exists(configPath))
-            {
-                await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with the name %ss%{configName}%se% already exists!");
-                return;
-            }
+			if (File.Exists(configPath))
+			{
+				await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Config with the name %ss%{configName}%se% already exists!");
+				return;
+			}
 
-            try
-            {
-                await Task.Run(() =>
-                {
-                    File.WriteAllText(configPath, "");
-                    RefreshConfigs(false);
-                });
+			try
+			{
+				await Task.Run(() =>
+				{
+					File.WriteAllText(configPath, "");
+					RefreshConfigs(false);
+				});
 
-                await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType() == typeof(System.UnauthorizedAccessException))
-                {
-                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while adding config %ss%{configName}%se%!");
-                }
-                else
-                {
-                    await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
-                }
-            }
-        }
-    }
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
+			}
+			catch (Exception ex)
+			{
+				if (ex.GetType() == typeof(System.UnauthorizedAccessException))
+				{
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"File permission error occurred while adding config %ss%{configName}%se%!");
+				}
+				else
+				{
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
+				}
+			}
+		}
+	}
 
-    private async void DeleteConfig(Nginx.ConfigFile conf)
-    {
-        string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete config %ss%{conf.Name}%se%?");
-        bool? confirm = await DialogService.Confirm(message, "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+	private async void DeleteConfig(Nginx.ConfigFile conf)
+	{
+		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete config %ss%{conf.Name}%se%?");
+		bool? confirm = await DialogService.Confirm(message, "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
-        if (confirm.HasValue && confirm.Value)
-        {
-            await Task.Run(() =>
-            {
-                File.Delete(conf.ConfigPath);
-                RefreshConfigs(false);
-            });
+		if (confirm.HasValue && confirm.Value)
+		{
+			await Task.Run(() =>
+			{
+				File.Delete(conf.ConfigPath);
+				RefreshConfigs(false);
+			});
 
-            await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
-        }
-    }
+			await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
+		}
+	}
 }

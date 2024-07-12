@@ -13,221 +13,221 @@
 @inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
-    @if (auth.Authenticated)
-    {
-        <RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
-            <RadzenHeader>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                    <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
-                    <span style="padding-right: 50px;">
-                        User: @cli.RunningAsUser
-                        <br />
-                        Nginx Service: @nginx.ServiceStatus.GetEnumDescription()
-                    </span>
+	@if (auth.Authenticated)
+	{
+		<RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
+			<RadzenHeader>
+				<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+					<RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+					<span style="padding-right: 50px;">
+						User: @cli.RunningAsUser
+						<br />
+						Nginx Service: @nginx.ServiceStatus.GetEnumDescription()
+					</span>
 
-                    <span>
-                        @switch (nginx.ServiceStatus)
-                        {
-                            case Services.Nginx.enuServiceStatus.Running:
-                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
-                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
-                                <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
-                                break;
-                            case Services.Nginx.enuServiceStatus.Stopped:
-                            case Services.Nginx.enuServiceStatus.Failed:
-                                <RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
-                                <RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
-                                break;
+					<span>
+						@switch (nginx.ServiceStatus)
+						{
+							case Services.Nginx.enuServiceStatus.Running:
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
+								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+								break;
+							case Services.Nginx.enuServiceStatus.Stopped:
+							case Services.Nginx.enuServiceStatus.Failed:
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
+								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+								break;
 
-                        }
-                    </span>
-                    <span style="margin-left: 100px;">
-                        Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
-                    </span>
-                </RadzenStack>
-            </RadzenHeader>
-            <RadzenSidebar @bind-Expanded="@sidebarExpanded">
-                <RadzenText Text="@Assembly.GetEntryAssembly()!.GetName().Name" TextStyle="TextStyle.DisplayH5" Style="padding: 10px;" />
-                <RadzenPanelMenu>
-                    <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
-                    <RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
-                    <RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
-                    <RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
-                </RadzenPanelMenu>
-            </RadzenSidebar>
-            <RadzenBody>
-                <div class="rz-p-4">
-                    @Body
-                </div>
-            </RadzenBody>
-        </RadzenLayout>
-    }
-    else
-    {
-        if (!String.IsNullOrWhiteSpace(AppConfig.Username))
-        {
-            <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-                <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
-                    <RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
-                </RadzenCard>
-                <RadzenCard Class="rz-shadow-0 rz-p-12">
-                    <RadzenTemplateForm Data=@("SimpleLogin")>
-                        <RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
-                    </RadzenTemplateForm>
-                </RadzenCard>
-            </RadzenStack>
-        }
-    }
+						}
+					</span>
+					<span style="margin-left: 100px;">
+						Version: @(GetType()?.Assembly?.GetName()?.Version?.ToString()) (Beta)
+					</span>
+				</RadzenStack>
+			</RadzenHeader>
+			<RadzenSidebar @bind-Expanded="@sidebarExpanded">
+				<RadzenText Text="@Assembly.GetEntryAssembly()!.GetName().Name" TextStyle="TextStyle.DisplayH5" Style="padding: 10px;" />
+				<RadzenPanelMenu>
+					<RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
+					<RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
+					<RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
+					<RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
+				</RadzenPanelMenu>
+			</RadzenSidebar>
+			<RadzenBody>
+				<div class="rz-p-4">
+					@Body
+				</div>
+			</RadzenBody>
+		</RadzenLayout>
+	}
+	else
+	{
+		if (!String.IsNullOrWhiteSpace(AppConfig.Username))
+		{
+			<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+				<RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
+					<RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
+				</RadzenCard>
+				<RadzenCard Class="rz-shadow-0 rz-p-12">
+					<RadzenTemplateForm Data=@("SimpleLogin")>
+						<RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
+					</RadzenTemplateForm>
+				</RadzenCard>
+			</RadzenStack>
+		}
+	}
 
-    <RadzenComponents />
+	<RadzenComponents />
 </CascadingValue>
 
 @code {
-    #region Variables
+	#region Variables
 
-    private bool sidebarExpanded = true;
-    private bool disableAllButtons = false;
-    private bool busyTesting = false;
+	private bool sidebarExpanded = true;
+	private bool disableAllButtons = false;
+	private bool busyTesting = false;
 
-    #endregion
+	#endregion
 
-    public enum toastType
-    {
-        success,
-        warning,
-        error,
-        info
-    }
+	public enum toastType
+	{
+		success,
+		warning,
+		error,
+		info
+	}
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            nginx.ServiceStatusChanged += RefreshServiceStatus;
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender)
+		{
+			nginx.ServiceStatusChanged += RefreshServiceStatus;
 
-            if (!AppConfig.DisableAuthWarningOnStart && !AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
-                DisplayToast(toastType.warning, $"No authentication mechanism has been set, see {AppConfig.AppConfigPath} for settings!");
-        }
-    }
+			if (!AppConfig.DisableAuthWarningOnStart && !AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
+				DisplayToast(toastType.warning, $"No authentication mechanism has been set, see {AppConfig.AppConfigPath} for settings!");
+		}
+	}
 
-    private async void OnLogin(LoginArgs args)
-    {
-        if (args.Username.ToLower() == AppConfig.Username.ToLower() && args.Password == AppConfig.Password)
-        {
-            auth.SetAuthenticated();
-            await DisplayToastAsync(toastType.info, $"Successful login, welcome {args.Username}!");
+	private async void OnLogin(LoginArgs args)
+	{
+		if (args.Username.ToLower() == AppConfig.Username.ToLower() && args.Password == AppConfig.Password)
+		{
+			auth.SetAuthenticated();
+			await DisplayToastAsync(toastType.info, $"Successful login, welcome {args.Username}!");
 
-            NavigationManager.NavigateTo("dashboard");
-        }
-        else
-        {
-            await DisplayToastAsync(toastType.error, "Invalid username or password!");
-        }
-    }
+			NavigationManager.NavigateTo("dashboard");
+		}
+		else
+		{
+			await DisplayToastAsync(toastType.error, "Invalid username or password!");
+		}
+	}
 
-    public async Task DisplayToastAsync(toastType type, string message, string title = "", bool dismissable = false)
-    {
-        await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
-    }
+	public async Task DisplayToastAsync(toastType type, string message, string title = "", bool dismissable = false)
+	{
+		await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+	}
 
-    public void DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
-    {
-        JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
-    }
+	public void DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
+	{
+		JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+	}
 
-    public string StyleMessage(toastType type, string message)
-    {
-        // Determine color by toastType
-        string color = "DeepSkyBlue";
+	public string StyleMessage(toastType type, string message)
+	{
+		// Determine color by toastType
+		string color = "DeepSkyBlue";
 
-        if (type == toastType.error)
-            color = "Crimson";
+		if (type == toastType.error)
+			color = "Crimson";
 
-        // Replace "span start/end" with styling
-        message = message.Replace("%ss%", "<span style='color: %color%; font-weight: bold;'>".Replace("%color%", color));
-        message = message.Replace("%se%", "</span>");
+		// Replace "span start/end" with styling
+		message = message.Replace("%ss%", "<span style='color: %color%; font-weight: bold;'>".Replace("%color%", color));
+		message = message.Replace("%se%", "</span>");
 
-        return message;
-    }
+		return message;
+	}
 
-    public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
+	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
 
-    private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
-    {
-        try
-        {
-            disableAllButtons = true;
+	private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
+	{
+		try
+		{
+			disableAllButtons = true;
 
-            // Perform requested action
-            await Task.Run(() => nginx.PerformServiceAction(action));
+			// Perform requested action
+			await Task.Run(() => nginx.PerformServiceAction(action));
 
-            switch (action)
-            {
-                case Services.Nginx.enuServiceAction.Start:
-                    await DisplayToastAsync(toastType.info, "Nginx service started!");
-                    break;
+			switch (action)
+			{
+				case Services.Nginx.enuServiceAction.Start:
+					await DisplayToastAsync(toastType.info, "Nginx service started!");
+					break;
 
-                case Services.Nginx.enuServiceAction.Stop:
-                    await DisplayToastAsync(toastType.info, "Nginx service stopped!");
-                    break;
+				case Services.Nginx.enuServiceAction.Stop:
+					await DisplayToastAsync(toastType.info, "Nginx service stopped!");
+					break;
 
-                case Services.Nginx.enuServiceAction.Restart:
-                    await DisplayToastAsync(toastType.info, "Nginx service restarted!");
-                    break;
-            }
-        }
-        finally
-        {
-            disableAllButtons = false;
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+				case Services.Nginx.enuServiceAction.Restart:
+					await DisplayToastAsync(toastType.info, "Nginx service restarted!");
+					break;
+			}
+		}
+		finally
+		{
+			disableAllButtons = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void TestConfig()
-    {
-        try
-        {
-            busyTesting = true;
+	private async void TestConfig()
+	{
+		try
+		{
+			busyTesting = true;
 
-            await Task.Run(() => nginx.TestConfig());
+			await Task.Run(() => nginx.TestConfig());
 
-            string results = nginx.LastTestResults;
+			string results = nginx.LastTestResults;
 
-            if (results.Contains("Successful"))
-            {
-                await DisplayToastAsync(toastType.success, "Nginx configuration test was successful!");
-            }
-            else
-            {
-                await DisplayToastAsync(toastType.error, $"Nginx configuration test failed! View dashboard for more information.");
-            }
-        }
-        finally
-        {
-            busyTesting = false;
-            await InvokeAsync(() => StateHasChanged());
-        }
-    }
+			if (results.Contains("Successful"))
+			{
+				await DisplayToastAsync(toastType.success, "Nginx configuration test was successful!");
+			}
+			else
+			{
+				await DisplayToastAsync(toastType.error, $"Nginx configuration test failed! View dashboard for more information.");
+			}
+		}
+		finally
+		{
+			busyTesting = false;
+			await InvokeAsync(() => StateHasChanged());
+		}
+	}
 
-    private async void RefreshServiceStatus()
-    {
-        await InvokeAsync(() => StateHasChanged());
-    }
+	private async void RefreshServiceStatus()
+	{
+		await InvokeAsync(() => StateHasChanged());
+	}
 
-    public async Task InvokeStateHasChanged()
-    {
-        await InvokeAsync(() => StateHasChanged());
-    }
+	public async Task InvokeStateHasChanged()
+	{
+		await InvokeAsync(() => StateHasChanged());
+	}
 
-    public async Task BusyDialog(string message)
-    {
-        await DialogService.OpenAsync("", ds =>
-        {
-            return 
-                @<RadzenStack AlignItems="AlignItems.Center" Class="rz-m-6" Gap="2rem">
-                    @message
-                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-                </RadzenStack>;
-        }, new DialogOptions() { ShowTitle = false, Style = "min-height: auto; min-width: auto; width: auto;", CloseDialogOnEsc = false });
-    }
+	public async Task BusyDialog(string message)
+	{
+		await DialogService.OpenAsync("", ds =>
+	{
+		return
+	@<RadzenStack AlignItems="AlignItems.Center" Class="rz-m-6" Gap="2rem">
+		@message
+		<RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+	</RadzenStack>;
+	}, new DialogOptions() { ShowTitle = false, Style = "min-height: auto; min-width: auto; width: auto;", CloseDialogOnEsc = false });
+	}
 }
