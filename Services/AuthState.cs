@@ -8,7 +8,7 @@
 
         public AuthState()
         {
-            if (!AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
+            if (String.IsNullOrWhiteSpace(AppConfig.Username))
             {
                 _authenticated = true;
             }

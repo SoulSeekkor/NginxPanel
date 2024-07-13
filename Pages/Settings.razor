@@ -103,6 +103,16 @@
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="PFX Certificate" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
 			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+
+			<hr style="margin-bottom: 25px;" />
+			<RadzenText Text="DUO Settings (Not Implemented Yet)" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
+					<RadzenCheckBox TValue="bool" Value="AppConfig.DUOEnabled" Name="EnableDUO" Change="() => ToggleDUOEnabled()" />
+					<RadzenLabel Text="Enable DUO" Component="EnableDUO" />
+				</RadzenRow>
+
+				<RadzenButton Click=@(() => SetDUODetails()) Text="Set DUO Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+			</RadzenStack>
 		</RadzenCard>
 	</RadzenStack>
 </RadzenStack>
@@ -807,6 +817,70 @@
 	});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Port set successfully!");
+			}
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
+
+	private async void ToggleDUOEnabled()
+	{
+		try
+		{
+			await Task.Run(() =>
+		{
+			AppConfig.DUOEnabled = !AppConfig.DUOEnabled;
+			AppConfig.SaveConfig();
+		});
+
+			await layout!.DisplayToastAsync(MainLayout.toastType.info, $"DUO has been {(AppConfig.DUOEnabled ? "enabled" : "disabled")} successfully!");
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
+
+	private async void SetDUODetails()
+	{
+		try
+		{
+			string integrationKey = AppConfig.DUOIntegrationKey;
+			string secretKey = AppConfig.DUOSecretKey;
+			string APIHostname = AppConfig.DUOAPIHostname;
+
+			var result = await DialogService.OpenAsync("Set DUO Details", ds =>
+	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
+		<span>Enter DUO integration key below:</span>
+		<RadzenTextBox @bind-Value=@integrationKey Style="width:310px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter DUO secret key below:</span>
+		<RadzenTextBox @bind-Value=@secretKey Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter DUO API hostname below:</span>
+		<RadzenTextBox @bind-Value=@APIHostname Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				StateHasChanged();
+
+				await Task.Run(() =>
+	{
+		AppConfig.DUOIntegrationKey = integrationKey;
+		AppConfig.DUOSecretKey = secretKey;
+		AppConfig.DUOAPIHostname = APIHostname;
+		AppConfig.SaveConfig();
+	});
+
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "DUO details set successfully!");
 			}
 		}
 		finally
