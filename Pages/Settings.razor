@@ -66,12 +66,12 @@
 					</RadzenRow>
 
 					<span>Set ACME Cloudflare Token:</span>
-					<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 					<span>Set ACME CA:</span>
-					<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 
 					<span>ACME Notifications:</span>
-					<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="cached" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
 					<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 						<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 						<RadzenLabel Text="SMTP Notify (SMTP Settings Must Be Set First)" Component="NotifyHookSMTP" />
@@ -80,9 +80,14 @@
 			</RadzenStack>
 		</RadzenCard>
 	</RadzenStack>
+
 	<RadzenStack Orientation="Orientation.Vertical">
 		<RadzenCard Style="width: 500px;">
 			<RadzenText Text="Application Settings" TextStyle="TextStyle.DisplayH6" />
+			
+			<hr style="margin-bottom: 25px;" />
+			<RadzenText Text="General Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
+			<RadzenButton Click=@(() => SetAppPort()) Text="Set Port" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
 
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="Authentication" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
@@ -763,6 +768,45 @@
 	});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "PFX details set successfully!");
+			}
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
+
+	private async void SetAppPort()
+	{
+		try
+		{
+			int port = AppConfig.Port;
+
+			var result = await DialogService.OpenAsync("Set Application Port", ds =>
+	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
+		<span>Enter port number to listen on below:</span>
+		<RadzenNumeric Min="1025" Max="65535" @bind-Value=@port Style="width:550px; margin-right: 4px; margin-bottom: 20px;" />
+		<RadzenText Text="NOTE: This requires a restart to take effect!" Style="margin-bottom: 40px; font-style: italic;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" Style="width: 80px;" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+		</RadzenStack>
+	</RadzenStack>
+	);
+
+			if (!(result is null) && result)
+			{
+				StateHasChanged();
+
+				await Task.Run(() =>
+	{
+		AppConfig.Port = port;
+		AppConfig.SaveConfig();
+	});
+
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Port set successfully!");
 			}
 		}
 		finally
