@@ -714,7 +714,7 @@
 		<RadzenTextBox @bind-Value=@username Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
 		<span>Enter password below:</span>
 		<RadzenPassword @bind-Value=@password Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
-		<RadzenText Text="NOTE: Leave blank to not require a username or password." Style="margin-bottom: 40px; font-style: italic;" />
+		<RadzenText Text="NOTE: Leave both blank to not require a username or password." Style="margin-bottom: 40px; font-style: italic;" />
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">
 				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
@@ -727,6 +727,12 @@
 			if (!(result is null) && result)
 			{
 				StateHasChanged();
+
+				if (!String.IsNullOrWhiteSpace(username) && String.IsNullOrWhiteSpace(password))
+				{
+					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Password cannot be blank if a username has been entered!");
+					return;
+				}
 
 				await Task.Run(() =>
 	{
