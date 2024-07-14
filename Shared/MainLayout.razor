@@ -13,7 +13,7 @@
 @inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
-	@if (!auth.AuthRequired || auth.Authenticated)
+	@if (auth.Authenticated)
 	{
 		<RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
 			<RadzenHeader>
@@ -62,8 +62,7 @@
 			</RadzenBody>
 		</RadzenLayout>
 	}
-	// Check if a username was specified, even if we do not have
-	// a password we need to validate the user first
+	// Check if a username was specified, if there was we need to validate the user
 	else if (!String.IsNullOrWhiteSpace(AppConfig.Username))
 	{
 		<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
@@ -98,6 +97,8 @@
 		info
 	}
 
+	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
+
 	protected override void OnAfterRender(bool firstRender)
 	{
 		if (firstRender)
@@ -105,7 +106,7 @@
 			nginx.ServiceStatusChanged += RefreshServiceStatus;
 
 			if (!AppConfig.DisableAuthWarningOnStart && !AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
-				DisplayToast(toastType.warning, $"No authentication mechanism has been set, see {AppConfig.AppConfigPath} for settings!");
+				DisplayToast(toastType.warning, "No authentication mechanism has been set, check the settings screen for more information!");
 		}
 	}
 
@@ -148,8 +149,6 @@
 
 		return message;
 	}
-
-	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
 
 	private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
 	{

@@ -107,7 +107,7 @@
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="DUO Settings (Not Implemented Yet)" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
-					<RadzenCheckBox TValue="bool" Value="AppConfig.DUOEnabled" Name="EnableDUO" Change="() => ToggleDUOEnabled()" />
+					<RadzenCheckBox TValue="bool" Disabled="!AppConfig.DUOAvailable" Value="AppConfig.DUOEnabled" Name="EnableDUO" Change="() => ToggleDUOEnabled()" />
 					<RadzenLabel Text="Enable DUO" Component="EnableDUO" />
 				</RadzenRow>
 

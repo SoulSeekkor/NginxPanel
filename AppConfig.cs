@@ -42,9 +42,17 @@ namespace NginxPanel
         {
             get
             {
-                return (DUOEnabled && !String.IsNullOrWhiteSpace(DUOClientID) &&
-                    !String.IsNullOrWhiteSpace(DUOSecretKey) &&
-                    !String.IsNullOrWhiteSpace(DUOAPIHostname));
+                return (DUOAvailable && DUOEnabled);
+			}
+        }
+
+        public static bool DUOAvailable
+        {
+            get
+			{
+				return (!String.IsNullOrWhiteSpace(DUOClientID) &&
+					!String.IsNullOrWhiteSpace(DUOSecretKey) &&
+					!String.IsNullOrWhiteSpace(DUOAPIHostname));
 			}
         }
 
