@@ -114,7 +114,7 @@ You can find the generated config file after first run at /etc/nginxpanel/app.co
 
 * DUOEnabled: Used for turning on DUO push 2FA, must also specify other DUO settings.
 
-* DUOIntegrationKey/DUOSecretKey/DUOAPIHostname: Values from the DUO admin portal when you create a new web SDK application.
+* DUOClientID/DUOSecretKey/DUOAPIHostname: Values from the DUO admin portal when you create a new web SDK application.
 
 > [!IMPORTANT]
 > DUO is not yet implemented!

@@ -26,7 +26,7 @@ namespace NginxPanel
 
         // DUO related settings
         public static bool DUOEnabled { get; set; } = false;
-        public static string DUOIntegrationKey { get; set; } = string.Empty;
+        public static string DUOClientID { get; set; } = string.Empty;
         public static string DUOSecretKey { get; set; } = string.Empty;
         public static string DUOAPIHostname { get; set; } = string.Empty;
 
@@ -65,7 +65,7 @@ namespace NginxPanel
 
             // DUO related settings
             config.AppendLine($"DUOEnabled='{DUOEnabled}'");
-            config.AppendLine($"DUOIntegrationKey='{DUOIntegrationKey}'");
+            config.AppendLine($"DUOClientID='{DUOClientID}'");
             config.AppendLine($"DUOSecretKey='{DUOSecretKey}'");
             config.AppendLine($"DUOAPIHostname='{DUOAPIHostname}'");
 
@@ -88,7 +88,7 @@ namespace NginxPanel
                 if (line.Contains("="))
                 {
                     split = line.Split('=', 2);
-                    split[1] = split[1].Trim('\'');
+                    split[1] = split[1].Trim().Trim('\'').Trim();
 
                     switch (split[0].ToLower())
                     {
@@ -106,8 +106,8 @@ namespace NginxPanel
                             Password = split[1]; break;
                         case "duoenabled":
                             DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
-                        case "duointegrationkey":
-                            DUOIntegrationKey = split[1]; break;
+                        case "duoclientid":
+                            DUOClientID = split[1]; break;
                         case "duosecretkey":
                             DUOSecretKey = split[1]; break;
                         case "duoapihostname":

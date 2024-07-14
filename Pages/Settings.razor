@@ -847,14 +847,14 @@
 	{
 		try
 		{
-			string integrationKey = AppConfig.DUOIntegrationKey;
+			string clientID = AppConfig.DUOClientID;
 			string secretKey = AppConfig.DUOSecretKey;
 			string APIHostname = AppConfig.DUOAPIHostname;
 
 			var result = await DialogService.OpenAsync("Set DUO Details", ds =>
 	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
-		<span>Enter DUO integration key below:</span>
-		<RadzenTextBox @bind-Value=@integrationKey Style="width:310px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter DUO client ID below:</span>
+		<RadzenTextBox @bind-Value=@clientID Style="width:310px; margin-right: 4px; margin-bottom: 20px;" />
 		<span>Enter DUO secret key below:</span>
 		<RadzenTextBox @bind-Value=@secretKey Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
 		<span>Enter DUO API hostname below:</span>
@@ -874,7 +874,7 @@
 
 				await Task.Run(() =>
 	{
-		AppConfig.DUOIntegrationKey = integrationKey;
+		AppConfig.DUOClientID = clientID;
 		AppConfig.DUOSecretKey = secretKey;
 		AppConfig.DUOAPIHostname = APIHostname;
 		AppConfig.SaveConfig();
