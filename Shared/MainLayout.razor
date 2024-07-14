@@ -13,7 +13,7 @@
 @inject TooltipService TooltipService;
 
 <CascadingValue Value="this">
-	@if (auth.Authenticated)
+	@if (!auth.AuthRequired || auth.Authenticated)
 	{
 		<RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
 			<RadzenHeader>
@@ -62,21 +62,20 @@
 			</RadzenBody>
 		</RadzenLayout>
 	}
-	else
+	// Check if a username was specified, even if we do not have
+	// a password we need to validate the user first
+	else if (!String.IsNullOrWhiteSpace(AppConfig.Username))
 	{
-		if (!String.IsNullOrWhiteSpace(AppConfig.Username))
-		{
-			<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-				<RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
-					<RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
-				</RadzenCard>
-				<RadzenCard Class="rz-shadow-0 rz-p-12">
-					<RadzenTemplateForm Data=@("SimpleLogin")>
-						<RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
-					</RadzenTemplateForm>
-				</RadzenCard>
-			</RadzenStack>
-		}
+		<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+			<RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
+				<RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
+			</RadzenCard>
+			<RadzenCard Class="rz-shadow-0 rz-p-12">
+				<RadzenTemplateForm Data=@("SimpleLogin")>
+					<RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
+				</RadzenTemplateForm>
+			</RadzenCard>
+		</RadzenStack>
 	}
 
 	<RadzenComponents />

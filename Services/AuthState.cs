@@ -2,18 +2,23 @@
 {
     public class AuthState
     {
-        public bool Authenticated { get { return _authenticated; } }
-
         private bool _authenticated = false;
-
-        public AuthState()
+        public bool Authenticated
         {
-            if (String.IsNullOrWhiteSpace(AppConfig.Username))
+            get
             {
-                _authenticated = true;
+                return (!AuthRequired || _authenticated);
             }
         }
 
+        public bool AuthRequired
+        {
+            get
+            {
+                return (AppConfig.UserRequired || AppConfig.DUORequired);
+            }
+        }
+        
         public void SetAuthenticated()
         {
             _authenticated = true;

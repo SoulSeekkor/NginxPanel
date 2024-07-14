@@ -30,6 +30,24 @@ namespace NginxPanel
         public static string DUOSecretKey { get; set; } = string.Empty;
         public static string DUOAPIHostname { get; set; } = string.Empty;
 
+		public static bool UserRequired
+		{
+			get
+			{
+				return (!String.IsNullOrWhiteSpace(Username) && !String.IsNullOrWhiteSpace(Password));
+			}
+		}
+
+		public static bool DUORequired
+        {
+            get
+            {
+                return (DUOEnabled && !String.IsNullOrWhiteSpace(DUOClientID) &&
+                    !String.IsNullOrWhiteSpace(DUOSecretKey) &&
+                    !String.IsNullOrWhiteSpace(DUOAPIHostname));
+			}
+        }
+
         public static void Init()
         {
             // Check if config already exists
@@ -84,7 +102,7 @@ namespace NginxPanel
 
             foreach (string line in lines)
             {
-                // TODO Add collection on unrecognized lines
+                // TODO Add collection on unrecognized lines (such as comments)
                 if (line.Contains("="))
                 {
                     split = line.Split('=', 2);
