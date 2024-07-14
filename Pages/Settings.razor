@@ -35,8 +35,8 @@
 						</RadzenColumn>
 					</RadzenRow>
 
-					<span>Reset Nginx by reinstalling (includes configs):</span>
-					<RadzenButton Click=@(() => ResetNginx()) Disabled="true" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					<span>Reset Nginx by reinstalling (REMOVES ALL CONFIGS!):</span>
+					<RadzenButton Click=@(() => ResetNginx()) Disabled="busyInstallReset" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
 				}
 			</RadzenStack>
 		</RadzenCard>
@@ -125,17 +125,36 @@
 
 	#region Nginx
 
-	private void ResetNginx()
+	private async void ResetNginx()
 	{
-		//busyInstallReset = true;
+		try
+		{
+			busyInstallReset = true;
+			StateHasChanged();
 
-		//cli.RunCommand("sudo", "apt purge nginx nginx-common nginx-full");
-		//cli.RunCommand("sudo", "apt install nginx");
+			bool? confirm = await DialogService.Confirm("Are you sure you want to reset Nginx? This will reinstall Nginx and remove ALL configuration files!", "Reset Nginx", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
-		// If all else fails
-		//cli.RunCommand("sudo", "dpkg --force-confmiss -i /var/cache/apt/archives/nginx-common_*.deb ");
+			if (confirm.HasValue && confirm.Value)
+			{
+				await Task.Run(() =>
+		{
+		// Purge
+		cli.RunCommand("apt purge nginx nginx-common nginx-full -y");
+		// Reinstall
+		cli.RunCommand("apt update");
+		cli.RunCommand("apt install nginx-full -y");
+		});
 
-		//busyInstallReset = false;
+				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx reset successfully!");
+			}
+		}
+		finally
+		{
+			busyInstallReset = false;
+			nginx.Refresh();
+			StateHasChanged();
+			await layout!.InvokeStateHasChanged();
+		}
 	}
 
 	private async void InstallNginx()
