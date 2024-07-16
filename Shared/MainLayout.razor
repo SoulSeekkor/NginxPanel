@@ -7,6 +7,7 @@
 
 @inject Services.AuthState auth;
 @inject Services.CLI cli;
+@inject Services.DUO duo;
 @inject Services.Nginx nginx;
 @inject DialogService DialogService;
 @inject NotificationService NotificationService;
@@ -99,6 +100,12 @@
 
 	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
 
+	protected override void OnInitialized()
+	{
+		if (AppConfig.DUORequired && !AppConfig.UserRequired)
+			InitializeDUO();
+	}
+
 	protected override void OnAfterRender(bool firstRender)
 	{
 		if (firstRender)
@@ -114,14 +121,31 @@
 	{
 		if (args.Username.ToLower() == AppConfig.Username.ToLower() && args.Password == AppConfig.Password)
 		{
-			auth.SetAuthenticated();
-			await DisplayToastAsync(toastType.info, $"Successful login, welcome {args.Username}!");
+			if (!AppConfig.DUORequired)
+			{
+				auth.SetAuthenticated();
+				await DisplayToastAsync(toastType.info, $"Successful login, welcome {args.Username}!");
 
-			NavigationManager.NavigateTo("dashboard");
+				NavigationManager.NavigateTo("dashboard");
+			}
+			else
+				InitializeDUO();
 		}
 		else
 		{
 			await DisplayToastAsync(toastType.error, "Invalid username or password!");
+		}
+	}
+
+	private void InitializeDUO()
+	{
+		try
+		{
+
+		}
+		catch
+		{
+			
 		}
 	}
 
