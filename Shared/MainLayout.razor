@@ -1,4 +1,5 @@
-﻿@using System.Reflection;
+﻿@using Microsoft.AspNetCore.WebUtilities;
+@using System.Reflection;
 
 @inherits LayoutComponentBase
 
@@ -63,19 +64,29 @@
 			</RadzenBody>
 		</RadzenLayout>
 	}
-	// Check if a username was specified, if there was we need to validate the user
-	else if (!String.IsNullOrWhiteSpace(AppConfig.Username))
+	// Check if a username was specified, if there was we need to validate the user unless this is a DUO redirect
+	else
 	{
-		<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-			<RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
-				<RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
-			</RadzenCard>
-			<RadzenCard Class="rz-shadow-0 rz-p-12">
-				<RadzenTemplateForm Data=@("SimpleLogin")>
-					<RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
-				</RadzenTemplateForm>
-			</RadzenCard>
-		</RadzenStack>
+		Uri uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+		bool DUOredirect = QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("state", out _);
+
+		if (DUOredirect)
+		{
+			<RadzenText TextStyle="TextStyle.DisplayH6" TagName="TagName.H6" TextAlign="TextAlign.Center" Text="Redirecting..." />
+		}
+		else if (AppConfig.UserRequired)
+		{
+			<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+				<RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
+					<RadzenText TextStyle="TextStyle.DisplayH4" TagName="TagName.H4" Class="rz-color-white rz-mb-0">NginxPanel Login</RadzenText>
+				</RadzenCard>
+				<RadzenCard Class="rz-shadow-0 rz-p-12">
+					<RadzenTemplateForm Data=@("SimpleLogin")>
+						<RadzenLogin AllowRegister="false" AllowResetPassword="false" Login="(args) => OnLogin(args)" />
+					</RadzenTemplateForm>
+				</RadzenCard>
+			</RadzenStack>
+		}
 	}
 
 	<RadzenComponents />
@@ -88,6 +99,10 @@
 	private bool disableAllButtons = false;
 	private bool busyTesting = false;
 
+#if DEBUG
+	private bool clearAuthOnInit = true;
+#endif
+
 	#endregion
 
 	public enum toastType
@@ -98,16 +113,69 @@
 		info
 	}
 
-	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
-
-	protected override void OnInitialized()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (AppConfig.DUORequired && !AppConfig.UserRequired)
-			InitializeDUO();
-	}
+		if (!auth.Authenticated)
+		{
+			// Check for cookie first
+			string authenticated = await JSRuntime.InvokeAsync<string>("readCookie", "Authenticated");
 
-	protected override void OnAfterRender(bool firstRender)
-	{
+#if DEBUG
+			if (clearAuthOnInit)
+			{
+				await JSRuntime.InvokeVoidAsync("writeCookie", "Authenticated", "", 120);
+				clearAuthOnInit = false;
+				authenticated = string.Empty;
+			}
+#endif
+
+			if (authenticated == "true")
+			{
+				auth.SetAuthenticated();
+				await InvokeAsync(() => StateHasChanged());
+			}
+			else
+			{
+				var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+				if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("state", out var returnState))
+				{
+					if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("code", out var returnCode))
+					{
+						// Current DUO auth in progress, verify cookie and continue
+						string username = await JSRuntime.InvokeAsync<string>("readCookie", "DUOUsername");
+						string state = await JSRuntime.InvokeAsync<string>("readCookie", "DUOState");
+
+						// Clear cookies
+						await JSRuntime.InvokeVoidAsync("writeCookie", "DUOUsername", "", 3);
+						await JSRuntime.InvokeVoidAsync("writeCookie", "DUOState", "", 3);
+
+						// Only continue if state was not tampered with
+						if (state == returnState)
+						{
+							bool success = await duo.ValidateAuth(returnCode!, username);
+
+							if (success)
+							{
+								// Write auth cookie for 2 hours
+								await JSRuntime.InvokeVoidAsync("writeCookie", "Authenticated", "true", 120);
+
+								auth.SetAuthenticated();
+
+								NavigationManager.NavigateTo("/");
+								return;
+							}
+						}
+					}
+				}
+
+				if (AppConfig.DUORequired && !AppConfig.UserRequired)
+				{
+					InitializeDUO();
+					return;
+				}
+			}
+		}
+
 		if (firstRender)
 		{
 			nginx.ServiceStatusChanged += RefreshServiceStatus;
@@ -123,10 +191,13 @@
 		{
 			if (!AppConfig.DUORequired)
 			{
+				// Write auth cookie for 2 hours
+				await JSRuntime.InvokeVoidAsync("writeCookie", "Authenticated", "true", 120);
+
 				auth.SetAuthenticated();
 				await DisplayToastAsync(toastType.info, $"Successful login, welcome {args.Username}!");
 
-				NavigationManager.NavigateTo("dashboard");
+				NavigationManager.NavigateTo("/");
 			}
 			else
 				InitializeDUO();
@@ -137,41 +208,34 @@
 		}
 	}
 
-	private void InitializeDUO()
+	private async void InitializeDUO()
 	{
 		try
 		{
+			string username = AppConfig.DUOUsername;
 
+			if (String.IsNullOrWhiteSpace(username))
+				username = AppConfig.Username;
+
+			if (!String.IsNullOrWhiteSpace(username))
+			{
+				// Save username to cookie
+				await JSRuntime.InvokeVoidAsync("writeCookie", "DUOUsername", username, 3);
+
+				string state = string.Empty;
+				string redirect = duo.GetAuthURL(username, ref state);
+
+				// Save state to cookie
+				await JSRuntime.InvokeVoidAsync("writeCookie", "DUOState", state, 3);
+
+				if (!String.IsNullOrWhiteSpace(redirect))
+					NavigationManager.NavigateTo(redirect);
+			}
 		}
 		catch
 		{
-			
+			// Placeholder
 		}
-	}
-
-	public async Task DisplayToastAsync(toastType type, string message, string title = "", bool dismissable = false)
-	{
-		await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
-	}
-
-	public void DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
-	{
-		JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
-	}
-
-	public string StyleMessage(toastType type, string message)
-	{
-		// Determine color by toastType
-		string color = "DeepSkyBlue";
-
-		if (type == toastType.error)
-			color = "Crimson";
-
-		// Replace "span start/end" with styling
-		message = message.Replace("%ss%", "<span style='color: %color%; font-weight: bold;'>".Replace("%color%", color));
-		message = message.Replace("%se%", "</span>");
-
-		return message;
 	}
 
 	private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
@@ -241,11 +305,38 @@
 		await InvokeAsync(() => StateHasChanged());
 	}
 
+	public async Task DisplayToastAsync(toastType type, string message, string title = "", bool dismissable = false)
+	{
+		await JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+	}
+
+	public void DisplayToast(toastType type, string message, string title = "", bool dismissable = false)
+	{
+		JSRuntime.InvokeVoidAsync("toast", type.ToString(), StyleMessage(type, message), title, dismissable);
+	}
+
+	public void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => TooltipService.Open(elementReference, text, options);
+
+	public string StyleMessage(toastType type, string message)
+	{
+		// Determine color by toastType
+		string color = "DeepSkyBlue";
+
+		if (type == toastType.error)
+			color = "Crimson";
+
+		// Replace "span start/end" with styling
+		message = message.Replace("%ss%", "<span style='color: %color%; font-weight: bold;'>".Replace("%color%", color));
+		message = message.Replace("%se%", "</span>");
+
+		return message;
+	}
+
 	public async Task BusyDialog(string message)
 	{
 		await DialogService.OpenAsync("", ds =>
-	{
-		return
+		{
+	return
 	@<RadzenStack AlignItems="AlignItems.Center" Class="rz-m-6" Gap="2rem">
 		@message
 		<RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />

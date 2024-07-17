@@ -5,18 +5,17 @@ namespace NginxPanel.Services
 {
 	public class DUO
 	{
-		private static Client? _client = null;
-		private static string _state = string.Empty;
+		private Client? _client = null;
 
 		public DUO()
 		{
 			if (AppConfig.DUORequired)
 			{
-				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://localhost:{AppConfig.Port}/dashboard").Build();
+				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, "https://localhost:" + AppConfig.Port).Build();
 			}
 		}
 
-		public static async Task<bool> DoHealthCheck()
+		public async Task<bool> DoHealthCheck()
 		{
 			bool result = false;
 
@@ -26,18 +25,41 @@ namespace NginxPanel.Services
 			return result;
 		}
 
-		public static string GetAuthURL(string username)
+		public string GetAuthURL(string username, ref string state)
 		{
 			string result = string.Empty;
 
-			if (AppConfig.DUORequired && _client != null)
+			if (AppConfig.DUORequired && _client != null && !String.IsNullOrWhiteSpace(username))
 			{
 				// Generate a random state value to tie the authentication steps together
-				_state = Client.GenerateState();
+				state = Client.GenerateState();
 
 				// Get the URI of the Duo prompt from the client.  This includes an embedded authentication request.
-				result = _client.GenerateAuthUri(username, _state);
+				result = _client.GenerateAuthUri(username, state);
 			}	
+
+			return result;
+		}
+
+		public async Task<bool> ValidateAuth(string code, string username)
+		{
+			bool result = false;
+
+			try
+			{
+				if (AppConfig.DUORequired && _client != null)
+				{
+					IdToken token = await _client.ExchangeAuthorizationCodeFor2faResult(code, username);
+                    if (token != null && token.AuthResult.Result == "allow")
+                    {
+						result = true;
+                    }
+                }
+			}
+			catch
+			{
+				// Placeholder
+			}
 
 			return result;
 		}

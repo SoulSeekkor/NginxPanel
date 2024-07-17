@@ -116,8 +116,7 @@ You can find the generated config file after first run at /etc/nginxpanel/app.co
 
 * DUOClientID/DUOSecretKey/DUOAPIHostname: Values from the DUO admin portal when you create a new web SDK application.
 
-> [!IMPORTANT]
-> DUO is not yet implemented!
+* DUOUsername: Optional if basic auth username has been set and you are okay with that, otherwise this is required (or can be used as an override).
 
 ## Reporting issues
 

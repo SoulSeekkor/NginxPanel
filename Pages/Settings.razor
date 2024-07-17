@@ -105,7 +105,7 @@
 			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
 
 			<hr style="margin-bottom: 25px;" />
-			<RadzenText Text="DUO Settings (Not Implemented Yet)" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+			<RadzenText Text="DUO Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 					<RadzenCheckBox TValue="bool" Disabled="!AppConfig.DUOAvailable" Value="AppConfig.DUOEnabled" Name="EnableDUO" Change="() => ToggleDUOEnabled()" />
 					<RadzenLabel Text="Enable DUO" Component="EnableDUO" />
@@ -875,6 +875,7 @@
 			string clientID = AppConfig.DUOClientID;
 			string secretKey = AppConfig.DUOSecretKey;
 			string APIHostname = AppConfig.DUOAPIHostname;
+			string DUOUsername = AppConfig.DUOUsername;
 
 			var result = await DialogService.OpenAsync("Set DUO Details", ds =>
 	@<RadzenStack Orientation="Orientation.Vertical" Gap=".2">
@@ -884,6 +885,8 @@
 		<RadzenTextBox @bind-Value=@secretKey Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
 		<span>Enter DUO API hostname below:</span>
 		<RadzenTextBox @bind-Value=@APIHostname Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
+		<span>Enter DUO username below (optional if also using username/password auth):</span>
+		<RadzenTextBox @bind-Value=@DUOUsername Style="width: 310px; margin-right: 4px; margin-bottom: 20px;" />
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 			<RadzenStack Orientation="Orientation.Horizontal">
 				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
@@ -902,6 +905,7 @@
 		AppConfig.DUOClientID = clientID;
 		AppConfig.DUOSecretKey = secretKey;
 		AppConfig.DUOAPIHostname = APIHostname;
+		AppConfig.DUOUsername = DUOUsername;
 		AppConfig.SaveConfig();
 	});
 

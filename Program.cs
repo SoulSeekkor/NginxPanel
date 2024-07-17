@@ -38,8 +38,8 @@ builder.Services.AddRadzenComponents();
 builder.Services.AddSingleton<CLI>();
 builder.Services.AddSingleton<Nginx>();
 builder.Services.AddSingleton<ACME>();
-builder.Services.AddSingleton<DUO>();
 
+builder.Services.AddScoped<DUO>();
 builder.Services.AddScoped<AuthState>();
 
 var app = builder.Build();

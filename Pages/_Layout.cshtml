@@ -72,10 +72,6 @@
             }
         }
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
         function setFocus(element) {
             if (element) {
                 element.focus();
@@ -94,6 +90,30 @@
                 title: title,
                 dismissable: dismissable,
             });
+        }
+    </script>
+    <!-- Cookies -->
+    <script>
+        function writeCookie(name, value, minutes) {
+            var expires;
+
+            if (minutes) {
+                var date = new Date();
+                date.setTime(date.getTime() + (minutes * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            } else {
+                expires = "";
+            }
+
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function readCookie(name) {
+            return (document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || '');
+        }
+
+        function clearCookie(name) {
+            writeCookie(name, "", 0);
         }
     </script>
 </body>
