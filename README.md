@@ -118,6 +118,9 @@ You can find the generated config file after first run at /etc/nginxpanel/app.co
 
 * DUOUsername: Optional if basic auth username has been set and you are okay with that, otherwise this is required (or can be used as an override).
 
+> [!IMPORTANT]
+> In order for DUO to function correctly, your instance must be DNS resolvable as the DUO redirect will be to the hostname of the instance NOT the IP!
+
 ## Reporting issues
 
 Issues can be reported via the [Github issue tracker](https://github.com/SoulSeekkor/NginxPanel/issues).

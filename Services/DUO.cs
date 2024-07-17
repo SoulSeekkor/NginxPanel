@@ -1,6 +1,5 @@
 ﻿using DuoUniversal;
 using System.Net;
-using System.Net.Sockets;
 
 namespace NginxPanel.Services
 {
@@ -12,7 +11,7 @@ namespace NginxPanel.Services
 		{
 			if (AppConfig.DUORequired)
 			{
-				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{GetLocalIPAddress()}:{AppConfig.Port}").Build();
+				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{Dns.GetHostName()}:{AppConfig.Port}").Build();
 			}
 		}
 
@@ -63,31 +62,6 @@ namespace NginxPanel.Services
 			}
 
 			return result;
-		}
-
-		private string GetLocalIPAddress()
-		{
-#if DEBUG
-			// For dev we have to hardcode this
-			return "localhost";
-#endif
-			try
-			{
-				var host = Dns.GetHostEntry(Dns.GetHostName());
-				foreach (var ip in host.AddressList)
-				{
-					if (ip.AddressFamily == AddressFamily.InterNetwork)
-					{
-						return ip.ToString();
-					}
-				}
-			}
-			catch
-			{
-				// Placeholder
-			}
-
-			return "localhost";
 		}
 	}
 }
