@@ -7,11 +7,23 @@ namespace NginxPanel.Services
 	{
 		private Client? _client = null;
 
+		private string GetHostName
+		{
+			get
+			{
+#if DEBUG
+				return "localhost";
+#else
+				return Dns.GetHostName();
+#endif
+			}
+		}
+
 		public DUO()
 		{
 			if (AppConfig.DUORequired)
 			{
-				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{Dns.GetHostName()}:{AppConfig.Port}").Build();
+				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{GetHostName}:{AppConfig.Port}").Build();
 			}
 		}
 
