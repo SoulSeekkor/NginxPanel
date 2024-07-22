@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="DuoUniversal" Version="1.2.5" />
-    <PackageReference Include="Radzen.Blazor" Version="4.34.1" />
+    <PackageReference Include="Radzen.Blazor" Version="5.0.1" />
   </ItemGroup>
 
 </Project>
