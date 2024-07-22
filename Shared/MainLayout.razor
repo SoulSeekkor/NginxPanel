@@ -31,7 +31,7 @@
 						@switch (nginx.ServiceStatus)
 						{
 							case Services.Nginx.enuServiceStatus.Running:
-								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Primary" />
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Danger" />
 								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
 								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
 								break;
@@ -53,7 +53,7 @@
 				<RadzenPanelMenu>
 					<RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="dashboard" />
 					<RadzenPanelMenuItem Text="Configs" Icon="description" Path="configs" />
-					<RadzenPanelMenuItem Text="Certificates" Icon="shield" Path="certificates" />
+					<RadzenPanelMenuItem Text="Certificates" Icon="encrypted" Path="certificates" />
 					<RadzenPanelMenuItem Text="Settings" Icon="settings" Path="settings" />
 				</RadzenPanelMenu>
 			</RadzenSidebar>
