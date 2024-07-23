@@ -15,8 +15,8 @@
 @if (acme.Installed)
 {
 	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0" Style="margin-bottom: 20px;">
-		<RadzenButton Click=@(() => RefreshCertificates(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Info" class="rz-mr-5" />
-		<RadzenButton Click=@(() => AddCertificate()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" ButtonStyle="ButtonStyle.Success" />
+		<RadzenButton Click=@(() => RefreshCertificates(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-primary-dark rz-mr-5" />
+		<RadzenButton Click=@(() => AddCertificate()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-success-dark" />
 	</RadzenStack>
 
 	if (acme.Certificates.Count == 0)
@@ -67,12 +67,12 @@
 				</RadzenCard>
 				<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 					<RadzenStack Orientation="Orientation.Horizontal" style="margin-left: 0.5rem; margin-top: 12px;">
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Install" Click="() => InstallCertificate(cert)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" />
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Export" Click="() => ExportToPFX(cert)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" />
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" />
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Details" Click="() => ViewCertificateDetails(cert)" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Install" Click="() => InstallCertificate(cert)" class="rz-background-color-primary-lighter" Size="ButtonSize.Small" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Export" Click="() => ExportToPFX(cert)" class="rz-background-color-primary-lighter" Size="ButtonSize.Small" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Force Renew" Click="() => ForceRenewCertificate(cert)" class="rz-background-color-warning-lighter rz-color-series-5" Size="ButtonSize.Small" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Text="Details" Click="() => ViewCertificateDetails(cert)" class="rz-background-color-info-lighter" Size="ButtonSize.Small" />
 					</RadzenStack>
-					<RadzenButton Variant="Variant.Text" Click="() => DeleteCertificate(cert)" Icon="delete" Size="ButtonSize.Large" ButtonStyle="ButtonStyle.Danger" style="margin: -5px;" />
+					<RadzenButton Variant="Variant.Text" Click="() => DeleteCertificate(cert)" Icon="delete" Size="ButtonSize.Large" class="rz-color-danger-dark" style="margin: -5px;" />
 				</RadzenStack>
 			</RadzenCard>
 		}

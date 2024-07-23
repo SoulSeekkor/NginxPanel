@@ -31,14 +31,14 @@
 						@switch (nginx.ServiceStatus)
 						{
 							case Services.Nginx.enuServiceStatus.Running:
-								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" ButtonStyle="ButtonStyle.Danger" />
-								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" ButtonStyle="ButtonStyle.Warning" />
-								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Stop)) Disabled="disableAllButtons" Text="Stop" Icon="stop" class="rz-background-color-danger-dark" />
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Restart)) Disabled="disableAllButtons" Text="Restart" Icon="replay" class="rz-background-color-warning-dark" />
+								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" class="rz-background-color-primary-dark rz-ripple" />
 								break;
 							case Services.Nginx.enuServiceStatus.Stopped:
 							case Services.Nginx.enuServiceStatus.Failed:
-								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" ButtonStyle="ButtonStyle.Success" />
-								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" ButtonStyle="ButtonStyle.Secondary" class="rz-ripple" />
+								<RadzenButton Click=@(() => PerformServiceAction(Services.Nginx.enuServiceAction.Start)) Disabled="disableAllButtons" Text="Start" Icon="play_arrow" class="rz-background-color-success-dark" />
+								<RadzenButton Click=@(() => TestConfig()) Disabled="disableAllButtons" Text="Test Config" Icon="check" BusyText="Testing..." IsBusy="busyTesting" class="rz-background-color-primary-dark rz-ripple" />
 								break;
 
 						}
