@@ -14,18 +14,18 @@
 	<RadzenCard Style="width: 700px;">
 		<RadzenText Text="Nginx" TextStyle="TextStyle.DisplayH6" />
 		<hr style="margin-bottom: 25px;" />
-		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" Style="margin: 0;">
 			@if (nginx.Installed)
 			{
-				<h6>Version: @nginx.Version</h6>
-				<h6>Last config test results:</h6>
-				@((MarkupString)nginx.LastTestResults)
+				<RadzenText>Version: @nginx.Version</RadzenText>
+				<RadzenText>Last config test results:</RadzenText>
+				<RadzenText>@((MarkupString)nginx.LastTestResults)</RadzenText>
 			}
 			else
 			{
-				<h5>
+				<RadzenText TextStyle="TextStyle.H6">
 					Nginx is not installed, see <RadzenLink Icon="settings" Path="Settings" Text="Settings" /> screen for more information.
-				</h5>
+				</RadzenText>
 			}
 		</RadzenStack>
 	</RadzenCard>
@@ -36,8 +36,8 @@
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 			@if (acme.Installed)
 			{
-				<h6>Version: @acme.Version</h6>
-				<h6>
+				<RadzenText>Version: @acme.Version</RadzenText>
+				<RadzenText>
 					Log File:&nbsp;
 					@{
 						string logFile = acme.AccountConf.GetConfValue(enuConfKey.LOG_FILE);
@@ -51,8 +51,8 @@
 							<span>@logFile</span>
 						}
 					}
-				</h6>
-				<h6>
+				</RadzenText>
+				<RadzenText>
 					Auto-upgrade:&nbsp;
 					@{
 						string upgrade = acme.AccountConf.GetConfValue(enuConfKey.AUTO_UPGRADE);
@@ -66,16 +66,14 @@
 							<span>No</span>
 						}
 					}
-					<br />
-					<br />
-					<RadzenTextArea Value="@acme.AccountConf.Config" Cols="85" Rows="18" Style="background-color: #5F737E !important; cursor: default; white-space: nowrap; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;" />
-				</h6>
+				</RadzenText>
+				<RadzenTextArea Value="@acme.AccountConf.Config" Cols="85" Rows="18" Style="background-color: #5F737E !important; cursor: default; white-space: nowrap; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;" />
 			}
 			else
 			{
-				<h6>
+				<RadzenText TextStyle="TextStyle.H6">
 					ACME is not installed, see <RadzenLink Icon="settings" Path="Settings" Text="Settings" /> screen for more information.
-				</h6>
+				</RadzenText>
 			}
 		</RadzenStack>
 	</RadzenCard>

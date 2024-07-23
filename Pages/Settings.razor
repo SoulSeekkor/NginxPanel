@@ -18,7 +18,7 @@
 				@if (!nginx.Installed)
 				{
 					<span>Install Nginx, gives the option of package manager (not recommended), stable or mainline:</span>
-					<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" Style="margin-top: -12px;" />
 				}
 				else
 				{
@@ -26,17 +26,17 @@
 						<RadzenColumn SizeSM="6">
 							<span>Uninstall Nginx:</span>
 							<br />
-							<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+							<RadzenButton Click=@(() => UninstallNginx()) Disabled="busyInstallReset" Text="Uninstall Nginx" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" Style="margin-top: 3px;" />
 						</RadzenColumn>
 						<RadzenColumn>
 							<span>Upgrade Nginx:</span>
 							<br />
-							<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+							<RadzenButton Click=@(() => UpgradeNginx()) Disabled="busyInstallReset" Text="Upgrade Nginx" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" Style="margin-top: 3px;" />
 						</RadzenColumn>
 					</RadzenRow>
 
 					<span>Reset Nginx by reinstalling (REMOVES ALL CONFIGS!):</span>
-					<RadzenButton Click=@(() => ResetNginx()) Disabled="busyInstallReset" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					<RadzenButton Click=@(() => ResetNginx()) Disabled="busyInstallReset" Text="Reset Nginx" Icon="cached" BusyText="Resetting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" Style="margin-top: -12px;" />
 				}
 			</RadzenStack>
 		</RadzenCard>
@@ -48,7 +48,7 @@
 				@if (!acme.Installed)
 				{
 					<span>Install ACME:</span>
-					<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+					<RadzenButton Click=@(() => InstallACME()) Disabled="busyInstallReset" Text="Install ACME" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" Style="margin-top: -12px;" />
 				}
 				else
 				{
@@ -56,22 +56,22 @@
 						<RadzenColumn SizeSM="6">
 							<span>Uninstall ACME:</span>
 							<br />
-							<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger" />
+							<RadzenButton Click=@(() => UninstallACME()) Disabled="busyInstallReset" Text="Uninstall ACME" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Danger"Style="margin-top: 3px;"  />
 						</RadzenColumn>
 						<RadzenColumn>
 							<span>Upgrade ACME:</span>
 							<br />
-							<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" />
+							<RadzenButton Click=@(() => UpgradeACME()) Disabled="busyInstallReset" Text="Upgrade ACME" Icon="cached" BusyText="Upgrading..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Success" Style="margin-top: 3px;" />
 						</RadzenColumn>
 					</RadzenRow>
 
 					<span>Set ACME Cloudflare Token:</span>
-					<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMECloudflareToken()) Disabled="busyInstallReset" Text="Set Token" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 					<span>Set ACME CA:</span>
-					<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMECertAuthority()) Disabled="busyInstallReset" Text="Set CA" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 
 					<span>ACME Notifications:</span>
-					<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" />
+					<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 					<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 						<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 						<RadzenLabel Text="SMTP Notify (SMTP Settings Must Be Set First)" Component="NotifyHookSMTP" />
@@ -87,7 +87,7 @@
 			
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="General Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
-			<RadzenButton Click=@(() => SetAppPort()) Text="Set Port" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+			<RadzenButton Click=@(() => SetAppPort()) Text="Set Port" Icon="edit" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="Authentication" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
@@ -97,12 +97,12 @@
 					<RadzenLabel Text="Disable Auth Settings Warning On Start" Component="DisableAuthWarning" />
 				</RadzenRow>
 
-				<RadzenButton Click=@(() => SetUsernamePassword()) Text="Set Username/Password" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+				<RadzenButton Click=@(() => SetUsernamePassword()) Text="Set Username/Password" Icon="edit" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 			</RadzenStack>
 
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="PFX Certificate" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
-			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 
 			<hr style="margin-bottom: 25px;" />
 			<RadzenText Text="DUO Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
@@ -111,7 +111,7 @@
 					<RadzenLabel Text="Enable DUO" Component="EnableDUO" />
 				</RadzenRow>
 
-				<RadzenButton Click=@(() => SetDUODetails()) Text="Set DUO Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" />
+				<RadzenButton Click=@(() => SetDUODetails()) Text="Set DUO Details" Icon="edit" ButtonStyle="ButtonStyle.Secondary" Style="margin-top: -12px;" />
 			</RadzenStack>
 		</RadzenCard>
 	</RadzenStack>
