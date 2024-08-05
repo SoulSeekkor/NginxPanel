@@ -114,7 +114,7 @@ else
 			busyRefreshing = true;
 			selectedConf = null;
 
-			await Task.Run(() => nginx.RefreshFiles());
+			await Task.Run(() => nginx.RefreshConfigs());
 
 			if (notifyUser)
 			{

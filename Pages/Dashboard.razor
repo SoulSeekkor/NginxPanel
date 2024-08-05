@@ -19,7 +19,15 @@
 			{
 				<RadzenText>Version: @nginx.Version</RadzenText>
 				<RadzenText>Last config test results:</RadzenText>
-				<RadzenText>@((MarkupString)nginx.LastTestResults)</RadzenText>
+				<RadzenText Style="margin-bottom: 10px;">@((MarkupString)nginx.LastTestResults)</RadzenText>
+
+				<RadzenText Style="line-height: 6px;">Modules loaded:</RadzenText>
+				<ul style="margin: 0px;">
+					@foreach (string module in nginx.Modules)
+					{
+						<li>@module</li>
+					}
+				</ul>
 			}
 			else
 			{

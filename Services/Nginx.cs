@@ -105,6 +105,7 @@ namespace NginxPanel.Services
 
 		private string _version = "";
 		private string _rootConfig = "";
+		private string _rootModules = "";
 		private string _rootPath = "";
 
 		private enuServiceStatus _serviceStatus = enuServiceStatus.Checking;
@@ -112,6 +113,7 @@ namespace NginxPanel.Services
 		private string _lastTestResults = "";
 
 		private List<ConfigFile> _configs = new List<ConfigFile>();
+		private List<string> _modules = new List<string>();
 
 		private System.Timers.Timer _refreshService = new System.Timers.Timer(1500);
 
@@ -125,6 +127,11 @@ namespace NginxPanel.Services
 		public bool Installed
 		{
 			get { return !(_rootConfig == "") && Directory.Exists(_rootPath); }
+		}
+
+		public bool NginxExtrasInstalled
+		{
+			get { return _modules.Contains("http_headers_more_filter_module"); }
 		}
 
 		public string Version
@@ -167,6 +174,11 @@ namespace NginxPanel.Services
 			get { return _configs; }
 		}
 
+		public List<string> Modules
+		{
+			get { return _modules; }
+		}
+
 		#endregion
 
 		#region Constructors
@@ -203,7 +215,8 @@ namespace NginxPanel.Services
 
 			GetVersion();
 			GetServiceStatus();
-			RefreshFiles();
+			RefreshConfigs();
+			RefreshModules();
 		}
 
 		private void GetVersion()
@@ -212,12 +225,13 @@ namespace NginxPanel.Services
 
 			_CLI.RunCommand("nginx -V");
 
-			Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s").Match(_CLI.StandardError);
+			Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s.*--modules-path=(?<modules>.*?)\\s").Match(_CLI.StandardError);
 
 			if (match.Success)
 			{
 				_version = match.Groups["version"].Value;
 				_rootConfig = match.Groups["config"].Value;
+				_rootModules = match.Groups["modules"].Value;
 				_rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
 			}
 			else
@@ -333,7 +347,7 @@ namespace NginxPanel.Services
 			}
 		}
 
-		public void RefreshFiles()
+		public void RefreshConfigs()
 		{
 			_configs.Clear();
 
@@ -356,6 +370,24 @@ namespace NginxPanel.Services
 
 				// Sort the configs
 				_configs.OrderBy(x => x.ConfigType).ThenBy(x => x.Name);
+			}
+		}
+
+		public void RefreshModules()
+		{
+			_modules.Clear();
+
+			if (Installed)
+			{
+				FileInfo? module = null;
+				foreach (string file in Directory.GetFiles(_rootModules))
+				{
+					module = new FileInfo(file);
+					_modules.Add(module.Name.Substring(4, module.Name.IndexOf(".") - 4));
+				}
+
+				// Sort the modules
+				_modules.Sort((x,y) => x.CompareTo(y));
 			}
 		}
 
