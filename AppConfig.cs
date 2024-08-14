@@ -39,15 +39,9 @@ namespace NginxPanel
 			}
 		}
 
-		public static bool DUORequired
-        {
-            get
-            {
-                return (DUOAvailable && DUOEnabled);
-			}
-        }
+        public static bool DUORequired => (DUOAvailable && DUOEnabled);
 
-        public static bool DUOAvailable
+		public static bool DUOAvailable
         {
             get
 			{
@@ -161,11 +155,13 @@ namespace NginxPanel
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             StringBuilder pass = new StringBuilder();
             Random rnd = new Random();
+
             for (int c = 0; c < 20; c++)
             {
                 pass.Append(valid[rnd.Next(valid.Length)]);
                 Thread.Sleep(50);
             }
+
             return pass.ToString();
         }
 

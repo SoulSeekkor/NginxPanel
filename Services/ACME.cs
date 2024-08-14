@@ -9,13 +9,13 @@ namespace NginxPanel.Services
 
 		public class Certificate
 		{
-			public string MainDomain { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Domain); } }
-			public string SANDomains { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Alt); } }
-			public string KeyLength { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Keylength); } }
-			public string API { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API); } }
-			public string Webroot { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Webroot); } }
-			public string RealKeyPath { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealKeyPath); } }
-			public string RealFullChainPath { get { return ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealFullChainPath); } }
+			public string MainDomain => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Domain);
+			public string SANDomains => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Alt);
+			public string KeyLength => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Keylength);
+			public string API => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_API);
+			public string Webroot => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_Webroot);
+			public string RealKeyPath => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealKeyPath);
+			public string RealFullChainPath => ConfigFile.GetConfValue(ConfigFile.enuConfKey.Le_RealFullChainPath);
 
 			public bool Installed
 			{
@@ -29,10 +29,7 @@ namespace NginxPanel.Services
 				}
 			}
 
-			public string RootPath
-			{
-				get { return _rootPath; }
-			}
+			public string RootPath => _rootPath;
 
 			public DateTime? Created;
 			public DateTime? Renew;
@@ -130,10 +127,7 @@ namespace NginxPanel.Services
 
 			#endregion
 
-			public string Config
-			{
-				get { return _configContent; }
-			}
+			public string Config => _configContent;
 
 			public ConfigFile()
 			{
@@ -294,25 +288,13 @@ namespace NginxPanel.Services
 			get { return !(String.IsNullOrWhiteSpace(_version)) && File.Exists($"{ACMEPath}/acme.sh"); }
 		}
 
-		public string Version
-		{
-			get { return _version; }
-		}
+		public string Version => _version;
 
-		public ConfigFile AccountConf
-		{
-			get { return _accountConf; }
-		}
+		public ConfigFile AccountConf => _accountConf;
 
-		public List<Certificate> Certificates
-		{
-			get { return _certificates; }
-		}
+		public List<Certificate> Certificates => _certificates;
 
-		public List<CertAuthority> CertAuthorities
-		{
-			get { return _certAuthorities; }
-		}
+		public List<CertAuthority> CertAuthorities => _certAuthorities;
 
 		public string ACMEPath
 		{

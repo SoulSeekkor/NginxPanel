@@ -40,7 +40,7 @@
 						if (conf.ContentsDirty)
 							style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
 
-						<RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="() => selectedConf = conf" Selected="@(selectedConf == conf)" Style="@style" />
+						<RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="@(() => selectedConf = conf)" Selected="@(selectedConf == conf)" Style="@style" />
 					}
 				}
 			</RadzenPanelMenu>
@@ -194,16 +194,16 @@ else
 	{
 		string configName = conf.Name;
 		var result = await DialogService.OpenAsync("Rename Config", ds =>
-	@<RadzenStack Gap="1.5rem">
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the new name for this config below:</RadzenText>
-		<RadzenTextBox @bind-Value=@configName class="w-100" />
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			@<RadzenStack Gap="1.5rem">
+				<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the new name for this config below:</RadzenText>
+				<RadzenTextBox @bind-Value=@configName class="w-100" />
+				<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+					<RadzenStack Orientation="Orientation.Horizontal">
+						<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+						<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+					</RadzenStack>
+				</RadzenStack>
 			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
 		);
 
 		if (!(result is null) && result && !(configName == conf.Name))
@@ -231,32 +231,32 @@ else
 			try
 			{
 				await Task.Run(() =>
-			{
-				// Output new file
-				File.WriteAllText(configPath, conf.FileContents);
-
-				// Check enabled status
-				if (conf.Enabled)
 				{
-					string oldName = conf.Name;
-					string oldPath = conf.ConfigPath;
+					// Output new file
+					File.WriteAllText(configPath, conf.FileContents);
 
-					// Disable current file
-					nginx.ToggleSiteEnabled(conf);
+					// Check enabled status
+					if (conf.Enabled)
+					{
+						string oldName = conf.Name;
+						string oldPath = conf.ConfigPath;
 
-					// Enable new file
-					conf.Name = configName;
-					conf.ConfigPath = configPath;
-					nginx.ToggleSiteEnabled(conf);
+						// Disable current file
+						nginx.ToggleSiteEnabled(conf);
 
-					// Reset values (so messages below are accurate)
-					conf.Name = oldName;
-					conf.ConfigPath = oldPath;
-				}
+						// Enable new file
+						conf.Name = configName;
+						conf.ConfigPath = configPath;
+						nginx.ToggleSiteEnabled(conf);
 
-				File.Delete(conf.ConfigPath);
-				RefreshConfigs(false);
-			});
+						// Reset values (so messages below are accurate)
+						conf.Name = oldName;
+						conf.ConfigPath = oldPath;
+					}
+
+					File.Delete(conf.ConfigPath);
+					RefreshConfigs(false);
+				});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
 			}
@@ -298,23 +298,23 @@ else
 		string configName = string.Empty;
 		Services.Nginx.ConfigFile.enuConfigType configType = Nginx.ConfigFile.enuConfigType.Site;
 		var result = await DialogService.OpenAsync("Add Config", ds =>
-	@<RadzenStack Gap="1.5rem">
-		<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
-		<RadzenTextBox @bind-Value=@configName class="w-100" />
-		<RadzenRadioButtonList @bind-Value=@configType TValue="Services.Nginx.ConfigFile.enuConfigType" class="mb-2">
-			<Items>
-				<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Site.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Site" />
-				<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Shared.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Shared" />
-			</Items>
-		</RadzenRadioButtonList>
-		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-			<RadzenStack Orientation="Orientation.Horizontal">
-				<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
-				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			@<RadzenStack Gap="1.5rem">
+				<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Please enter the name of the config:</RadzenText>
+				<RadzenTextBox @bind-Value=@configName class="w-100" />
+				<RadzenRadioButtonList @bind-Value=@configType TValue="Services.Nginx.ConfigFile.enuConfigType" class="mb-2">
+					<Items>
+						<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Site.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Site" />
+						<RadzenRadioButtonListItem Text="@Services.Nginx.ConfigFile.enuConfigType.Shared.ToString()" Value="Services.Nginx.ConfigFile.enuConfigType.Shared" />
+					</Items>
+				</RadzenRadioButtonList>
+				<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+					<RadzenStack Orientation="Orientation.Horizontal">
+						<RadzenButton Text="Ok" Click="() => ds.Close(true)" Style="width: 80px;" />
+						<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+					</RadzenStack>
+				</RadzenStack>
 			</RadzenStack>
-		</RadzenStack>
-	</RadzenStack>
-	);
+		);
 
 		if (!(result is null) && result)
 		{

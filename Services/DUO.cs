@@ -1,5 +1,5 @@
 ﻿using DuoUniversal;
-using System.Net;
+using System.Net;  // Required for release mode
 
 namespace NginxPanel.Services
 {

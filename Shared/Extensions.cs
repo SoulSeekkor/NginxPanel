@@ -12,11 +12,9 @@ namespace NginxPanel.Shared
             DescriptionAttribute[] attributes = (DescriptionAttribute[])(fi.GetCustomAttributes(typeof(DescriptionAttribute), false));
 
             if (attributes != null && attributes.Any())
-            {
-                return attributes.First().Description;
-            }
+				return attributes.First().Description;
 
-            return value.ToString();
+			return value.ToString();
         }
     }
 }

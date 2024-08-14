@@ -10,15 +10,9 @@ namespace NginxPanel.Services
 		private string _standardOut = string.Empty;
 		private string _standardError = string.Empty;
 
-		public string RunningAsUser
-		{
-			get { return _runningAsUser; }
-		}
+		public string RunningAsUser => _runningAsUser;
 
-		public string HomePath
-		{
-			get { return _homePath; }
-		}
+		public string HomePath => _homePath;
 
 		public string StandardOut
 		{

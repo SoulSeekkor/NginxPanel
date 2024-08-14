@@ -134,25 +134,13 @@ namespace NginxPanel.Services
 			get { return _modules.Contains("http_headers_more_filter_module"); }
 		}
 
-		public string Version
-		{
-			get { return _version; }
-		}
+		public string Version => _version;
 
-		public enuServiceStatus ServiceStatus
-		{
-			get { return _serviceStatus; }
-		}
+		public enuServiceStatus ServiceStatus => _serviceStatus;
 
-		public string ServiceDetails
-		{
-			get { return _serviceDetails; }
-		}
+		public string ServiceDetails => _serviceDetails;
 
-		public string LastTestResults
-		{
-			get { return _lastTestResults; }
-		}
+		public string LastTestResults => _lastTestResults;
 
 		public string SitesAvailable
 		{
@@ -169,15 +157,9 @@ namespace NginxPanel.Services
 			get { return Path.Combine(_rootPath, "shared-files"); }
 		}
 
-		public List<ConfigFile> Configs
-		{
-			get { return _configs; }
-		}
+		public List<ConfigFile> Configs => _configs;
 
-		public List<string> Modules
-		{
-			get { return _modules; }
-		}
+		public List<string> Modules => _modules;
 
 		#endregion
 
