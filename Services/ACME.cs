@@ -269,6 +269,16 @@ namespace NginxPanel.Services
 
 		#endregion
 
+		#region Enums
+
+		public enum enuCertType
+		{
+			ECC,  // Default
+			RSA
+		}
+
+		#endregion
+
 		#region Variables
 
 		private CLI _CLI;
@@ -387,7 +397,7 @@ namespace NginxPanel.Services
 			return false;
 		}
 
-		public bool IssueCertificate(List<string> domains, string CA, ref string result)
+		public bool IssueCertificate(List<string> domains, string CA, enuCertType certType, ref string result)
 		{
 			try
 			{
@@ -396,9 +406,7 @@ namespace NginxPanel.Services
 
 				// Check if we are using a Cloudflare API token
 				if (_accountConf.GetConfValue(ConfigFile.enuConfKey.SAVED_CF_Token) != string.Empty)
-				{
 					cmd += " --dns dns_cf";
-				}
 
 				// Build list of domains portion of the command
 				cmd += " --issue";
@@ -408,9 +416,13 @@ namespace NginxPanel.Services
 				}
 
 				if (!String.IsNullOrWhiteSpace(CA))
-				{
 					cmd += $" --server {CA}";
-				}
+
+				// Check cert type
+				if (certType == enuCertType.ECC)
+					cmd += " --ecc";
+				else if (certType == enuCertType.RSA)
+					cmd += " --keylength 4096";
 
 				// Execute command to issue certificate
 				_CLI.RunCommand(cmd, sudo: false);

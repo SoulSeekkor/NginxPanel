@@ -1,6 +1,6 @@
 ﻿@page "/certificates"
 
-
+@using static Services.ACME;
 @using System.Security.Cryptography;
 @using System.Security.Cryptography.X509Certificates;
 @using System.Text.RegularExpressions;
@@ -121,6 +121,7 @@ else
 		public List<string> SANdomains = new List<string>();
 		public string selectedSAN = string.Empty;
 		public string newSANdomain = string.Empty;
+		public enuCertType certType = enuCertType.ECC;
 	}
 
 	private class InstallCertificateModel
@@ -348,6 +349,15 @@ else
 									<RadzenListBox @ref=cert.SANs @bind-Value=cert.selectedSAN Data="@cert.SANdomains" Style="height: 185px;" />
 								</RadzenStack>
 							</div>
+							<div>
+								<RadzenText Text="Select the certificate type you would like to use below:" />
+								<RadzenRadioButtonList @bind-Value=cert.certType TValue="enuCertType" Orientation=Orientation.Horizontal class="rz-mb-5">
+									<Items>
+										<RadzenRadioButtonListItem Text="ECC" Value="enuCertType.ECC" />
+										<RadzenRadioButtonListItem Text="RSA (Required in order to export certificates for Exchange)" Value="enuCertType.RSA" />
+									</Items>
+								</RadzenRadioButtonList>
+							</div>
 							<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Left">
 								<RadzenButton Text="Ok" ButtonType="ButtonType.Submit" Style="width: 80px;" />
 								<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
@@ -384,7 +394,7 @@ else
 				layout?.BusyDialog("Issuing (May Take Some Time) ...");
 
 				// First, attempt to issue the certificate
-				success = acme.IssueCertificate(domains, cert.CA, ref result);
+				success = acme.IssueCertificate(domains, cert.CA, cert.certType, ref result);
 
 				// Close the dialog
 				DialogService.Close();
