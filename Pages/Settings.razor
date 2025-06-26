@@ -160,10 +160,12 @@
 				await Task.Run(() =>
 				{
 					// Purge
-					cli.RunCommand("apt purge nginx nginx-common nginx-full -y");
+					cli.RunCommand("systemctl stop nginx");
+					cli.RunCommand("apt purge nginx* -y");
+
 					// Reinstall
 					cli.RunCommand("apt update");
-					cli.RunCommand("apt install nginx-full -y");
+					cli.RunCommand("apt install nginx -y");
 				});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx reset successfully!");
@@ -204,6 +206,7 @@
 				await Task.Run(() =>
 				{
 					// Remove existing Nginx first
+					cli.RunCommand("systemctl stop nginx");
 					cli.RunCommand("apt autoremove nginx* -y");
 
 					if (!String.IsNullOrWhiteSpace(result))
