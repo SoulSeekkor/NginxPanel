@@ -204,7 +204,7 @@
 				await Task.Run(() =>
 				{
 					// Remove existing Nginx first
-					cli.RunCommand("apt remove nginx* -y");
+					cli.RunCommand("apt autoremove nginx* -y");
 
 					if (!String.IsNullOrWhiteSpace(result))
 					{
@@ -259,7 +259,7 @@
 				await Task.Run(() =>
 				{
 					// Remove existing Nginx first
-					cli.RunCommand("apt remove nginx* -y");
+					cli.RunCommand("apt autoremove nginx* -y");
 					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
 					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
 					//cli.RunCommand("apt update");
