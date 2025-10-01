@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DuoUniversal" Version="1.3.0" />
-    <PackageReference Include="Radzen.Blazor" Version="7.1.2" />
+    <PackageReference Include="DuoUniversal" Version="1.3.1" />
+    <PackageReference Include="Radzen.Blazor" Version="7.4.3" />
   </ItemGroup>
 
 </Project>
