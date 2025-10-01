@@ -36,7 +36,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://localhost:5000"
       },
-      "distributionName": ""
+      "distributionName": "Debian"
     }
   },
   "iisSettings": {
