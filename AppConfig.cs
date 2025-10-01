@@ -29,27 +29,27 @@ namespace NginxPanel
         public static string DUOClientID { get; set; } = string.Empty;
         public static string DUOSecretKey { get; set; } = string.Empty;
         public static string DUOAPIHostname { get; set; } = string.Empty;
-		public static string DUOUsername { get; set; } = string.Empty;
+        public static string DUOUsername { get; set; } = string.Empty;
 
-		public static bool UserRequired
-		{
-			get
-			{
-				return (!String.IsNullOrWhiteSpace(Username) && !String.IsNullOrWhiteSpace(Password));
-			}
-		}
+        public static bool UserRequired
+        {
+            get
+            {
+                return (!String.IsNullOrWhiteSpace(Username) && !String.IsNullOrWhiteSpace(Password));
+            }
+        }
 
         public static bool DUORequired => (DUOAvailable && DUOEnabled);
 
-		public static bool DUOAvailable
+        public static bool DUOAvailable
         {
             get
-			{
-				return (!String.IsNullOrWhiteSpace(DUOClientID) &&
-					!String.IsNullOrWhiteSpace(DUOSecretKey) &&
-					!String.IsNullOrWhiteSpace(DUOAPIHostname) &&
+            {
+                return (!String.IsNullOrWhiteSpace(DUOClientID) &&
+                    !String.IsNullOrWhiteSpace(DUOSecretKey) &&
+                    !String.IsNullOrWhiteSpace(DUOAPIHostname) &&
                     (!String.IsNullOrWhiteSpace(DUOUsername) || !String.IsNullOrWhiteSpace(Username)));
-			}
+            }
         }
 
         public static void Init()
@@ -90,10 +90,10 @@ namespace NginxPanel
             config.AppendLine($"DUOClientID='{DUOClientID}'");
             config.AppendLine($"DUOSecretKey='{DUOSecretKey}'");
             config.AppendLine($"DUOAPIHostname='{DUOAPIHostname}'");
-			config.AppendLine($"DUOUsername='{DUOUsername}'");
+            config.AppendLine($"DUOUsername='{DUOUsername}'");
 
-			// Output config file (overwrites)
-			File.WriteAllText(AppConfigPath, config.ToString());
+            // Output config file (overwrites)
+            File.WriteAllText(AppConfigPath, config.ToString());
 
             // Make sure certificate exists, if not then generate a new self-signed one
             if (!File.Exists(PFXPath))
@@ -135,9 +135,9 @@ namespace NginxPanel
                             DUOSecretKey = split[1]; break;
                         case "duoapihostname":
                             DUOAPIHostname = split[1]; break;
-						case "duousername":
-							DUOUsername = split[1]; break;
-					}
+                        case "duousername":
+                            DUOUsername = split[1]; break;
+                    }
                 }
             }
 
