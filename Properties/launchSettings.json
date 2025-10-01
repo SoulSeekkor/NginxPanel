@@ -16,18 +16,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Docker": {
-      "commandName": "Docker",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
-      "environmentVariables": {
-        "ASPNETCORE_URLS": "https://+:8282",
-        "ASPNETCORE_HTTPS_PORT": "8282"
-      },
-      "publishAllPorts": true,
-      "useSSL": true,
-      "sslPort": 8282
-    },
     "WSL 2": {
       "commandName": "WSL2",
       "launchBrowser": true,
