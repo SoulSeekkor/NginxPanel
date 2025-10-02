@@ -1,5 +1,7 @@
 # NginxPanel
 
+UPDATE 10-1-2025: Updated to switch to Debian and new Nginx repo, please use a fresh install going forward!
+
 ## Table of Contents
 
 * [Introduction](#introduction)
@@ -13,17 +15,17 @@
 
 ## Introduction
 
-NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently requires it to be ran with sudo (ideally in an LXD/Incus container for ease of setting it up) as it must control services.
+NginxPanel is a **front-end** for Debian 12/13 *only* (for now). This currently requires it to be ran with passwordless sudo (ideally in an LXD/Incus container for ease of setting it up) as it must control services.
 
 ## Requirements
 
-* Ubuntu 22.04 (may work on other versions)
+* Debian 12/13 (may work on other versions)
 * .NET 8
 
 *Optional:*
 
 * *OpenSSL for PFX Export (Only when installing certificates)*
-* *LXD/Incus for Deployment*
+* *LXD/Incus/Proxmox for Deployment*
 
 ### Important
 
@@ -34,6 +36,9 @@ NginxPanel is a **front-end** for Ubuntu 22.04 *only* (for now). This currently 
 1. Install .NET 8:
 
     ```bash
+    wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    sudo dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
     sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-8.0
     ```
 
