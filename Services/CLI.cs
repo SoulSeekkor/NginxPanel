@@ -38,56 +38,74 @@ namespace NginxPanel.Services
             _standardOut = string.Empty;
             _standardError = string.Empty;
 
-            string arguments = string.Empty;
+            // Split command by pipe
+            List<string> commands = command.Split('|').ToList();
+            string standardOut = string.Empty;
+            string standardError = string.Empty;
 
-            if (parseArgs)
+            // Iterate through all commands and continue input/output as necessary
+            foreach (string cmd in commands)
             {
-                if (sudo)
+                string arguments = string.Empty;
+
+                if (parseArgs)
                 {
-                    arguments = command;
+                    if (sudo)
+                    {
+                        arguments = cmd;
+                        command = "sudo";
+                    }
+                    else if (cmd.Contains(" "))
+                    {
+                        arguments = cmd.Substring(cmd.IndexOf(" ") + 1);
+                        command = cmd.Substring(0, cmd.IndexOf(" "));
+                    }
+                }
+                else if (sudo)
+                {
+                    arguments = cmd;
                     command = "sudo";
                 }
-                else if (command.Contains(" "))
+
+                using (Process p = new Process())
                 {
-                    arguments = command.Substring(command.IndexOf(" ") + 1);
-                    command = command.Substring(0, command.IndexOf(" "));
+                    p.StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = command,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        Arguments = arguments
+                    };
+
+                    if (!String.IsNullOrWhiteSpace(working_dir))
+                        p.StartInfo.WorkingDirectory = working_dir;
+                    else
+                        p.StartInfo.WorkingDirectory = _homePath;
+
+                    try
+                    {                        
+                        p.Start();
+                        p.StandardInput.Write(standardOut);
+                        p.StandardInput.Write(standardError);
+                        p.StandardInput.Close();
+
+                        standardOut = p.StandardOutput.ReadToEnd().Trim();
+                        standardError = p.StandardError.ReadToEnd().Trim();
+                        p.WaitForExit();
+                    }
+                    catch (Exception ex)
+                    {
+                        standardError = ex.ToString();
+                    }
+
+                    // Append command results
+                    _standardOut += standardOut;
+                    _standardError += standardError;
                 }
             }
-            else if (sudo)
-            {
-                arguments = command;
-                command = "sudo";
-            }
-
-            using (Process p = new Process())
-            {
-                p.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = command,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    Arguments = arguments
-                };
-
-                if (!String.IsNullOrWhiteSpace(working_dir))
-                    p.StartInfo.WorkingDirectory = working_dir;
-                else
-                    p.StartInfo.WorkingDirectory = _homePath;
-
-                try
-                {
-                    p.Start();
-                    _standardOut = p.StandardOutput.ReadToEnd().Trim();
-                    _standardError = p.StandardError.ReadToEnd().Trim();
-                    p.WaitForExit();
-                }
-                catch (Exception ex)
-                {
-                    _standardError = ex.ToString();
-                }
-            };
         }
     }
 }
