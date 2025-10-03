@@ -343,7 +343,7 @@ namespace NginxPanel.Services
 
                 // Load shared configs next, make sure the folder exists first
                 if (!Directory.Exists(SharedFiles))
-                    _CLI.RunCommand("mkdir " + SharedFiles);
+                    Directory.CreateDirectory(SharedFiles);
 
                 foreach (string file in Directory.GetFiles(SharedFiles))
                 {
@@ -351,7 +351,7 @@ namespace NginxPanel.Services
                 }
 
                 // Sort the configs
-                _configs.OrderBy(x => x.ConfigType).ThenBy(x => x.Name);
+                _configs = _configs.OrderBy(x => x.ConfigType).ThenBy(x => x.Name).ToList();
             }
         }
 
