@@ -18,7 +18,6 @@
 				@if (!nginx.Installed)
 				{
 					<span>Install Nginx, gives the option of package manager (not recommended), stable or mainline:</span>
-					<br />
 					<RadzenButton Click=@(() => InstallNginx()) Disabled="busyInstallReset" Text="Install Nginx" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" class="rz-background-color-success-dark" Style="margin-top: -12px;" />
 				}
 				else
@@ -199,7 +198,7 @@
 						<RadzenButton Text="Cancel" Click="() => ds.Close()" ButtonStyle="ButtonStyle.Light" Style="float: right;" />
 					</RadzenStack>
 				</RadzenStack>
-			);
+	);
 
 			if (!(result is null))
 			{
@@ -217,13 +216,18 @@
 						cli.RunCommand("apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring -y");
 
 						// Add GPG key
-						cli.RunCommand("curl -fSsL https://nginx.org/keys/nginx_signing.key | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg");
+						cli.RunCommand("curl -fSsL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output nginx-archive-keyring.gpg");
+						cli.RunCommand("mv nginx-archive-keyring.gpg /usr/share/keyrings/nginx-archive-keyring.gpg");
 
 						// TODO Confirm GPG key
 						//cli.RunCommand("gpg --dry-run --quiet --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg");
-						
+
+						// Get distro name
+						cli.RunCommand("lsb_release -cs");
+						string distro = cli.StandardOut;
+
 						// Add repository
-						cli.RunCommand($"echo \"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/{(result == "stable" ? "" : "mainline/")}ubuntu `lsb_release -cs` nginx\" | tee /etc/apt/sources.list.d/nginx.list");
+						cli.RunCommand($"echo \"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/{(result == "stable" ? "" : "mainline/")}debian {distro} nginx\" | tee /etc/apt/sources.list.d/nginx.list");
 
 						// Configure APT pinning for Nginx
 						cli.RunCommand("echo -e \"Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n\" | tee /etc/apt/preferences.d/99nginx");
@@ -234,8 +238,9 @@
 					else
 					{
 						// Remove custom repositories if they exist first
-						cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
-						cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+						cli.RunCommand("rm /etc/apt/sources.list.d/nginx.list");
+						cli.RunCommand("rm /usr/share/keyrings/nginx-archive-keyring.gpg");
+						cli.RunCommand("rm /etc/apt/preferences.d/99nginx");
 						cli.RunCommand("apt update");
 						cli.RunCommand("apt install nginx -y");  // Default system package
 					}
@@ -268,8 +273,9 @@
 				{
 					// Remove existing Nginx first
 					cli.RunCommand("apt autoremove nginx* -y");
-					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx -y");
-					cli.RunCommand("add-apt-repository --remove ppa:ondrej/nginx-mainline -y");
+					cli.RunCommand("rm /etc/apt/sources.list.d/nginx.list");
+					cli.RunCommand("rm /usr/share/keyrings/nginx-archive-keyring.gpg");
+					cli.RunCommand("rm /etc/apt/preferences.d/99nginx");
 					//cli.RunCommand("apt update");
 				});
 
