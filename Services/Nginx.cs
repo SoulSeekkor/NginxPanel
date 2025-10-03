@@ -207,19 +207,34 @@ namespace NginxPanel.Services
 
             _CLI.RunCommand("nginx -V");
 
-            Match match = new Regex("(?si)version:\\s(?<version>.*?)\\n.*--conf-path=(?<config>.*?)\\s.*--modules-path=(?<modules>.*?)\\s").Match(_CLI.StandardError);
+            bool matchFailed = false;
 
+            // Version
+            Match match = Regex.Match(_CLI.StandardError, "version:\\s(?<version>.*?)\\n");
+            if (match.Success)
+                _version = match.Groups["version"].Value;
+            else
+                matchFailed = true;
+
+            // Config path
+            match = Regex.Match(_CLI.StandardError, "--conf-path=(?<config>.*?)\\s");
             if (match.Success)
             {
-                _version = match.Groups["version"].Value;
                 _rootConfig = match.Groups["config"].Value;
-                _rootModules = match.Groups["modules"].Value;
                 _rootPath = new FileInfo(_rootConfig).DirectoryName ?? "";
             }
             else
-            {
+                matchFailed = true;
+
+            // Modules path
+            match = Regex.Match(_CLI.StandardError, "--modules-path=(?<modules>.*?)\\s");
+            if (match.Success)
+                _rootModules = match.Groups["modules"].Value;
+            else
+                matchFailed = true;
+
+            if (matchFailed)
                 _serviceStatus = enuServiceStatus.Unknown;
-            }
         }
 
         public void GetServiceStatus()
