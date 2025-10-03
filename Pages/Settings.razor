@@ -329,7 +329,7 @@
 	{
 		try
 		{
-			bool? confirm = await DialogService.Confirm("This will install nginx extras package which will use another 20 MB disk space approximately and includes additonal modules such as 'more headers'. Continue?", "Install Nginx Extras", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
+			bool? confirm = await DialogService.Confirm("This will install nginx extras package which will use another 100 MB disk space approximately and includes additonal modules such as 'more headers'. Continue?", "Install Nginx Extras", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 			if (confirm.HasValue && confirm.Value)
 			{
@@ -339,12 +339,14 @@
 				await Task.Run(() =>
 				{
 					cli.RunCommand("apt update");
-					cli.RunCommand("apt install nginx-extras -y");
+					cli.RunCommand("apt install nginx-module-acme nginx-module-geoip nginx-module-image-filter nginx-module-njs nginx-module-otel nginx-module-perl nginx-module-xslt -y");
 				});
 
-				if (cli.StandardOut.Contains("Triggering nginx reload ..."))
+				string output = cli.StandardOut;
+
+				if (output.Contains("module for nginx has been installed"))
 					await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx extras installed successfully!");
-				else if (cli.StandardOut.Contains("is already the newest version"))
+				else if (output.Contains("is already the newest version"))
 					await layout!.DisplayToastAsync(MainLayout.toastType.info, "Nginx extras already at the latest version!");
 				else
 					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Nginx extras failed to install!");
@@ -373,12 +375,14 @@
 				await Task.Run(() =>
 				{
 					cli.RunCommand("apt update");
-					cli.RunCommand("apt autoremove nginx-extras --purge -y");
+					cli.RunCommand("apt autoremove nginx-module-acme nginx-module-geoip nginx-module-image-filter nginx-module-njs nginx-module-otel nginx-module-perl nginx-module-xslt --purge -y");
 				});
+				
+				string output = cli.StandardOut;
 
-				if (cli.StandardOut.Contains("Removing nginx-extras"))
+				if (output.Contains("Purging configuration files for"))
 					await layout!.DisplayToastAsync(MainLayout.toastType.success, "Nginx extras uninstalled successfully!");
-				else if (cli.StandardOut.Contains("Package 'nginx-extras' is not installed"))
+				else if (output.Contains("is not installed"))
 					await layout!.DisplayToastAsync(MainLayout.toastType.info, "Nginx extras is not currently installed!");
 				else
 					await layout!.DisplayToastAsync(MainLayout.toastType.error, "Nginx extras failed to uninstall!");

@@ -131,7 +131,7 @@ namespace NginxPanel.Services
 
         public bool NginxExtrasInstalled
         {
-            get { return _modules.Contains("http_headers_more_filter_module"); }
+            get { return _modules.Contains("http_acme_module"); }
         }
 
         public string Version => _version;
