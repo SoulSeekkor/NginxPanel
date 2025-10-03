@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -13,6 +14,8 @@ namespace NginxPanel
         private const string _basePath = "/etc/nginxpanel";
 #endif
         public const string AppConfigPath = _basePath + "/app.conf";
+
+        private static bool _runningInContainer = false;
 
         public static int Port { get; set; } = 5000;
         public static string PFXPath { get; set; } = Path.Combine(_basePath, "self-signed.pfx");
@@ -36,6 +39,14 @@ namespace NginxPanel
             get
             {
                 return (!String.IsNullOrWhiteSpace(Username) && !String.IsNullOrWhiteSpace(Password));
+            }
+        }
+
+        public static bool IsRunningInContainer
+        {
+            get
+            {
+                return _runningInContainer;
             }
         }
 
@@ -66,6 +77,35 @@ namespace NginxPanel
                 // Create a new config file with defaults
                 SaveConfig();
             }
+
+            // Determine container status
+            try
+            {
+                // Docker check
+                if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+                    _runningInContainer = true;
+
+                // LXC check
+                using (Process p = new Process())
+                {
+                    p.StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = "ps",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        Arguments = "2"
+                    };
+
+                    p.Start();
+                    string standardOut = p.StandardOutput.ReadToEnd().Trim();
+                    p.WaitForExit();
+
+                    if (!standardOut.Contains("2"))
+                        _runningInContainer = true;
+                }
+            }
+            catch { }  // Ignore exceptions
         }
 
         public static void SaveConfig()

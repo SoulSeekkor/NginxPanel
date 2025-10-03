@@ -15,7 +15,7 @@ UPDATE 10-1-2025: Updated to switch to Debian and new Nginx repo, please use a f
 
 ## Introduction
 
-NginxPanel is a **front-end** for Debian 12/13 *only* (for now). This currently requires it to be ran with passwordless sudo (ideally in an LXD/Incus container for ease of setting it up) as it must control services.
+NginxPanel is a **front-end** for Debian 12/13 *only* (for now). This currently requires it to be ran with passwordless sudo when in a VM or on hardware as it must control services.  The best option is running this within an LXC container, it will detect this automatically and not require sudo.
 
 ## Requirements
 

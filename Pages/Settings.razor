@@ -7,7 +7,7 @@
 @inject Services.Nginx nginx;
 @inject DialogService DialogService;
 
-<PageTitle>Nginx Panel - Settings</PageTitle>
+<PageTitle>Nginx Panel - Settings @(AppConfig.IsRunningInContainer == true ? "CONTAINER" : "NOT CONTAINER")</PageTitle>
 
 <RadzenStack Orientation="Orientation.Horizontal">
 	<RadzenStack Orientation="Orientation.Vertical">
@@ -216,8 +216,8 @@
 						cli.RunCommand("apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring -y");
 
 						// Add GPG key
-						cli.RunCommand("curl -fSsL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output nginx-archive-keyring.gpg");
-						cli.RunCommand("mv nginx-archive-keyring.gpg /usr/share/keyrings/nginx-archive-keyring.gpg");
+						cli.RunCommand("curl -fSsL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /tmp/nginx-archive-keyring.gpg");
+						cli.RunCommand("mv /tmp/nginx-archive-keyring.gpg /usr/share/keyrings/nginx-archive-keyring.gpg");
 
 						// TODO Confirm GPG key
 						//cli.RunCommand("gpg --dry-run --quiet --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg");

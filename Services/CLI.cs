@@ -39,7 +39,7 @@ namespace NginxPanel.Services
             _standardError = string.Empty;
 
             // Split command by pipe
-            List<string> commands = command.Split('|').ToList();
+            List<string> commands = command.Split('|').Select(s=> s.Trim()).ToList();
             string standardOut = string.Empty;
             string standardError = string.Empty;
 
@@ -50,18 +50,18 @@ namespace NginxPanel.Services
 
                 if (parseArgs)
                 {
-                    if (sudo)
+                    if (sudo && !AppConfig.IsRunningInContainer)
                     {
                         arguments = cmd;
                         command = "sudo";
                     }
-                    else if (cmd.Contains(" "))
+                    else if (cmd.Trim().Contains(" "))
                     {
                         arguments = cmd.Substring(cmd.IndexOf(" ") + 1);
                         command = cmd.Substring(0, cmd.IndexOf(" "));
                     }
                 }
-                else if (sudo)
+                else if (sudo && !AppConfig.IsRunningInContainer)
                 {
                     arguments = cmd;
                     command = "sudo";
@@ -71,13 +71,13 @@ namespace NginxPanel.Services
                 {
                     p.StartInfo = new ProcessStartInfo()
                     {
-                        FileName = command,
+                        FileName = command.Trim(),
                         RedirectStandardInput = true,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,
                         CreateNoWindow = true,
-                        Arguments = arguments
+                        Arguments = arguments.Trim()
                     };
 
                     if (!String.IsNullOrWhiteSpace(working_dir))
