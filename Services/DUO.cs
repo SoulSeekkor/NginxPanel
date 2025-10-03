@@ -3,77 +3,77 @@ using System.Net;  // Required for release mode
 
 namespace NginxPanel.Services
 {
-	public class DUO
-	{
-		private Client? _client = null;
+    public class DUO
+    {
+        private Client? _client = null;
 
-		private string GetHostName
-		{
-			get
-			{
+        private string GetHostName
+        {
+            get
+            {
 #if DEBUG
-				return "localhost";
+                return "localhost";
 #else
-				return Dns.GetHostName();
+                return Dns.GetHostName();
 #endif
-			}
-		}
+            }
+        }
 
-		public DUO()
-		{
-			if (AppConfig.DUORequired)
-			{
-				_client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{GetHostName}:{AppConfig.Port}").Build();
-			}
-		}
+        public DUO()
+        {
+            if (AppConfig.DUORequired)
+            {
+                _client = new ClientBuilder(AppConfig.DUOClientID, AppConfig.DUOSecretKey, AppConfig.DUOAPIHostname, $"https://{GetHostName}:{AppConfig.Port}").Build();
+            }
+        }
 
-		public async Task<bool> DoHealthCheck()
-		{
-			bool result = false;
+        public async Task<bool> DoHealthCheck()
+        {
+            bool result = false;
 
-			if (AppConfig.DUORequired && _client != null)
-				result = await _client.DoHealthCheck();
+            if (AppConfig.DUORequired && _client != null)
+                result = await _client.DoHealthCheck();
 
-			return result;
-		}
+            return result;
+        }
 
-		public string GetAuthURL(string username, ref string state)
-		{
-			string result = string.Empty;
+        public string GetAuthURL(string username, ref string state)
+        {
+            string result = string.Empty;
 
-			if (AppConfig.DUORequired && _client != null && !String.IsNullOrWhiteSpace(username))
-			{
-				// Generate a random state value to tie the authentication steps together
-				state = Client.GenerateState();
+            if (AppConfig.DUORequired && _client != null && !String.IsNullOrWhiteSpace(username))
+            {
+                // Generate a random state value to tie the authentication steps together
+                state = Client.GenerateState();
 
-				// Get the URI of the Duo prompt from the client.  This includes an embedded authentication request.
-				result = _client.GenerateAuthUri(username, state);
-			}	
+                // Get the URI of the Duo prompt from the client.  This includes an embedded authentication request.
+                result = _client.GenerateAuthUri(username, state);
+            }	
 
-			return result;
-		}
+            return result;
+        }
 
-		public async Task<bool> ValidateAuth(string code, string username)
-		{
-			bool result = false;
+        public async Task<bool> ValidateAuth(string code, string username)
+        {
+            bool result = false;
 
-			try
-			{
-				if (AppConfig.DUORequired && _client != null)
-				{
-					IdToken token = await _client.ExchangeAuthorizationCodeFor2faResult(code, username);
+            try
+            {
+                if (AppConfig.DUORequired && _client != null)
+                {
+                    IdToken token = await _client.ExchangeAuthorizationCodeFor2faResult(code, username);
                     if (token != null && token.AuthResult.Result == "allow")
                     {
-						result = true;
+                        result = true;
                     }
                 }
-			}
-			catch
-			{
-				// Placeholder
-			}
+            }
+            catch
+            {
+                // Placeholder
+            }
 
-			return result;
-		}
-	}
+            return result;
+        }
+    }
 }
