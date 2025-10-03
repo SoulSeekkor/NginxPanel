@@ -371,6 +371,10 @@ else
 		{
 			await Task.Run(() =>
 			{
+				// Make sure config is not enabled
+				if (conf.Enabled)
+					nginx.ToggleSiteEnabled(conf);
+
 				File.Delete(conf.ConfigPath);
 				RefreshConfigs(false);
 			});
