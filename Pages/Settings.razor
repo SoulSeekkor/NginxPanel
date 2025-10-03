@@ -47,13 +47,13 @@
 							{
 								<span>Install Nginx Extras:</span>
 								<br />
-								<RadzenButton Click=@(() => InstallNginxExtras()) Disabled="busyInstallReset" Text="Install Extras" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" class="rz-background-color-success-dark" Style="margin-top: 3px;" />
+								<RadzenButton Click=@(() => InstallNginxExtras()) Disabled="true" Text="Install Extras" Icon="cached" BusyText="Installing..." IsBusy="busyInstallReset" class="rz-background-color-success-dark" Style="margin-top: 3px;" />
 							}
 							else
 							{
 								<span>Uninstall Nginx Extras:</span>
 								<br />
-								<RadzenButton Click=@(() => UninstallNginxExtras()) Disabled="busyInstallReset" Text="Uninstall Extras" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" class="rz-background-color-danger-dark" Style="margin-top: 3px;" />
+								<RadzenButton Click=@(() => UninstallNginxExtras()) Disabled="true" Text="Uninstall Extras" Icon="cached" BusyText="Uninstalling..." IsBusy="busyInstallReset" class="rz-background-color-danger-dark" Style="margin-top: 3px;" />
 							}
 						</RadzenColumn>
 					</RadzenRow>
