@@ -11,13 +11,29 @@
 {
 	<RadzenLayout Style="max-height: 800px;">
 		<RadzenHeader>
-			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-				<RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
-				<RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing"  class="rz-background-color-primary-dark rz-mr-5" />
-				<RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-success-dark" />
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+				<RadzenStack Orientation="Orientation.Horizontal">
+					<RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
+					<RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-primary-dark rz-mr-5" />
+					<RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-success-dark" />
+				</RadzenStack>
+
+				@if (!(selectedConf is null) && !busyRefreshing)
+				{
+					// Display config actions
+					<RadzenStack Orientation="Orientation.Horizontal">
+						<RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
+						<RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" class="rz-background-color-primary-dark" />
+						<RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" />
+						<RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" />
+						<RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" class="rz-background-color-danger-dark" />
+					</RadzenStack>
+				}
 			</RadzenStack>
-			<span>Total Configs: @nginx.Configs.Count.ToString()</span>
+
 		</RadzenHeader>
+
+		<span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
 		<RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
 			<RadzenPanelMenu Style="max-height: 700px;">
 				@if (!busyRefreshing)
@@ -51,32 +67,13 @@
 				{
 					// Display selected config
 					<RadzenCard>
-						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-							@if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-							{
-								<RadzenStack Orientation="Orientation.Horizontal">
-									<RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
-									<RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
-								</RadzenStack>
-							}
-
-							<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-								<RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" class="rz-background-color-primary-dark" />
-								<RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" Style="float: right;" />
-								<RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" Style="float: right;" />
-								<RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" class="rz-background-color-danger-dark" Style="float: right;" />
-							</RadzenStack>
-						</RadzenRow>
-
 						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="27" Style="@(configCurrentCSS)" />
+						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
 						<br />
 						<RadzenStack Orientation="Orientation.Horizontal">
 							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
 							<RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
 						</RadzenStack>
-						<br />
-						<RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" class="rz-background-color-success-dark" />
 					</RadzenCard>
 				}
 			</div>
