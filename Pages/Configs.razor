@@ -107,7 +107,7 @@ else
 		RefreshConfigs(false);
 	}
 
-	private async void RefreshConfigs(bool notifyUser)
+	private async void RefreshConfigs(bool notifyUser, string? selectConf = null)
 	{
 		try
 		{
@@ -115,6 +115,11 @@ else
 			selectedConf = null;
 
 			await Task.Run(() => nginx.RefreshConfigs());
+
+			if (!(selectConf is null))
+			{
+				selectedConf = nginx.Configs.FirstOrDefault(c => c.Name == selectConf);
+			}
 
 			if (notifyUser)
 			{
@@ -346,14 +351,7 @@ else
 				await Task.Run(() =>
 				{
 					File.WriteAllText(configPath, "");
-					RefreshConfigs(false);
-				// }).ContinueWith(t =>
-				// {
-				// 	if (t.IsCompletedSuccessfully)
-				// 	{
-				// 		selectedConf = nginx.Configs.FirstOrDefault(c => c.Name == configName);
-				// 		StateHasChanged();
-				// 	}
+					RefreshConfigs(false, selectConf: configName);
 				});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
