@@ -351,9 +351,13 @@ namespace NginxPanel.Services
             if (Installed)
             {
                 // Load site configs first
-                foreach (string file in Directory.GetFiles(SitesAvailable))
+                if (Directory.Exists(SitesAvailable))
                 {
-                    _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
+                    foreach (string file in Directory.GetFiles(SitesAvailable))
+                    {
+                        if (File.Exists(file))
+                            _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
+                    }
                 }
 
                 // Load shared configs next, make sure the folder exists first
@@ -362,7 +366,8 @@ namespace NginxPanel.Services
 
                 foreach (string file in Directory.GetFiles(SharedFiles))
                 {
-                    _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
+                    if (File.Exists(file))
+                        _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
                 }
 
                 // Sort the configs
@@ -381,8 +386,11 @@ namespace NginxPanel.Services
                     FileInfo? module = null;
                     foreach (string file in Directory.GetFiles(_rootModules))
                     {
-                        module = new FileInfo(file);
-                        _modules.Add(module.Name.Substring(4, module.Name.IndexOf(".") - 4));
+                        if (File.Exists(file))
+                        {
+                            module = new FileInfo(file);
+                            _modules.Add(module.Name.Substring(4, module.Name.IndexOf(".") - 4));
+                        }
                     }
 
                     // Sort the modules
