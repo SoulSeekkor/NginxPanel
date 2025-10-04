@@ -314,7 +314,7 @@ else
 					</RadzenStack>
 				</RadzenStack>
 			</RadzenStack>
-		);
+	);
 
 		if (!(result is null) && result)
 		{
@@ -347,6 +347,13 @@ else
 				{
 					File.WriteAllText(configPath, "");
 					RefreshConfigs(false);
+				// }).ContinueWith(t =>
+				// {
+				// 	if (t.IsCompletedSuccessfully)
+				// 	{
+				// 		selectedConf = nginx.Configs.FirstOrDefault(c => c.Name == configName);
+				// 		StateHasChanged();
+				// 	}
 				});
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
@@ -361,6 +368,10 @@ else
 				{
 					await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Error occurred while adding config %ss%{configName}%se%!");
 				}
+			}
+			finally
+			{
+				await InvokeAsync(() => StateHasChanged());
 			}
 		}
 	}
