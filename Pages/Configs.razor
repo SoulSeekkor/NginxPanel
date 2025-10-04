@@ -9,7 +9,7 @@
 
 @if (nginx.Installed)
 {
-	<RadzenLayout Style="margin-top: 10px;">
+	<RadzenLayout Style="max-height: 800px;">
 		<RadzenHeader>
 			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
 				<RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
@@ -19,7 +19,7 @@
 			<span>Total Configs: @nginx.Configs.Count.ToString()</span>
 		</RadzenHeader>
 		<RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
-			<RadzenPanelMenu>
+			<RadzenPanelMenu Style="max-height: 700px;">
 				@if (!busyRefreshing)
 				{
 					@foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
@@ -69,7 +69,7 @@
 						</RadzenRow>
 
 						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="100" Rows="25" Style="@(configCurrentCSS)" />
+						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="27" Style="@(configCurrentCSS)" />
 						<br />
 						<RadzenStack Orientation="Orientation.Horizontal">
 							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
