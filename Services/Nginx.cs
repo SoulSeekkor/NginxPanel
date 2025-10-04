@@ -350,14 +350,15 @@ namespace NginxPanel.Services
 
             if (Installed)
             {
+                // Make sure the common configs folder exists first
+                if (!Directory.Exists(SitesAvailable))
+                    Directory.CreateDirectory(SitesAvailable);
+
                 // Load site configs first
-                if (Directory.Exists(SitesAvailable))
+                foreach (string file in Directory.GetFiles(SitesAvailable))
                 {
-                    foreach (string file in Directory.GetFiles(SitesAvailable))
-                    {
-                        if (File.Exists(file))
-                            _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
-                    }
+                    if (File.Exists(file))
+                        _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
                 }
 
                 // Load shared configs next, make sure the folder exists first
