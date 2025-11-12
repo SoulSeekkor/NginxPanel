@@ -1,6 +1,6 @@
 # NginxPanel
 
-UPDATE 10-1-2025: Updated to switch to Debian and new Nginx repo, please use a fresh install going forward!
+UPDATE 10-1-2025: Updated to switch to Debian and new Nginx package repo, please use a fresh install going forward!
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ NginxPanel is a **front-end** for Debian 12/13 *only* (for now). This currently 
 ## Requirements
 
 * Debian 12/13 (may work on other versions)
-* .NET 8
+* .NET 10
 
 *Optional:*
 
@@ -33,13 +33,13 @@ NginxPanel is a **front-end** for Debian 12/13 *only* (for now). This currently 
 
 ## Install
 
-1. Install .NET 8:
+1. Install .NET 10:
 
     ```bash
     wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
     sudo dpkg -i packages-microsoft-prod.deb
     rm packages-microsoft-prod.deb
-    sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-8.0
+    sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-10.0
     ```
 
 2. Download publish.tar from releases page.
