@@ -67,6 +67,14 @@
 				{
 					// Display selected config
 					<RadzenCard>
+						@if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+						{
+							<RadzenStack Orientation="Orientation.Horizontal">
+								<RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
+								<RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
+							</RadzenStack>
+						}
+
 						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
 						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
 						<br />
