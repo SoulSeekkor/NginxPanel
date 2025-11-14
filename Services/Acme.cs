@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace NginxPanel.Services
 {
-    public class ACME
+    public class Acme
     {
         #region Classes
 
@@ -278,7 +278,7 @@ namespace NginxPanel.Services
 
         #region Variables
 
-        private readonly CLI _CLI;
+        private readonly Cli _CLI;
 
         private string _version = "";
 
@@ -317,7 +317,7 @@ namespace NginxPanel.Services
 
         #region Constructors
 
-        public ACME(CLI CLI)
+        public Acme(Cli CLI)
         {
             _CLI = CLI;
             _accountConf = new ConfigFile(AccountConfPath);

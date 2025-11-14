@@ -35,11 +35,11 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddRadzenComponents();
 
 // Add custom services.
-builder.Services.AddSingleton<CLI>();
+builder.Services.AddSingleton<Cli>();
 builder.Services.AddSingleton<Nginx>();
-builder.Services.AddSingleton<ACME>();
+builder.Services.AddSingleton<Acme>();
 
-builder.Services.AddScoped<DUO>();
+builder.Services.AddScoped<Duo>();
 builder.Services.AddScoped<AuthState>();
 
 var app = builder.Build();

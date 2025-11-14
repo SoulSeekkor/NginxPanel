@@ -101,7 +101,7 @@ namespace NginxPanel.Services
 
         #region Variables
 
-        private readonly CLI _CLI;
+        private readonly Cli _CLI;
 
         private string _version = "";
         private string _rootConfig = "";
@@ -165,7 +165,7 @@ namespace NginxPanel.Services
 
         #region Constructors
 
-        public Nginx(CLI CLI)
+        public Nginx(Cli CLI)
         {
             _CLI = CLI;
             Refresh();

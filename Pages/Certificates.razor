@@ -1,12 +1,12 @@
 ﻿@page "/certificates"
 
-@using static Services.ACME;
+@using static Services.Acme;
 @using System.Security.Cryptography;
 @using System.Security.Cryptography.X509Certificates;
 @using System.Text
 @using System.Text.RegularExpressions;
 
-@inject Services.ACME acme;
+@inject Services.Acme acme;
 @inject DialogService DialogService;
 
 @inject IJSRuntime JSRuntime
@@ -26,7 +26,7 @@
 	}
 	else
 	{
-		foreach (Services.ACME.Certificate cert in acme.Certificates)
+		foreach (Services.Acme.Certificate cert in acme.Certificates)
 		{
 			<RadzenCard Class="rz-my-8" Style="max-width: 550px">
 				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
@@ -127,7 +127,7 @@ else
 
 	private sealed class InstallCertificateModel
 	{
-		public Services.ACME.Certificate? cert = null;
+		public Services.Acme.Certificate? cert = null;
 
 		public string rootFolder = string.Empty;
 		public string keyFilename = string.Empty;
@@ -153,7 +153,7 @@ else
 		}
 	}
 
-	private async Task DeleteCertificate(Services.ACME.Certificate cert)
+	private async Task DeleteCertificate(Services.Acme.Certificate cert)
 	{
 		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete certificate %ss%{cert.MainDomain}%se%?");
 		bool? confirm = await DialogService.Confirm(message, "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
@@ -170,7 +170,7 @@ else
 		}
 	}
 
-	private async Task ForceRenewCertificate(Services.ACME.Certificate cert)
+	private async Task ForceRenewCertificate(Services.Acme.Certificate cert)
 	{
 		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to force renewal for certificate %ss%{cert.MainDomain}%se%?");
 		bool? confirm = await DialogService.Confirm(message, "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
@@ -189,7 +189,7 @@ else
 		}
 	}
 
-	private async Task ExportToPFX(Services.ACME.Certificate cert)
+	private async Task ExportToPFX(Services.Acme.Certificate cert)
 	{
 		string pfxPath = Path.Combine(new System.IO.FileInfo(cert.RealKeyPath).DirectoryName!, "exported.pfx");
 		string pfxPass = string.Empty;
@@ -242,7 +242,7 @@ else
 		}
 	}
 
-	private async Task ViewCertificateDetails(Services.ACME.Certificate cert)
+	private async Task ViewCertificateDetails(Services.Acme.Certificate cert)
 	{
 		await DialogService.OpenAsync("Certificate Details", ds =>
 			@<RadzenCard Class="rz-my-8" Style="max-width: 550px">
@@ -460,7 +460,7 @@ else
 		}
 	}
 
-	private async Task InstallCertificate(Services.ACME.Certificate cert)
+	private async Task InstallCertificate(Services.Acme.Certificate cert)
 	{
 		try
 		{

@@ -3,7 +3,7 @@ using System.Net;  // Required for release mode
 
 namespace NginxPanel.Services
 {
-    public class DUO
+    public class Duo
     {
         private readonly Client? _client = null;
 
@@ -19,7 +19,7 @@ namespace NginxPanel.Services
             }
         }
 
-        public DUO()
+        public Duo()
         {
             if (AppConfig.DUORequired)
             {

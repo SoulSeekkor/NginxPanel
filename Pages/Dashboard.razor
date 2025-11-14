@@ -1,11 +1,11 @@
 ﻿@page "/"
 @page "/dashboard"
 
-@using static Services.ACME.ConfigFile;
+@using static Services.Acme.ConfigFile
 
 @inject NavigationManager NavigationManager
 
-@inject Services.ACME acme;
+@inject Services.Acme acme;
 @inject Services.Nginx nginx;
 
 <PageTitle>Nginx Panel - Dashboard</PageTitle>

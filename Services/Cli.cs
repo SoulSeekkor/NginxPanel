@@ -2,7 +2,7 @@
 
 namespace NginxPanel.Services
 {
-    public class CLI
+    public class Cli
     {
         private readonly string _runningAsUser = Environment.UserName;
         private readonly string _homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
