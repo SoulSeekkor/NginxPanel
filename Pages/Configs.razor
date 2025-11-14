@@ -33,7 +33,24 @@
 
 		</RadzenHeader>
 
-		<span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
+		<RadzenDataGrid @ref="configsGrid" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
+			<Columns>
+				<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+					<Template Context="data">
+						@(nginx.Configs.IndexOf(data) + 1)
+					</Template>
+				</RadzenDataGridColumn>
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="80px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Enabled)" Title="Enabled" />
+				<RadzenDataGridColumn Property="Status" Title="Location" />
+				<RadzenDataGridColumn Width="160px" Property="Details" Title="Config Details">
+					<Template Context="data">
+						<RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="rz-m-1" Text="Open" />
+					</Template>
+				</RadzenDataGridColumn>
+			</Columns>
+		</RadzenDataGrid>
+		@* <span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
 		<RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
 			<RadzenPanelMenu Style="max-height: 700px;">
 				@if (!busyRefreshing)
@@ -85,7 +102,7 @@
 					</RadzenCard>
 				}
 			</div>
-		</RadzenBody>
+		</RadzenBody> *@
 	</RadzenLayout>
 }
 else
@@ -96,6 +113,8 @@ else
 @code {
 	[CascadingParameter]
 	private MainLayout? layout { get; set; }
+
+	RadzenDataGrid<Nginx.ConfigFile>? configsGrid;
 
 	private Nginx.ConfigFile? selectedConf = null;
 

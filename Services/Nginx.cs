@@ -19,10 +19,10 @@ namespace NginxPanel.Services
             private string _fileContents;
 
             public enuConfigType ConfigType { get; set; }
-            public string Name;
-            public string ConfigPath;
+            public string Name { get; set; }
+            public string ConfigPath { get; set; }
 
-            public bool Enabled = false;
+            public bool Enabled { get; set; } = false;
             public string FileContents
             {
                 get { return _fileContents; }
@@ -31,9 +31,9 @@ namespace NginxPanel.Services
                     ContentsDirty = true;
                 }
             }
-            public bool ContentsDirty = false;
+            public bool ContentsDirty { get; set; } = false;
 
-            public bool busySaving = false;
+            public bool busySaving { get; set; } = false;
 
             public ConfigFile(enuConfigType configType, string rootPath, string configPath)
             {
