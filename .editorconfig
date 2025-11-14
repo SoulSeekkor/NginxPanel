@@ -1,0 +1,4 @@
+# All files
+[*]
+guidelines = 150
+guidelines_style = 2px dashed 40ff0000
