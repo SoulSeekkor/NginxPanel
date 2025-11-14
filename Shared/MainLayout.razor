@@ -137,40 +137,38 @@
 			else
 			{
 				var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-				if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("state", out var returnState))
+				if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("state", out var returnState) &&
+					QueryHelpers.ParseQuery(uri.Query).TryGetValue("code", out var returnCode))
 				{
-					if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("code", out var returnCode))
+					// Current DUO auth in progress, verify cookie and continue
+					string username = await JSRuntime.InvokeAsync<string>("readCookie", "DUOUsername");
+					string state = await JSRuntime.InvokeAsync<string>("readCookie", "DUOState");
+
+					// Clear cookies
+					await JSRuntime.InvokeVoidAsync("writeCookie", "DUOUsername", "", 3);
+					await JSRuntime.InvokeVoidAsync("writeCookie", "DUOState", "", 3);
+
+					// Only continue if state was not tampered with
+					if (state == returnState)
 					{
-						// Current DUO auth in progress, verify cookie and continue
-						string username = await JSRuntime.InvokeAsync<string>("readCookie", "DUOUsername");
-						string state = await JSRuntime.InvokeAsync<string>("readCookie", "DUOState");
+						bool success = await duo.ValidateAuth(returnCode!, username);
 
-						// Clear cookies
-						await JSRuntime.InvokeVoidAsync("writeCookie", "DUOUsername", "", 3);
-						await JSRuntime.InvokeVoidAsync("writeCookie", "DUOState", "", 3);
-
-						// Only continue if state was not tampered with
-						if (state == returnState)
+						if (success)
 						{
-							bool success = await duo.ValidateAuth(returnCode!, username);
+							// Write auth cookie for 2 hours
+							await JSRuntime.InvokeVoidAsync("writeCookie", "Authenticated", "true", 120);
 
-							if (success)
-							{
-								// Write auth cookie for 2 hours
-								await JSRuntime.InvokeVoidAsync("writeCookie", "Authenticated", "true", 120);
+							auth.SetAuthenticated();
 
-								auth.SetAuthenticated();
-
-								NavigationManager.NavigateTo("/");
-								return;
-							}
+							NavigationManager.NavigateTo("/");
+							return;
 						}
 					}
 				}
 
 				if (AppConfig.DUORequired && !AppConfig.UserRequired)
 				{
-					InitializeDUO();
+					await InitializeDUO();
 					return;
 				}
 			}
@@ -181,7 +179,7 @@
 			nginx.ServiceStatusChanged += RefreshServiceStatus;
 
 			if (!AppConfig.DisableAuthWarningOnStart && !AppConfig.DUOEnabled && String.IsNullOrWhiteSpace(AppConfig.Username))
-				DisplayToast(toastType.warning, "No authentication mechanism has been set, check the settings screen for more information!");
+				await DisplayToastAsync(toastType.warning, "No authentication mechanism has been set, check the settings screen for more information!");
 		}
 	}
 
@@ -200,7 +198,7 @@
 				NavigationManager.NavigateTo("/");
 			}
 			else
-				InitializeDUO();
+				await InitializeDUO();
 		}
 		else
 		{
@@ -208,7 +206,7 @@
 		}
 	}
 
-	private async void InitializeDUO()
+	private async Task InitializeDUO()
 	{
 		try
 		{
@@ -238,7 +236,7 @@
 		}
 	}
 
-	private async void PerformServiceAction(Services.Nginx.enuServiceAction action)
+	private async Task PerformServiceAction(Services.Nginx.enuServiceAction action)
 	{
 		try
 		{
@@ -269,7 +267,7 @@
 		}
 	}
 
-	private async void TestConfig()
+	private async Task TestConfig()
 	{
 		try
 		{

@@ -3,6 +3,7 @@
 @using static Services.ACME;
 @using System.Security.Cryptography;
 @using System.Security.Cryptography.X509Certificates;
+@using System.Text
 @using System.Text.RegularExpressions;
 
 @inject Services.ACME acme;
@@ -89,9 +90,9 @@ else
 
 	private bool busyRefreshing = false;
 
-	private string fqdnRegEx = @"^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$";
+	private const string fqdnRegEx = @"^(?=^.{1,254}$)(^(?:(?!\.|-)([a-z0-9\-\*]{1,63}|([a-z0-9\-]{1,62}[a-z0-9]))\.)+(?:[a-z]{2,})$)$";
 
-	private async void RefreshCertificates(bool notifyUser)
+	private async Task RefreshCertificates(bool notifyUser)
 	{
 		try
 		{
@@ -111,7 +112,7 @@ else
 		}
 	}
 
-	private class AddCertificateModel
+	private sealed class AddCertificateModel
 	{
 		public string CA = string.Empty;
 		public string primaryDomain = string.Empty;
@@ -124,7 +125,7 @@ else
 		public enuCertType certType = enuCertType.ECC;
 	}
 
-	private class InstallCertificateModel
+	private sealed class InstallCertificateModel
 	{
 		public Services.ACME.Certificate? cert = null;
 
@@ -139,7 +140,7 @@ else
 		public string PFXpassword = string.Empty;
 	}
 
-	private async void CopyToClipboard(string name, string value)
+	private async Task CopyToClipboard(string name, string value)
 	{
 		try
 		{
@@ -152,49 +153,43 @@ else
 		}
 	}
 
-	private async void DeleteCertificate(Services.ACME.Certificate cert)
+	private async Task DeleteCertificate(Services.ACME.Certificate cert)
 	{
 		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete certificate %ss%{cert.MainDomain}%se%?");
 		bool? confirm = await DialogService.Confirm(message, "Delete Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
-			await Task.Run(() =>
+			if (acme.DeleteCertificate(cert))
 			{
-				if (acme.DeleteCertificate(cert))
-				{
-					layout?.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been deleted!");
-					RefreshCertificates(false);
-				}
-				else
-					layout?.DisplayToastAsync(MainLayout.toastType.error, "Failed to delete certificate %ss%{cert.MainDomain}%se%!");
-			});
+				await layout.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been deleted!");
+				await RefreshCertificates(false);
+			}
+			else
+				await layout.DisplayToastAsync(MainLayout.toastType.error, "Failed to delete certificate %ss%{cert.MainDomain}%se%!");
 		}
 	}
 
-	private async void ForceRenewCertificate(Services.ACME.Certificate cert)
+	private async Task ForceRenewCertificate(Services.ACME.Certificate cert)
 	{
 		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to force renewal for certificate %ss%{cert.MainDomain}%se%?");
 		bool? confirm = await DialogService.Confirm(message, "Renew Certificate", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
-			await Task.Run(() =>
-			{
-				string response = string.Empty;
+			string response = string.Empty;
 
-				if (acme.ForceRenewCertificate(cert, ref response))
-				{
-					layout?.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been renewed!");
-					RefreshCertificates(false);
-				}
-				else
-					layout?.DisplayToastAsync(MainLayout.toastType.error, $"Failed to force certificate renewal for %ss%{cert.MainDomain}%se%: {response}");
-			});
+			if (acme.ForceRenewCertificate(cert, ref response))
+			{
+				layout?.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% has been renewed!");
+				await RefreshCertificates(false);
+			}
+			else
+				layout?.DisplayToastAsync(MainLayout.toastType.error, $"Failed to force certificate renewal for %ss%{cert.MainDomain}%se%: {response}");
 		}
 	}
 
-	private async void ExportToPFX(Services.ACME.Certificate cert)
+	private async Task ExportToPFX(Services.ACME.Certificate cert)
 	{
 		string pfxPath = Path.Combine(new System.IO.FileInfo(cert.RealKeyPath).DirectoryName!, "exported.pfx");
 		string pfxPass = string.Empty;
@@ -236,7 +231,7 @@ else
 				if (!Directory.Exists(pfxFile.DirectoryName))
 					Directory.CreateDirectory(pfxFile.DirectoryName!);
 
-				File.WriteAllBytes(pfxFile.FullName, pfxCert.Export(X509ContentType.Pfx, pfxPass));
+				await File.WriteAllBytesAsync(pfxFile.FullName, pfxCert.Export(X509ContentType.Pfx, pfxPass));
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.MainDomain}%se% successfully exported!");
 			}
@@ -247,7 +242,7 @@ else
 		}
 	}
 
-	private async void ViewCertificateDetails(Services.ACME.Certificate cert)
+	private async Task ViewCertificateDetails(Services.ACME.Certificate cert)
 	{
 		await DialogService.OpenAsync("Certificate Details", ds =>
 			@<RadzenCard Class="rz-my-8" Style="max-width: 550px">
@@ -317,7 +312,7 @@ else
 		);
 	}
 
-	private async void AddCertificate()
+	private async Task AddCertificate()
 	{
 		try
 		{
@@ -403,7 +398,7 @@ else
 			if (success)
 			{
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{cert.primaryDomain}%se% issued successfully!");
-				RefreshCertificates(false);
+				await RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else
@@ -415,7 +410,7 @@ else
 		}
 	}
 
-	private async void AddSANDomain(AddCertificateModel cert)
+	private async Task AddSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
@@ -445,7 +440,7 @@ else
 		}
 	}
 
-	private async void DeleteSANDomain(AddCertificateModel cert)
+	private async Task DeleteSANDomain(AddCertificateModel cert)
 	{
 		try
 		{
@@ -465,7 +460,7 @@ else
 		}
 	}
 
-	private async void InstallCertificate(Services.ACME.Certificate cert)
+	private async Task InstallCertificate(Services.ACME.Certificate cert)
 	{
 		try
 		{
@@ -551,15 +546,14 @@ else
 			}
 
 			// Build list of domains portion of the command
-			string domainsCmd = $"-d {installCert.cert!.MainDomain}";
-			if (!(installCert.cert.SANDomains == "no"))
+			StringBuilder domainsCmd = new StringBuilder($"-d {installCert.cert!.MainDomain}");
+			if (installCert.cert.SANDomains != "no")
 			{
 				foreach (string domain in installCert.cert.SANDomains.Split(","))
 				{
-					domainsCmd += $" -d {domain}";
+					domainsCmd.Append($" -d {domain}");
 				}
 			}
-			domainsCmd = domainsCmd.Trim();
 
 			// Generate reload command
 			string reloadCmd = string.Empty;
@@ -598,7 +592,7 @@ else
 				layout?.BusyDialog("Installing ...");
 
 				// First, attempt to issue the certificate
-				success = acme.InstallCertificate(domainsCmd, installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, reloadCmd, ref result);
+				success = acme.InstallCertificate(domainsCmd.ToString().Trim(), installCert.rootFolder, installCert.keyFilename, installCert.fullChainFilename, reloadCmd, ref result);
 
 				// Close the dialog
 				DialogService.Close();
@@ -607,7 +601,7 @@ else
 			if (success)
 			{
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Certificate %ss%{installCert.cert!.MainDomain}%se% installed successfully!");
-				RefreshCertificates(false);
+				await RefreshCertificates(false);
 				DialogService.Close(true);
 			}
 			else

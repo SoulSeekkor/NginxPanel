@@ -6,7 +6,7 @@ using System.Text;
 
 namespace NginxPanel
 {
-    public class AppConfig
+    public static class AppConfig
     {
 #if DEBUG
         private const string _basePath = "/mnt/d/Repositories/Visual Studio Projects/NginxPanel/config";
@@ -105,7 +105,10 @@ namespace NginxPanel
                         _runningInContainer = true;
                 }
             }
-            catch { }  // Ignore exceptions
+            catch
+            {
+                // Ignore exceptions
+            }
         }
 
         public static void SaveConfig()
@@ -145,39 +148,36 @@ namespace NginxPanel
             string[] lines = File.ReadAllLines(AppConfigPath);
             string[] split;
 
-            foreach (string line in lines)
+            foreach (string line in lines.Where((x) => x.Contains("=")))
             {
                 // TODO Add collection on unrecognized lines (such as comments)
-                if (line.Contains("="))
-                {
-                    split = line.Split('=', 2);
-                    split[1] = split[1].Trim().Trim('\'').Trim();
+                split = line.Split('=', 2);
+                split[1] = split[1].Trim().Trim('\'').Trim();
 
-                    switch (split[0].ToLower())
-                    {
-                        case "port":
-                            Port = int.Parse(split[1]); break;
-                        case "pfxpath":
-                            PFXPath = split[1]; break;
-                        case "pfxpassword":
-                            PFXPassword = split[1]; break;
-                        case "disableauthwarningonstart":
-                            DisableAuthWarningOnStart = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
-                        case "username":
-                            Username = split[1]; break;
-                        case "password":
-                            Password = split[1]; break;
-                        case "duoenabled":
-                            DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
-                        case "duoclientid":
-                            DUOClientID = split[1]; break;
-                        case "duosecretkey":
-                            DUOSecretKey = split[1]; break;
-                        case "duoapihostname":
-                            DUOAPIHostname = split[1]; break;
-                        case "duousername":
-                            DUOUsername = split[1]; break;
-                    }
+                switch (split[0].ToLower())
+                {
+                    case "port":
+                        Port = int.Parse(split[1]); break;
+                    case "pfxpath":
+                        PFXPath = split[1]; break;
+                    case "pfxpassword":
+                        PFXPassword = split[1]; break;
+                    case "disableauthwarningonstart":
+                        DisableAuthWarningOnStart = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
+                    case "username":
+                        Username = split[1]; break;
+                    case "password":
+                        Password = split[1]; break;
+                    case "duoenabled":
+                        DUOEnabled = (split[1] == "1" || split[1].ToLower() == "true" || split[1].ToLower() == "yes"); break;
+                    case "duoclientid":
+                        DUOClientID = split[1]; break;
+                    case "duosecretkey":
+                        DUOSecretKey = split[1]; break;
+                    case "duoapihostname":
+                        DUOAPIHostname = split[1]; break;
+                    case "duousername":
+                        DUOUsername = split[1]; break;
                 }
             }
 

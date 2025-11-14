@@ -7,7 +7,7 @@
 @inject Services.Nginx nginx;
 @inject DialogService DialogService;
 
-<PageTitle>Nginx Panel - Settings @(AppConfig.IsRunningInContainer == true ? "CONTAINER" : "NOT CONTAINER")</PageTitle>
+<PageTitle>Nginx Panel - Settings @(AppConfig.IsRunningInContainer ? "CONTAINER" : "NOT CONTAINER")</PageTitle>
 
 <RadzenStack Orientation="Orientation.Horizontal">
 	<RadzenStack Orientation="Orientation.Vertical">
@@ -93,7 +93,7 @@
 					<span>ACME Notifications:</span>
 					<RadzenButton Click=@(() => SetACMEEmailNotifications()) Disabled="busyInstallReset" Text="SMTP Settings" Icon="edit" BusyText="Setting..." IsBusy="busyInstallReset" class="rz-background-color-primary-dark" Style="margin-top: -12px;" />
 					<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
-						<RadzenCheckBox TValue="bool" Value="!(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) == string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
+						<RadzenCheckBox TValue="bool" Value="(acme.AccountConf.GetConfValue(enuConfKey.NOTIFY_HOOK) != string.Empty)" Disabled="acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_HOST) == string.Empty || busyInstallReset" Name="NotifyHookSMTP" Change="() => ToggleACMENotifyHook()" />
 						<RadzenLabel Text="SMTP Notify (SMTP Settings Must Be Set First)" Component="NotifyHookSMTP" />
 					</RadzenRow>
 				}
@@ -145,7 +145,7 @@
 
 	#region Nginx
 
-	private async void ResetNginx()
+	private async Task ResetNginx()
 	{
 		try
 		{
@@ -179,7 +179,7 @@
 		}
 	}
 
-	private async void InstallNginx()
+	private async Task InstallNginx()
 	{
 		try
 		{
@@ -258,7 +258,7 @@
 		}
 	}
 
-	private async void UninstallNginx()
+	private async Task UninstallNginx()
 	{
 		try
 		{
@@ -291,7 +291,7 @@
 		}
 	}
 
-	private async void UpgradeNginx()
+	private async Task UpgradeNginx()
 	{
 		try
 		{
@@ -325,7 +325,7 @@
 		}
 	}
 
-	private async void InstallNginxExtras()
+	private async Task InstallNginxExtras()
 	{
 		try
 		{
@@ -361,7 +361,7 @@
 		}
 	}
 
-	private async void UninstallNginxExtras()
+	private async Task UninstallNginxExtras()
 	{
 		try
 		{
@@ -401,7 +401,7 @@
 
 	#region ACME
 
-	private async void InstallACME()
+	private async Task InstallACME()
 	{
 		try
 		{
@@ -476,7 +476,7 @@
 		}
 	}
 
-	private async void UninstallACME()
+	private async Task UninstallACME()
 	{
 		try
 		{
@@ -506,7 +506,7 @@
 		}
 	}
 
-	private async void UpgradeACME()
+	private async Task UpgradeACME()
 	{
 		try
 		{
@@ -551,7 +551,7 @@
 		}
 	}
 
-	private async void SetACMECloudflareToken()
+	private async Task SetACMECloudflareToken()
 	{
 		try
 		{
@@ -604,7 +604,7 @@
 		}
 	}
 
-	private async void SetACMEEmailNotifications()
+	private async Task SetACMEEmailNotifications()
 	{
 		try
 		{
@@ -679,7 +679,7 @@
 		}
 	}
 
-	private async void SetACMECertAuthority()
+	private async Task SetACMECertAuthority()
 	{
 		try
 		{
@@ -753,7 +753,7 @@
 		}
 	}
 
-	private async void ToggleACMENotifyHook()
+	private async Task ToggleACMENotifyHook()
 	{
 		try
 		{
@@ -783,7 +783,7 @@
 
 	#region Application Settings
 
-	private async void ToggleAuthSettingsWarning()
+	private async Task ToggleAuthSettingsWarning()
 	{
 		try
 		{
@@ -801,7 +801,7 @@
 		}
 	}
 
-	private async void SetUsernamePassword()
+	private async Task SetUsernamePassword()
 	{
 		try
 		{
@@ -850,7 +850,7 @@
 		}
 	}
 
-	private async void SetPFXDetails()
+	private async Task SetPFXDetails()
 	{
 		try
 		{
@@ -892,7 +892,7 @@
 		}
 	}
 
-	private async void SetAppPort()
+	private async Task SetAppPort()
 	{
 		try
 		{
@@ -931,7 +931,7 @@
 		}
 	}
 
-	private async void ToggleDUOEnabled()
+	private async Task ToggleDUOEnabled()
 	{
 		try
 		{
@@ -949,7 +949,7 @@
 		}
 	}
 
-	private async void SetDUODetails()
+	private async Task SetDUODetails()
 	{
 		try
 		{

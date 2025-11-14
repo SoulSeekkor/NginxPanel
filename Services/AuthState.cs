@@ -5,7 +5,7 @@
         private bool _authenticated = false;
         public bool Authenticated => (!AuthRequired || _authenticated);
 
-        public bool AuthRequired => (AppConfig.UserRequired || AppConfig.DUORequired);
+        public static bool AuthRequired => (AppConfig.UserRequired || AppConfig.DUORequired);
 
         public void SetAuthenticated()
         {

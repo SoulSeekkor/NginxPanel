@@ -79,7 +79,7 @@
 						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
 						<br />
 						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args == true ? "" : configNoWrapCSS))" />
+							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args ? "" : configNoWrapCSS))" />
 							<RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
 						</RadzenStack>
 					</RadzenCard>
@@ -103,16 +103,16 @@ else
 	private bool busyRefreshing = false;
 
 	private string configCurrentCSS = string.Empty;
-	private string defaultConfigCSS = "background-color: #5F737E !important; cursor: default; font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;";
-	private string configNoWrapCSS = "white-space: nowrap;";
+	private const string defaultConfigCSS = "background-color: #5F737E !important; cursor: default; font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 11px; background: url(content/images/linenumbers.png); background-attachment: local; background-repeat: no-repeat; padding-left: 35px; padding-top: 12px; line-height:16px; border-color:#ccc;";
+	private const string configNoWrapCSS = "white-space: nowrap;";
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		configCurrentCSS = configNoWrapCSS + defaultConfigCSS;
-		RefreshConfigs(false);
+		await RefreshConfigs(false);
 	}
 
-	private async void RefreshConfigs(bool notifyUser, string? selectConf = null)
+	private async Task RefreshConfigs(bool notifyUser, string? selectConf = null)
 	{
 		try
 		{
@@ -138,7 +138,7 @@ else
 		}
 	}
 
-	private async void ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
+	private async Task ToggleSiteEnabled(Services.Nginx.ConfigFile conf)
 	{
 		try
 		{
@@ -159,7 +159,7 @@ else
 		}
 	}
 
-	private async void SaveConfig(Nginx.ConfigFile conf)
+	private async Task SaveConfig(Nginx.ConfigFile conf)
 	{
 		try
 		{
@@ -180,7 +180,7 @@ else
 		}
 	}
 
-	private async void RevertConfig(Nginx.ConfigFile conf)
+	private async Task RevertConfig(Nginx.ConfigFile conf)
 	{
 		try
 		{
@@ -200,7 +200,7 @@ else
 		}
 	}
 
-	private async void RenameConfig(Nginx.ConfigFile conf)
+	private async Task RenameConfig(Nginx.ConfigFile conf)
 	{
 		string configName = conf.Name;
 		var result = await DialogService.OpenAsync("Rename Config", ds =>
@@ -216,7 +216,7 @@ else
 			</RadzenStack>
 		);
 
-		if (!(result is null) && result && !(configName == conf.Name))
+		if (!(result is null) && result && configName != conf.Name)
 		{
 			if (String.IsNullOrWhiteSpace(configName))
 			{
@@ -240,33 +240,30 @@ else
 
 			try
 			{
-				await Task.Run(() =>
+				// Output new file
+				await File.WriteAllTextAsync(configPath, conf.FileContents);
+
+				// Check enabled status
+				if (conf.Enabled)
 				{
-					// Output new file
-					File.WriteAllText(configPath, conf.FileContents);
+					string oldName = conf.Name;
+					string oldPath = conf.ConfigPath;
 
-					// Check enabled status
-					if (conf.Enabled)
-					{
-						string oldName = conf.Name;
-						string oldPath = conf.ConfigPath;
+					// Disable current file
+					nginx.ToggleSiteEnabled(conf);
 
-						// Disable current file
-						nginx.ToggleSiteEnabled(conf);
+					// Enable new file
+					conf.Name = configName;
+					conf.ConfigPath = configPath;
+					nginx.ToggleSiteEnabled(conf);
 
-						// Enable new file
-						conf.Name = configName;
-						conf.ConfigPath = configPath;
-						nginx.ToggleSiteEnabled(conf);
+					// Reset values (so messages below are accurate)
+					conf.Name = oldName;
+					conf.ConfigPath = oldPath;
+				}
 
-						// Reset values (so messages below are accurate)
-						conf.Name = oldName;
-						conf.ConfigPath = oldPath;
-					}
-
-					File.Delete(conf.ConfigPath);
-					RefreshConfigs(false);
-				});
+				File.Delete(conf.ConfigPath);
+				await RefreshConfigs(false);
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been renamed to %ss%{configName}%se%!");
 			}
@@ -284,7 +281,7 @@ else
 		}
 	}
 
-	private async void AutoFormatConfig(Nginx.ConfigFile conf)
+	private async Task AutoFormatConfig(Nginx.ConfigFile conf)
 	{
 		try
 		{
@@ -303,7 +300,7 @@ else
 		}
 	}
 
-	private async void AddConfig()
+	private async Task AddConfig()
 	{
 		string configName = string.Empty;
 		Services.Nginx.ConfigFile.enuConfigType configType = Nginx.ConfigFile.enuConfigType.Site;
@@ -353,11 +350,8 @@ else
 				selectedConf = null;
 				await InvokeAsync(() => StateHasChanged());
 
-				await Task.Run(() =>
-				{
-					File.WriteAllText(configPath, "");
-					RefreshConfigs(false, selectConf: configName);
-				});
+				await File.WriteAllTextAsync(configPath, "");
+				await RefreshConfigs(false, selectConf: configName);
 
 				await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{configName}%se% has been added!");
 			}
@@ -379,22 +373,19 @@ else
 		}
 	}
 
-	private async void DeleteConfig(Nginx.ConfigFile conf)
+	private async Task DeleteConfig(Nginx.ConfigFile conf)
 	{
 		string message = layout!.StyleMessage(MainLayout.toastType.success, $"Are you sure you want to delete config %ss%{conf.Name}%se%?");
 		bool? confirm = await DialogService.Confirm(message, "Delete Config", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No", CloseDialogOnOverlayClick = true });
 
 		if (confirm.HasValue && confirm.Value)
 		{
-			await Task.Run(() =>
-			{
-				// Make sure config is not enabled
-				if (conf.Enabled)
-					nginx.ToggleSiteEnabled(conf);
+			// Make sure config is not enabled
+			if (conf.Enabled)
+				nginx.ToggleSiteEnabled(conf);
 
-				File.Delete(conf.ConfigPath);
-				RefreshConfigs(false);
-			});
+			File.Delete(conf.ConfigPath);
+			await RefreshConfigs(false);
 
 			await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
 		}

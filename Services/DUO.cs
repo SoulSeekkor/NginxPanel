@@ -5,9 +5,9 @@ namespace NginxPanel.Services
 {
     public class DUO
     {
-        private Client? _client = null;
+        private readonly Client? _client = null;
 
-        private string GetHostName
+        private static string GetHostName
         {
             get
             {

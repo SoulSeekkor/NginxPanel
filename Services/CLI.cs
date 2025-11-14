@@ -4,8 +4,8 @@ namespace NginxPanel.Services
 {
     public class CLI
     {
-        private string _runningAsUser = string.Empty;
-        private string _homePath = string.Empty;
+        private readonly string _runningAsUser = Environment.UserName;
+        private readonly string _homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
         private string _standardOut = string.Empty;
         private string _standardError = string.Empty;
@@ -22,15 +22,6 @@ namespace NginxPanel.Services
         public string StandardError
         {
             get { return (_standardError ?? string.Empty).Trim(); }
-        }
-
-        public CLI()
-        {
-            // Determine user this is running as
-            _runningAsUser = Environment.UserName;
-
-            // Determine user's home path
-            _homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
 
         public void RunCommand(string command, string working_dir = "", bool sudo = true, bool parseArgs = true)

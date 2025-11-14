@@ -16,11 +16,11 @@ namespace NginxPanel.Services
                 Shared = 1
             }
 
-            private string _fileContents = string.Empty;
+            private string _fileContents;
 
             public enuConfigType ConfigType { get; set; }
-            public string Name = string.Empty;
-            public string ConfigPath = string.Empty;
+            public string Name;
+            public string ConfigPath;
 
             public bool Enabled = false;
             public string FileContents
@@ -101,7 +101,7 @@ namespace NginxPanel.Services
 
         #region Variables
 
-        private CLI _CLI;
+        private readonly CLI _CLI;
 
         private string _version = "";
         private string _rootConfig = "";
@@ -113,9 +113,9 @@ namespace NginxPanel.Services
         private string _lastTestResults = "";
 
         private List<ConfigFile> _configs = new List<ConfigFile>();
-        private List<string> _modules = new List<string>();
+        private readonly List<string> _modules = new List<string>();
 
-        private System.Timers.Timer _refreshService = new System.Timers.Timer(1500);
+        private readonly System.Timers.Timer _refreshService = new System.Timers.Timer(1500);
 
         public event ServiceStatusChangedHandler? ServiceStatusChanged;
         public delegate void ServiceStatusChangedHandler();
@@ -126,7 +126,7 @@ namespace NginxPanel.Services
 
         public bool Installed
         {
-            get { return !(_rootConfig == "") && Directory.Exists(_rootPath); }
+            get { return _rootConfig != "" && Directory.Exists(_rootPath); }
         }
 
         public bool NginxExtrasInstalled
@@ -301,7 +301,7 @@ namespace NginxPanel.Services
             else
                 _serviceStatus = enuServiceStatus.NotInstalled;
 
-            if (!(oldStatus == _serviceStatus) && !(ServiceStatusChanged is null))
+            if (oldStatus != _serviceStatus && !(ServiceStatusChanged is null))
                 ServiceStatusChanged();
         }
 
@@ -355,20 +355,18 @@ namespace NginxPanel.Services
                     Directory.CreateDirectory(SitesAvailable);
 
                 // Load site configs first
-                foreach (string file in Directory.GetFiles(SitesAvailable))
+                foreach (string file in Directory.GetFiles(SitesAvailable).Where((x) => File.Exists(x)))
                 {
-                    if (File.Exists(file))
-                        _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
+                    _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Site, _rootPath, file));
                 }
 
                 // Load shared configs next, make sure the folder exists first
                 if (!Directory.Exists(SharedFiles))
                     Directory.CreateDirectory(SharedFiles);
 
-                foreach (string file in Directory.GetFiles(SharedFiles))
+                foreach (string file in Directory.GetFiles(SharedFiles).Where((x) => File.Exists(x)))
                 {
-                    if (File.Exists(file))
-                        _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
+                    _configs.Add(new ConfigFile(ConfigFile.enuConfigType.Shared, _rootPath, file));
                 }
 
                 // Sort the configs
@@ -380,23 +378,17 @@ namespace NginxPanel.Services
         {
             _modules.Clear();
 
-            if (Installed)
+            if (Installed && Directory.Exists(_rootModules))
             {
-                if (Directory.Exists(_rootModules))
+                FileInfo? module = null;
+                foreach (string file in Directory.GetFiles(_rootModules).Where((x) => File.Exists(x)))
                 {
-                    FileInfo? module = null;
-                    foreach (string file in Directory.GetFiles(_rootModules))
-                    {
-                        if (File.Exists(file))
-                        {
-                            module = new FileInfo(file);
-                            _modules.Add(module.Name.Substring(4, module.Name.IndexOf(".") - 4));
-                        }
-                    }
-
-                    // Sort the modules
-                    _modules.Sort((x, y) => x.CompareTo(y));
+                    module = new FileInfo(file);
+                    _modules.Add(module.Name.Substring(4, module.Name.IndexOf(".") - 4));
                 }
+
+                // Sort the modules
+                _modules.Sort((x, y) => x.CompareTo(y));
             }
         }
 
