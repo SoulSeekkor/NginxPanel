@@ -32,6 +32,8 @@ namespace NginxPanel.Services
                 }
             }
             public bool ContentsDirty { get; set; } = false;
+            public string ServerName { get; set; }
+            public string ProxyPass { get; set; }
 
             public bool busySaving { get; set; } = false;
 
@@ -45,6 +47,20 @@ namespace NginxPanel.Services
                     Enabled = File.Exists(Path.Combine(rootPath, "sites-enabled", Name));
 
                 _fileContents = File.ReadAllText(configPath);
+
+                // Check for proxy_pass
+                foreach (string line in _fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
+                {
+                    if (line.Trim().ToLower().StartsWith("server_name"))
+                    {
+                        ServerName = line.Trim().Substring(11).TrimEnd(';').Trim();
+                    }
+
+                    if (line.Trim().ToLower().StartsWith("proxy_pass"))
+                    {
+                        ProxyPass = line.Trim().Substring(10).TrimEnd(';').Trim();
+                    }
+                }
             }
 
             public async Task Save()

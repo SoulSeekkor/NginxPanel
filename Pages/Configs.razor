@@ -22,10 +22,7 @@
 				{
 					// Display config actions
 					<RadzenStack Orientation="Orientation.Horizontal">
-						<RadzenButton Click=@(() => SaveConfig(selectedConf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="selectedConf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
 						<RadzenButton Click=@(() => RenameConfig(selectedConf)) Disabled="busyRefreshing" Text="Rename" Icon="edit" class="rz-background-color-primary-dark" />
-						<RadzenButton Click=@(() => AutoFormatConfig(selectedConf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" />
-						<RadzenButton Click=@(() => RevertConfig(selectedConf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="selectedConf.busySaving" class="rz-background-color-primary-dark" />
 						<RadzenButton Click=@(() => DeleteConfig(selectedConf)) Disabled="busyRefreshing" Icon="delete" Size="ButtonSize.Medium" class="rz-background-color-danger-dark" />
 					</RadzenStack>
 				}
@@ -33,76 +30,24 @@
 
 		</RadzenHeader>
 
-		<RadzenDataGrid @ref="configsGrid" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
+		<RadzenDataGrid @ref="configsGrid" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
 			<Columns>
 				<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
 					<Template Context="data">
 						@(nginx.Configs.IndexOf(data) + 1)
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="80px" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Enabled)" Title="Enabled" />
-				<RadzenDataGridColumn Property="Status" Title="Location" />
-				<RadzenDataGridColumn Width="160px" Property="Details" Title="Config Details">
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="300px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Enabled)" Title="Enabled" Width="125px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target" />
+				<RadzenDataGridColumn Width="160px" Property="Details" Title="Actions">
 					<Template Context="data">
-						<RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="rz-m-1" Text="Open" />
+						<RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="rz-m-1" Click=@(() => EditConfig(data)) Text="Edit" />
 					</Template>
 				</RadzenDataGridColumn>
 			</Columns>
 		</RadzenDataGrid>
-		@* <span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
-		<RadzenSidebar @bind-Expanded="@configsSidebarExpanded">
-			<RadzenPanelMenu Style="max-height: 700px;">
-				@if (!busyRefreshing)
-				{
-					@foreach (Services.Nginx.ConfigFile conf in nginx.Configs)
-					{
-						string icon = "";
-						string style = "";
-
-						if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-						{
-							if (conf.Enabled)
-								icon = "check";
-							else
-								icon = "description";
-						}
-						else
-							icon = "share";
-
-						if (conf.ContentsDirty)
-							style = "border-style: ridge; border-color: FireBrick; border-width: 3px;";
-
-						<RadzenPanelMenuItem Text="@conf.Name" Icon="@(icon)" Click="@(() => selectedConf = conf)" Selected="@(selectedConf == conf)" Style="@style" />
-					}
-				}
-			</RadzenPanelMenu>
-		</RadzenSidebar>
-		<RadzenBody>
-			<div class="rz-p-4" style="min-height: 1200px;">
-				@if (!(selectedConf is null) && !busyRefreshing)
-				{
-					// Display selected config
-					<RadzenCard>
-						@if (selectedConf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-						{
-							<RadzenStack Orientation="Orientation.Horizontal">
-								<RadzenCheckBox TValue="bool" Value="@selectedConf.Enabled" Name="@selectedConf.Name" Change="() => ToggleSiteEnabled(selectedConf)" />
-								<RadzenLabel Text="Enabled" Component="@selectedConf.Name" />
-							</RadzenStack>
-						}
-
-						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-						<RadzenTextArea Value="@selectedConf.FileContents" Change=@(value => @selectedConf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
-						<br />
-						<RadzenStack Orientation="Orientation.Horizontal">
-							<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(selectedConf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args ? "" : configNoWrapCSS))" />
-							<RadzenLabel Text="Word wrap" Component="@(selectedConf.Name + "_wordwrap")" />
-						</RadzenStack>
-					</RadzenCard>
-				}
-			</div>
-		</RadzenBody> *@
 	</RadzenLayout>
 }
 else
@@ -408,5 +353,35 @@ else
 
 			await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% has been deleted!");
 		}
+	}
+
+	private async Task EditConfig(Nginx.ConfigFile conf)
+	{
+		var result = await DialogService.OpenAsync("Edit Config", ds =>
+			@<RadzenCard>
+
+				@if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+				{
+					<RadzenStack Orientation="Orientation.Horizontal">
+						<RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSiteEnabled(conf)" />
+						<RadzenLabel Text="Enabled" Component="@conf.Name" />
+					</RadzenStack>
+				}
+				<br />
+
+				<RadzenButton Click=@(() => SaveConfig(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
+				<RadzenButton Click=@(() => AutoFormatConfig(conf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" />
+				<RadzenButton Click=@(() => RevertConfig(conf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" />
+
+				<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
+				<RadzenTextArea Value="@conf.FileContents" Change=@(value => @conf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
+				<br />
+
+				<RadzenStack Orientation="Orientation.Horizontal">
+					<RadzenCheckBox TValue="bool" Value="@(!configCurrentCSS.Contains("nowrap"))" Name="@(conf.Name + "_wordwrap")" Change="@((args) => configCurrentCSS = defaultConfigCSS + (args ? "" : configNoWrapCSS))" />
+					<RadzenLabel Text="Word wrap" Component="@(conf.Name + "_wordwrap")" />
+				</RadzenStack>
+			</RadzenCard>
+		,new DialogOptions() { Width = "1200px", Height = "900px" });
 	}
 }
