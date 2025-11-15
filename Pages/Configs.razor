@@ -27,7 +27,6 @@
 					</RadzenStack>
 				}
 			</RadzenStack>
-
 		</RadzenHeader>
 
 		<RadzenDataGrid @ref="configsGrid" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
@@ -37,11 +36,15 @@
 						@(nginx.Configs.IndexOf(data) + 1)
 					</Template>
 				</RadzenDataGridColumn>
+				<RadzenDataGridColumn Title="Active" TextAlign="TextAlign.Center" Width="100px">
+					<Template Context="data">
+						<RadzenSwitch TValue="bool" Value="@data.Enabled" Name="@data.Name" Change="() => ToggleSiteEnabled(data)" />
+					</Template>
+				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="300px" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Enabled)" Title="Enabled" Width="125px" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname" Width="400px" />
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target" />
-				<RadzenDataGridColumn Width="160px" Property="Details" Title="Actions">
+				<RadzenDataGridColumn Width="160px" Title="Actions">
 					<Template Context="data">
 						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) title="Edit" />
 						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="match_word" IconColor="blueviolet" class="rz-m-1" Click=@(() => RenameConfig(data)) title="Rename" />
