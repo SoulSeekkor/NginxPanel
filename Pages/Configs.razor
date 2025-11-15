@@ -19,6 +19,11 @@
 					<RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-success-dark" />
 				</RadzenStack>
 
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Right">
+					<RadzenCheckBox TValue="bool" Value="showCopyButtons" Name="ClipboardButtons" Change="() => showCopyButtons = !showCopyButtons" />
+					<RadzenLabel Text="Show Clipboard Buttons" Component="ClipboardButtons" Style="margin-right: 10px;" />
+				</RadzenStack>
+
 				@if (!(selectedConf is null) && !busyRefreshing)
 				{
 					// Display config actions
@@ -47,7 +52,10 @@
 				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="250px">
 					<Template Context="data">
-						<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Name", data.Name)) title="Copy" />
+						@if (showCopyButtons)
+						{
+							<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Name", data.Name)) title="Copy" />
+						}
 						<span style="font-weight: bold;">@data.Name</span>
 					</Template>
 				</RadzenDataGridColumn>
@@ -55,7 +63,10 @@
 					<Template Context="data">
 						@if (!string.IsNullOrWhiteSpace(data.ServerName))
 						{
-							<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Hostname(s)", data.ServerName)) title="Copy" />
+							@if (showCopyButtons)
+							{
+								<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Hostname(s)", data.ServerName)) title="Copy" />	
+							}
 							<span style="font-style: italic; color: lightgray;">@data.ServerName</span>
 						}
 					</Template>
@@ -64,7 +75,10 @@
 					<Template Context="data">
 						@if (!string.IsNullOrWhiteSpace(data.ProxyPass))
 						{
-							<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Target(s)", data.ProxyPass)) title="Copy" />
+							@if (showCopyButtons)
+							{
+								<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Target(s)", data.ProxyPass)) title="Copy" />	
+							}
 							<span style="font-style: italic; color: lightgray;">@data.ProxyPass</span>
 						}
 					</Template>
@@ -95,6 +109,7 @@ else
 
 	private Nginx.ConfigFile? selectedConf = null;
 
+	private bool showCopyButtons = false;
 	private bool busyRefreshing = false;
 
 	private string configCurrentCSS = string.Empty;
