@@ -367,22 +367,12 @@ else
 	{
 		var result = await DialogService.OpenAsync("Edit Config - " + conf.Name, ds =>
 			@<RadzenCard>
-
-				@if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
-				{
-					<RadzenStack Orientation="Orientation.Horizontal">
-						<RadzenLabel Text="Enabled" Component="@conf.Name" Style="font-size: 18px; font-weight: bold;" />
-						<RadzenSwitch TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSiteEnabled(conf)" />
-					</RadzenStack>
-				}
-				<br />
-
 				<RadzenButton Click=@(() => SaveConfig(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
-				<RadzenButton Click=@(() => AutoFormatConfig(conf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" />
+				<RadzenButton Click=@(() => AutoFormatConfig(conf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" Style="margin-right: 5px;" />
 				<RadzenButton Click=@(() => RevertConfig(conf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" />
 
 				<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mt-5" TagName="TagName.H3">Configuration:</RadzenText>
-				<RadzenTextArea Value="@conf.FileContents" Change=@(value => @conf.FileContents = value) Cols="120" Rows="33" Style="@(configCurrentCSS)" />
+				<RadzenTextArea Value="@conf.FileContents" Change=@(value => @conf.FileContents = value) Cols="120" Rows="36" Style="@(configCurrentCSS)" />
 				<br />
 
 				<RadzenStack Orientation="Orientation.Horizontal">
@@ -390,6 +380,6 @@ else
 					<RadzenLabel Text="Word wrap" Component="@(conf.Name + "_wordwrap")" />
 				</RadzenStack>
 			</RadzenCard>
-		,new DialogOptions() { Width = "1200px", Height = "900px" });
+		,new DialogOptions() { Width = "1200px", Height = "850px" });
 	}
 }
