@@ -15,7 +15,6 @@
 		<RadzenHeader>
 			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
 				<RadzenStack Orientation="Orientation.Horizontal">
-					<RadzenSidebarToggle Click="@(() => configsSidebarExpanded = !configsSidebarExpanded)" />
 					<RadzenButton Click=@(() => RefreshConfigs(true)) Disabled="busyRefreshing" Text="Refresh" Icon="cached" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-primary-dark rz-mr-5" />
 					<RadzenButton Click=@(() => AddConfig()) Disabled="busyRefreshing" Text="Add" Icon="add" BusyText="Refreshing..." IsBusy="busyRefreshing" class="rz-background-color-success-dark" />
 				</RadzenStack>
@@ -96,7 +95,6 @@ else
 
 	private Nginx.ConfigFile? selectedConf = null;
 
-	private bool configsSidebarExpanded = true;
 	private bool busyRefreshing = false;
 
 	private string configCurrentCSS = string.Empty;
