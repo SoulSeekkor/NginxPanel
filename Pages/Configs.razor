@@ -44,7 +44,7 @@
 						}
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="250px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="250px" />
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip />
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px" />
 				<RadzenDataGridColumn Width="160px" Title="Actions">
@@ -56,6 +56,8 @@
 				</RadzenDataGridColumn>
 			</Columns>
 		</RadzenDataGrid>
+		<br />
+		<span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
 	</RadzenLayout>
 }
 else
