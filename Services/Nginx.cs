@@ -49,22 +49,28 @@ namespace NginxPanel.Services
                 _fileContents = File.ReadAllText(configPath);
 
                 // Check for server_name
-                Match match = Regex.Match(_fileContents, @"(?:;|{)\s+server_name (?<name>.*?);", RegexOptions.Singleline);
+                MatchCollection matches = Regex.Matches(_fileContents, @"(?:;|{)\s+server_name (?<name>.*?);", RegexOptions.Singleline);
 
-                if (match.Success)
+                foreach (Match match in matches)
                 {
-                    // Set server name from regex match
-                    ServerName = match.Groups["name"].Value;
+                    if (!ServerName.ToLower().Contains(match.Groups["name"].Value.ToLower()))
+                        ServerName += ", " + match.Groups["name"].Value;
                 }
+
+                if (ServerName.StartsWith(", "))
+                    ServerName = ServerName.Substring(2);
 
                 // Check for proxy_pass
-                match = Regex.Match(_fileContents, @"(?:;|{)\s+proxy_pass (?<target>[^\s]*);", RegexOptions.Singleline);
+                matches = Regex.Matches(_fileContents, @"(?:;|{)\s+proxy_pass (?<target>[^\s]*);", RegexOptions.Singleline);
 
-                if (match.Success)
+                foreach (Match match in matches)
                 {
-                    // Set proxy pass location from regex match
-                    ProxyPass = match.Groups["target"].Value;
+                    if (!ProxyPass.ToLower().Contains(match.Groups["target"].Value.ToLower()))
+                        ProxyPass += ", " + match.Groups["target"].Value;
                 }
+
+                if (ProxyPass.StartsWith(", "))
+                    ProxyPass = ProxyPass.Substring(2);
             }
 
             public async Task Save()

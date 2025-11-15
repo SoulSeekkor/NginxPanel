@@ -44,9 +44,9 @@
 						}
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="300px" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target" Width="350px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="250px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px" />
 				<RadzenDataGridColumn Width="160px" Title="Actions">
 					<Template Context="data">
 						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) title="Edit" />
