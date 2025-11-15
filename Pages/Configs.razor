@@ -43,9 +43,9 @@
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target" />
 				<RadzenDataGridColumn Width="160px" Property="Details" Title="Actions">
 					<Template Context="data">
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) />
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="drive_file_rename_outline" IconColor="blueviolet" class="rz-m-1" Click=@(() => RenameConfig(data)) />
-						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="delete" IconColor="red" class="rz-m-1" Click=@(() => DeleteConfig(data)) />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) title="Edit" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="match_word" IconColor="blueviolet" class="rz-m-1" Click=@(() => RenameConfig(data)) title="Rename" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="delete" IconColor="red" class="rz-m-1" Click=@(() => DeleteConfig(data)) title="Delete" />
 					</Template>
 				</RadzenDataGridColumn>
 			</Columns>
@@ -359,14 +359,14 @@ else
 
 	private async Task EditConfig(Nginx.ConfigFile conf)
 	{
-		var result = await DialogService.OpenAsync("Edit Config", ds =>
+		var result = await DialogService.OpenAsync("Edit Config - " + conf.Name, ds =>
 			@<RadzenCard>
 
 				@if (conf.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
 				{
 					<RadzenStack Orientation="Orientation.Horizontal">
-						<RadzenCheckBox TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSiteEnabled(conf)" />
-						<RadzenLabel Text="Enabled" Component="@conf.Name" />
+						<RadzenLabel Text="Enabled" Component="@conf.Name" Style="font-size: 18px; font-weight: bold;" />
+						<RadzenSwitch TValue="bool" Value="@conf.Enabled" Name="@conf.Name" Change="() => ToggleSiteEnabled(conf)" />
 					</RadzenStack>
 				}
 				<br />
