@@ -5,6 +5,8 @@
 @inject DialogService DialogService;
 @inject Services.Nginx nginx;
 
+@inject IJSRuntime JSRuntime
+
 <PageTitle>Nginx Panel - Configs</PageTitle>
 
 @if (nginx.Installed)
@@ -44,9 +46,30 @@
 						}
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="250px" />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip />
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px" />
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="250px">
+					<Template Context="data">
+						<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Name", data.Name)) title="Copy" />
+						<span style="font-weight: bold;">@data.Name</span>
+					</Template>
+				</RadzenDataGridColumn>
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip>
+					<Template Context="data">
+						@if (!string.IsNullOrWhiteSpace(data.ServerName))
+						{
+							<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Hostname(s)", data.ServerName)) title="Copy" />
+							<span style="font-style: italic; color: lightgray;">@data.ServerName</span>
+						}
+					</Template>
+				</RadzenDataGridColumn>
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px">
+					<Template Context="data">
+						@if (!string.IsNullOrWhiteSpace(data.ProxyPass))
+						{
+							<RadzenButton Variant="Variant.Outlined" Shade="Shade.Darker" Size="ButtonSize.Small" Icon="content_copy" class="rz-m-1" Click=@(() => CopyToClipboard("Target(s)", data.ProxyPass)) title="Copy" />
+							<span style="font-style: italic; color: lightgray;">@data.ProxyPass</span>
+						}
+					</Template>
+				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Width="160px" Title="Actions">
 					<Template Context="data">
 						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) title="Edit" />
@@ -84,6 +107,19 @@ else
 	{
 		configCurrentCSS = configNoWrapCSS + defaultConfigCSS;
 		await RefreshConfigs(false);
+	}
+
+	private async Task CopyToClipboard(string name, string value)
+	{
+		try
+		{
+			await JSRuntime.InvokeAsync<string>("clipboardCopy", value);
+			await layout!.DisplayToastAsync(MainLayout.toastType.success, name + " copied to the clipboard successfully!");
+		}
+		catch
+		{
+			await layout!.DisplayToastAsync(MainLayout.toastType.error, $"Failed to copy {name} to the clipboard!");
+		}
 	}
 
 	private async Task RefreshConfigs(bool notifyUser, string? selectConf = null)
