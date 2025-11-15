@@ -51,10 +51,9 @@ namespace NginxPanel.Services
                 // Check for server_name
                 MatchCollection matches = Regex.Matches(_fileContents, @"(?:;|{)\s+server_name (?<name>.*?);", RegexOptions.Singleline);
 
-                foreach (Match match in matches)
+                foreach (Match match in matches.Where((x) => !ServerName.ToLower().Contains(x.Groups["name"].Value.ToLower())))
                 {
-                    if (!ServerName.ToLower().Contains(match.Groups["name"].Value.ToLower()))
-                        ServerName += ", " + match.Groups["name"].Value;
+                    ServerName += ", " + match.Groups["name"].Value;
                 }
 
                 if (ServerName.StartsWith(", "))
@@ -63,10 +62,9 @@ namespace NginxPanel.Services
                 // Check for proxy_pass
                 matches = Regex.Matches(_fileContents, @"(?:;|{)\s+proxy_pass (?<target>[^\s]*);", RegexOptions.Singleline);
 
-                foreach (Match match in matches)
+                foreach (Match match in matches.Where((x) => !ProxyPass.ToLower().Contains(x.Groups["target"].Value.ToLower())))
                 {
-                    if (!ProxyPass.ToLower().Contains(match.Groups["target"].Value.ToLower()))
-                        ProxyPass += ", " + match.Groups["target"].Value;
+                    ProxyPass += ", " + match.Groups["target"].Value;
                 }
 
                 if (ProxyPass.StartsWith(", "))
