@@ -43,7 +43,9 @@
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target" />
 				<RadzenDataGridColumn Width="160px" Property="Details" Title="Actions">
 					<Template Context="data">
-						<RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="rz-m-1" Click=@(() => EditConfig(data)) Text="Edit" />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="edit" class="rz-m-1" Click=@(() => EditConfig(data)) />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="drive_file_rename_outline" IconColor="blueviolet" class="rz-m-1" Click=@(() => RenameConfig(data)) />
+						<RadzenButton Variant="Variant.Flat" Shade="Shade.Lighter" Icon="delete" IconColor="red" class="rz-m-1" Click=@(() => DeleteConfig(data)) />
 					</Template>
 				</RadzenDataGridColumn>
 			</Columns>

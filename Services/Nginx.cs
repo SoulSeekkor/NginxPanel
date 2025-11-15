@@ -48,18 +48,22 @@ namespace NginxPanel.Services
 
                 _fileContents = File.ReadAllText(configPath);
 
-                // Check for proxy_pass
-                foreach (string line in _fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
-                {
-                    if (line.Trim().ToLower().StartsWith("server_name"))
-                    {
-                        ServerName = line.Trim().Substring(11).TrimEnd(';').Trim();
-                    }
+                // Check for server_name
+                Match match = Regex.Match(_fileContents, @";\s+server_name (?<server>[^\s]*);", RegexOptions.Singleline);
 
-                    if (line.Trim().ToLower().StartsWith("proxy_pass"))
-                    {
-                        ProxyPass = line.Trim().Substring(10).TrimEnd(';').Trim();
-                    }
+                if (match.Success)
+                {
+                    // Set server name from regex match
+                    ServerName = match.Groups["server"].Value;
+                }
+
+                // Check for proxy_pass
+                match = Regex.Match(_fileContents, @";\s+proxy_pass (?<server>[^\s]*);", RegexOptions.Singleline);
+
+                if (match.Success)
+                {
+                    // Set proxy pass location from regex match
+                    ProxyPass = match.Groups["server"].Value;
                 }
             }
 
