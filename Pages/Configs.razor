@@ -38,7 +38,10 @@
 				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Title="Active" TextAlign="TextAlign.Center" Width="100px">
 					<Template Context="data">
-						<RadzenSwitch TValue="bool" Value="@data.Enabled" Name="@data.Name" Change="() => ToggleSiteEnabled(data)" />
+						@if (data.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
+						{
+							<RadzenSwitch TValue="bool" Value="@data.Enabled" Name="@data.Name" Change="() => ToggleSiteEnabled(data)" />
+						}
 					</Template>
 				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" Width="300px" />

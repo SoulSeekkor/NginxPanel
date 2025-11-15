@@ -32,8 +32,8 @@ namespace NginxPanel.Services
                 }
             }
             public bool ContentsDirty { get; set; } = false;
-            public string ServerName { get; set; }
-            public string ProxyPass { get; set; }
+            public string ServerName { get; set; } = string.Empty;
+            public string ProxyPass { get; set; } = string.Empty;
 
             public bool busySaving { get; set; } = false;
 
