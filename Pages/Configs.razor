@@ -35,7 +35,9 @@
 			</RadzenStack>
 		</RadzenHeader>
 
-		<RadzenDataGrid @ref="configsGrid" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
+		<RadzenDataGrid @ref="configsGrid" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand"
+						AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile" RowDoubleClick="(args) => EditConfig(args.Data)">
+
 			<Columns>
 				<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
 					<Template Context="data">
@@ -93,7 +95,10 @@
 			</Columns>
 		</RadzenDataGrid>
 		<br />
-		<span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+			<span style="padding-top: 5px;">Total Configs: @nginx.Configs.Count.ToString()</span>
+			<span style="padding-top: 5px; font-style: italic;">(Double-click to edit.)</span>
+		</RadzenStack>
 	</RadzenLayout>
 }
 else
