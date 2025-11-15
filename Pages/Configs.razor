@@ -29,14 +29,14 @@
 			</RadzenStack>
 		</RadzenHeader>
 
-		<RadzenDataGrid @ref="configsGrid" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
+		<RadzenDataGrid @ref="configsGrid" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile">
 			<Columns>
 				<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
 					<Template Context="data">
 						@(nginx.Configs.IndexOf(data) + 1)
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Title="Active" TextAlign="TextAlign.Center" Width="100px">
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Enabled)" Title="Active" TextAlign="TextAlign.Center" Width="100px">
 					<Template Context="data">
 						@if (data.ConfigType == Nginx.ConfigFile.enuConfigType.Site)
 						{
