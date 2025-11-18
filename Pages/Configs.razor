@@ -11,7 +11,7 @@
 
 @if (nginx.Installed)
 {
-	<RadzenLayout Style="max-height: 800px;">
+	<RadzenLayout Style="max-height: 800px; max-width: 1500px;">
 		<RadzenHeader>
 			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
 				<RadzenStack Orientation="Orientation.Horizontal">
@@ -35,11 +35,12 @@
 			</RadzenStack>
 		</RadzenHeader>
 
-		<RadzenDataGrid @ref="configsGrid" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand"
-						AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile" RowDoubleClick="(args) => EditConfig(args.Data)">
+		<RadzenDataGrid @ref="configsGrid" FilterMode="FilterMode.Simple" AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" 
+						AllowColumnResize="true" AllowSorting="true" Density="Density.Compact" Data="@nginx.Configs" TItem="Nginx.ConfigFile"
+						RowDoubleClick="(args) => EditConfig(args.Data)">
 
 			<Columns>
-				<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+				<RadzenDataGridColumn Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="50px">
 					<Template Context="data">
 						@(nginx.Configs.IndexOf(data) + 1)
 					</Template>
@@ -52,7 +53,7 @@
 						}
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="250px">
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.Name)" Title="Name" ShowCellDataAsTooltip Width="225px" MinWidth="100px">
 					<Template Context="data">
 						@if (showCopyButtons)
 						{
@@ -61,7 +62,7 @@
 						<span style="font-weight: bold;">@data.Name</span>
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip>
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ServerName)" Title="Hostname(s)" ShowCellDataAsTooltip Width="500px" MinWidth="100px">
 					<Template Context="data">
 						@if (!string.IsNullOrWhiteSpace(data.ServerName))
 						{
@@ -73,7 +74,7 @@
 						}
 					</Template>
 				</RadzenDataGridColumn>
-				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px">
+				<RadzenDataGridColumn Property="@nameof(Nginx.ConfigFile.ProxyPass)" Title="Target(s)" ShowCellDataAsTooltip Width="375px" MinWidth="150px">
 					<Template Context="data">
 						@if (!string.IsNullOrWhiteSpace(data.ProxyPass))
 						{
