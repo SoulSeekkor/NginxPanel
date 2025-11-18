@@ -105,12 +105,24 @@
 		<RadzenCard Style="width: 500px;">
 			<RadzenText Text="Application Settings" TextStyle="TextStyle.DisplayH6" />
 
+			<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
+				<RadzenRow Style="width: 100%;">
+					<RadzenColumn SizeSM="8">
+						<span>General Settings:</span>
+						<br />
+						<RadzenButton Click=@(() => SetAppPort()) Text="Set Port" Icon="edit" class="rz-background-color-primary-dark" Style="margin-top: 3px;" />
+					</RadzenColumn>
+					<RadzenColumn>
+						<span>Install NginxPanel Service</span>
+						<br />
+						<RadzenButton Click=@(() => InstallNginxPanelService()) Disabled="true" Text="Install" Icon="cached" class="rz-background-color-primary-dark" Style="margin-top: 3px;" />
+					</RadzenColumn>
+				</RadzenRow>
+			</RadzenRow>
+			
 			<hr style="margin-bottom: 25px;" />
-			<RadzenText Text="General Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
-			<RadzenButton Click=@(() => SetAppPort()) Text="Set Port" Icon="edit" class="rz-background-color-primary-dark" Style="margin-top: -12px;" />
-
-			<hr style="margin-bottom: 25px;" />
-			<RadzenText Text="Authentication" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
+			<span>Authentication:</span>
+			<br />
 			<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 					<RadzenCheckBox TValue="bool" Value="AppConfig.DisableAuthWarningOnStart" Name="DisableAuthWarning" Change="() => ToggleAuthSettingsWarning()" />
@@ -121,11 +133,14 @@
 			</RadzenStack>
 
 			<hr style="margin-bottom: 25px;" />
-			<RadzenText Text="PFX Certificate" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" />
-			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" class="rz-background-color-primary-dark" Style="margin-top: -12px;" />
+			<span>PFX Certificate:</span>
+			<br />
+			<RadzenButton Click=@(() => SetPFXDetails()) Text="Set PFX Details" Icon="edit" class="rz-background-color-primary-dark" Style="margin-top: 3px;" />
 
 			<hr style="margin-bottom: 25px;" />
-			<RadzenText Text="DUO Settings" Style="font-size: 16px; margin-bottom: 10px; font-weight: bold;" /><RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+			<span>Duo Settings:</span>
+			<br />
+			<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
 				<RadzenRow AlignItems="AlignItems.Start" Style="width: 100%;">
 					<RadzenCheckBox TValue="bool" Disabled="!AppConfig.DUOAvailable" Value="AppConfig.DUOEnabled" Name="EnableDUO" Change="() => ToggleDUOEnabled()" />
 					<RadzenLabel Text="Enable DUO" Component="EnableDUO" />
@@ -929,6 +944,11 @@
 		{
 			StateHasChanged();
 		}
+	}
+
+	private async Task InstallNginxPanelService()
+	{
+		
 	}
 
 	private async Task ToggleDUOEnabled()
