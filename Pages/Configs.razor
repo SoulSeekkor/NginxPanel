@@ -188,7 +188,7 @@ else
 		}
 	}
 
-	private async Task SaveConfig(Nginx.ConfigFile conf)
+	private async Task SaveConfig(Nginx.ConfigFile conf, DialogService ds)
 	{
 		try
 		{
@@ -197,6 +197,8 @@ else
 			await conf.Save();
 
 			await layout!.DisplayToastAsync(MainLayout.toastType.success, $"Config %ss%{conf.Name}%se% saved successfully!");
+
+			ds.Close();
 		}
 		catch
 		{
@@ -424,7 +426,7 @@ else
 	{
 		var result = await DialogService.OpenAsync("Edit Config - " + conf.Name, ds =>
 			@<RadzenCard>
-				<RadzenButton Click=@(() => SaveConfig(conf)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
+				<RadzenButton Click=@(() => SaveConfig(conf, ds)) Disabled="busyRefreshing" Text="Save" Icon="save" BusyText="Saving..." IsBusy="conf.busySaving" class="rz-background-color-success-dark" Style="margin-right: 25px;" />
 				<RadzenButton Click=@(() => AutoFormatConfig(conf)) Disabled="busyRefreshing" Text="Auto Format" Icon="brush" BusyText="Formatting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" Style="margin-right: 5px;" />
 				<RadzenButton Click=@(() => RevertConfig(conf)) Disabled="busyRefreshing" Text="Revert" Icon="upload_file" BusyText="Reverting..." IsBusy="conf.busySaving" class="rz-background-color-primary-dark" />
 
