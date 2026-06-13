@@ -376,7 +376,7 @@ namespace NginxPanel.Services
             {
                 // Make sure the common configs folder exists first
                 if (!Directory.Exists(SitesAvailable))
-                    Directory.CreateDirectory(SitesAvailable);
+                    _CLI.RunCommand("mkdir " + SitesAvailable);
 
                 // Load site configs first
                 foreach (string file in Directory.GetFiles(SitesAvailable).Where((x) => File.Exists(x)))
@@ -386,7 +386,7 @@ namespace NginxPanel.Services
 
                 // Load shared configs next, make sure the folder exists first
                 if (!Directory.Exists(SharedFiles))
-                    Directory.CreateDirectory(SharedFiles);
+                    _CLI.RunCommand("mkdir " + SharedFiles);
 
                 foreach (string file in Directory.GetFiles(SharedFiles).Where((x) => File.Exists(x)))
                 {
