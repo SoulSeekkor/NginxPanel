@@ -630,9 +630,9 @@
 			string to = acme.AccountConf.GetConfValue(enuConfKey.SAVED_SMTP_TO);
 
 #if DEBUG
-			host = "10.12.1.16";
+			host = "192.168.3.4";
 			from = "ajenti@soulseekkor.net";
-			to = "mewert@soulseekkor.net";
+			to = "webmaster@soulseekkor.com";
 #endif
 
 			var result = await DialogService.OpenAsync("Set ACME Email Notifications", ds =>
